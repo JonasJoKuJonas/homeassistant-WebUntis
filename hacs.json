@@ -2,5 +2,6 @@
   "name": "Web Untis",
   "render_readme": true, 
   "zip_release": true,
-  "filename": "webuntis.zip"
+  "filename": "webuntis.zip",
+  "homeassistant": "2021.11.0"
 }
