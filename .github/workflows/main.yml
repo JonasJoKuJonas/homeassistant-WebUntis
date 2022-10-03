@@ -12,19 +12,17 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "build"
+  validate:
+      runs-on: "ubuntu-latest"
+      steps:
+          - uses: "actions/checkout@v2"
+          - uses: "home-assistant/actions/hassfest@master"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-
       - name: HACS Action
-        # You may pin to the exact commit or the version.
-        # uses: hacs/action@d556e736723344f83838d08488c983a15381059a
         uses: hacs/action@22.5.0
         with:
           category: integration
