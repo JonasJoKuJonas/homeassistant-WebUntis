@@ -1,0 +1,29 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect. Please check the host.",
+            "invalid_auth": "Invalid authentication",
+            "bad_credentials": "Invalid user name and/or password",
+            "school_not_found": "Invalid school name/id",
+            "name_split_error": "Invalid name. Try \"first_name, last_name\".",
+            "student_not_found": "Student not found. Check the name or pick other source.",
+            "no_rights_for_timetable": "No rights for timetable.",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "server": "Server",
+                    "school": "School",
+                    "username": "Username",
+                    "password": "Password",
+                    "timetable_source": "Timetable source",
+                    "timetable_source_id": "Full name/ Class/ Subject/ Room"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "webuntis",
+  "name": "Web Untis",
+  "config_flow": true,
+  "documentation": "",
+  "requirements": ["webuntis==0.1.12"],
+  "codeowners": ["@JonasJoKuJonas"],
+  "quality_scale": "silver",
+  "iot_class": "local_polling",
+  "loggers": ["webuntis"]
+}
