@@ -12,14 +12,14 @@ def update_manifest():
             version = sys.argv[index + 1]
 
     with open(
-        f"{os.getcwd()}/custom_components/webuntsi/manifest.json"
+        "/custom_components/webuntsi/manifest.json"
     ) as manifestfile:
         manifest = json.load(manifestfile)
 
     manifest["version"] = version
 
     with open(
-        f"{os.getcwd()}/custom_components/webuntis/manifest.json", "w"
+        "/custom_components/webuntis/manifest.json", "w"
     ) as manifestfile:
         manifestfile.write(json.dumps(manifest, indent=4, sort_keys=True))
 
