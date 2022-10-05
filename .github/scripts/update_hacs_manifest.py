@@ -12,7 +12,7 @@ def update_manifest():
             version = sys.argv[index + 1]
 
     with open(
-        "/custom_components/webuntsi/manifest.json"
+        "/custom_components/webuntis/manifest.json"
     ) as manifestfile:
         manifest = json.load(manifestfile)
 
