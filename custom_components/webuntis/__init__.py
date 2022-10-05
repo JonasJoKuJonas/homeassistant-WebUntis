@@ -1,5 +1,6 @@
 """The Web Untis integration."""
 from __future__ import annotations
+from asyncio.log import logger
 
 from collections.abc import Mapping
 from datetime import datetime, timedelta, date
@@ -164,6 +165,18 @@ class WebUntis:
             return
 
         try:
+            self.is_class = await self._hass.async_add_executor_job(self._is_class)
+        except OSError as error:
+            self.is_class = None
+
+            _LOGGER.warning(
+                "Updating the propertie next_class of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
             self.next_class = await self._hass.async_add_executor_job(self._next_class)
         except OSError as error:
             self.next_class = None
@@ -225,15 +238,16 @@ class WebUntis:
         now = datetime.now()
         last_time = None
 
-        for lesson in table:
-            for i in lesson[1][0][1]:
-                if i.start > now and i.code != "cancelled":
-                    return (
-                        i.start.astimezone()
-                        if last_time is None
-                        else last_time.astimezone()
-                    )
-                last_time = i.start
+        for time, row in table:
+            for date_, cell in row:
+                for i in cell:
+                    if i.start > now and i.code != "cancelled":
+                        return (
+                            i.start.astimezone()
+                            if last_time is None
+                            else last_time.astimezone()
+                        )
+                    last_time = i.start
 
 
 class WebUntisEntity(Entity):
