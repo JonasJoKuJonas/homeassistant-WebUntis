@@ -231,23 +231,17 @@ class WebUntis:
         timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
-        table = self.session.timetable(
-            start=monday, end=friday, **timetable_object
-        ).to_table()
+        table = self.session.timetable(start=monday, end=friday, **timetable_object)
 
         now = datetime.now()
         last_time = None
 
-        for time, row in table:
-            for date_, cell in row:
-                for i in cell:
-                    if i.start > now and i.code != "cancelled":
-                        return (
-                            i.start.astimezone()
-                            if last_time is None
-                            else last_time.astimezone()
-                        )
-                    last_time = i.start
+        time_list = []
+        for lesson in table:
+            if lesson.start > now and lesson.code != "cancelled":
+                time_list.append(lesson.start)
+
+        return sorted(time_list)[0]
 
 
 class WebUntisEntity(Entity):
