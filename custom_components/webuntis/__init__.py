@@ -241,7 +241,7 @@ class WebUntis:
             if lesson.start > now and lesson.code != "cancelled":
                 time_list.append(lesson.start)
 
-        return sorted(time_list)[0]
+        return sorted(time_list)[0].astimezone()
 
 
 class WebUntisEntity(Entity):
