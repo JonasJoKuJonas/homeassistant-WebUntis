@@ -233,7 +233,6 @@ class WebUntis:
         table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
 
         now = datetime.now()
-        last_time = None
 
         time_list = []
         for lesson in table:
