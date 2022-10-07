@@ -226,12 +226,11 @@ class WebUntis:
     def _next_class(self):
         """returns time of next class."""
         today = date.today()
-        monday = today - timedelta(days=today.weekday())
-        friday = monday + timedelta(days=4)
+        in_x_days = today + timedelta(days=14)
         timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
-        table = self.session.timetable(start=monday, end=friday, **timetable_object)
+        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
 
         now = datetime.now()
         last_time = None
