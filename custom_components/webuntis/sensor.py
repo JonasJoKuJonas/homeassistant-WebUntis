@@ -11,8 +11,8 @@ from .const import (
     DOMAIN,
     ICON_NEXT_CLASS,
     NAME_NEXT_CLASS,
-    UNIT_NEXT_CLASS,
-    DEVICE_CLASS_NEXT_CLASS,
+    ICON_FIRST_CLASS,
+    NAME_FIRST_CLASS,
 )
 
 
@@ -25,7 +25,7 @@ async def async_setup_entry(
     server = hass.data[DOMAIN][config_entry.unique_id]
 
     # Create entities list.
-    entities = [WebUntisNextClassSensor(server)]
+    entities = [WebUntisNextClassSensor(server), WebUntisFirstClassSensor(server)]
 
     # Add sensor entities.
     async_add_entities(entities, True)
@@ -61,10 +61,28 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
             server=server,
             type_name=NAME_NEXT_CLASS,
             icon=ICON_NEXT_CLASS,
-            unit=UNIT_NEXT_CLASS,
-            device_class=DEVICE_CLASS_NEXT_CLASS,
+            unit=None,
+            device_class="timestamp",
         )
 
     async def async_update(self) -> None:
         """Update next class."""
         self._attr_native_value = self._server.next_class
+
+
+class WebUntisFirstClassSensor(WebUntisSensorEntity):
+    """Representation of a Web Untis first class sensor."""
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize first class sensor."""
+        super().__init__(
+            server=server,
+            type_name=NAME_FIRST_CLASS,
+            icon=ICON_FIRST_CLASS,
+            unit=None,
+            device_class="timestamp",
+        )
+
+    async def async_update(self) -> None:
+        """Update first class."""
+        self._attr_native_value = self._server.first_class
