@@ -95,19 +95,12 @@ class WebUntis:
             school=self.school,
         )
 
-        self.version = None
-        self.protocol_version = None
-        self.latency_time = None
-        self.players_online = None
-        self.players_max = None
-        self.players_list: list[str] | None = None
-        self.motd = None
-
         self._last_status_request_failed = False
 
         # Data provided by 3rd party library
         self.is_class = None
         self.next_class = None
+        self.first_class = None
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -144,6 +137,7 @@ class WebUntis:
             # Login error, set all properties to unknown.
             self.is_class = None
             self.next_class = None
+            self.first_class = None
 
             self.session = webuntis.Session(
                 username=self.username,
@@ -170,7 +164,7 @@ class WebUntis:
             self.is_class = None
 
             _LOGGER.warning(
-                "Updating the propertie next_class of '%s@%s' failed - OSError: %s",
+                "Updating the propertie is_class of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -187,6 +181,21 @@ class WebUntis:
                 self.username,
                 error,
             )
+
+        try:
+            self.first_class = await self._hass.async_add_executor_job(
+                self._first_class
+            )
+        except OSError as error:
+            self.first_class = None
+
+            _LOGGER.warning(
+                "Updating the propertie first_class of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
         await self._hass.async_add_executor_job(self.session.logout)
 
     def get_timetable_object(self):
@@ -240,6 +249,24 @@ class WebUntis:
                 time_list.append(lesson.start)
 
         return sorted(time_list)[0].astimezone()
+
+    def _first_class(self):
+        """returns time of first class."""
+        today = date.today()
+        timetable_object = self.get_timetable_object()
+
+        # pylint: disable=maybe-no-member
+        table = self.session.timetable(start=today, end=today, **timetable_object)
+
+        time_list = []
+        for lesson in table:
+            if lesson.code != "cancelled":
+                time_list.append(lesson.start)
+
+        if len(time_list) > 1:
+            return sorted(time_list)[0].astimezone()
+        else:
+            return None
 
 
 class WebUntisEntity(Entity):
