@@ -100,7 +100,7 @@ class WebUntis:
         # Data provided by 3rd party library
         self.is_class = None
         self.next_class = None
-        self.first_class = None
+        self.next_lesson_to_wake_up = None
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -137,7 +137,7 @@ class WebUntis:
             # Login error, set all properties to unknown.
             self.is_class = None
             self.next_class = None
-            self.first_class = None
+            self.next_lesson_to_wake_up = None
 
             self.session = webuntis.Session(
                 username=self.username,
@@ -183,14 +183,14 @@ class WebUntis:
             )
 
         try:
-            self.first_class = await self._hass.async_add_executor_job(
-                self._first_class
+            self.next_lesson_to_wake_up = await self._hass.async_add_executor_job(
+                self._next_lesson_to_wake_up
             )
         except OSError as error:
-            self.first_class = None
+            self.next_lesson_to_wake_up = None
 
             _LOGGER.warning(
-                "Updating the propertie first_class of '%s@%s' failed - OSError: %s",
+                "Updating the propertie next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -267,6 +267,33 @@ class WebUntis:
             return sorted(time_list)[0].astimezone()
         else:
             return None
+
+    def _next_lesson_to_wake_up(self):
+        """returns time of the next lesson to weak up."""
+        today = date.today()
+        now = datetime.now()
+        in_x_days = today + timedelta(days=14)
+        timetable_object = self.get_timetable_object()
+
+        # pylint: disable=maybe-no-member
+        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
+
+        time_list = []
+        for lesson in table:
+            if lesson.code != "cancelled":
+                time_list.append(lesson.start)
+
+        time_list_new = []
+        for time in sorted(time_list):
+            if time < now:
+                now = now.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                ) + timedelta(days=1)
+                continue
+            else:
+                time_list_new.append(time)
+
+        return sorted(time_list_new)[0].astimezone()
 
 
 class WebUntisEntity(Entity):
