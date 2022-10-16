@@ -3,11 +3,11 @@ DOMAIN = "webuntis"
 
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"
-ICON_FIRST_CLASS = "mdi:clock-start"
+ICON_NEXT_LESSON_TO_WAKE_UP = "mdi:clock-start"
 
 NAME_STATUS = "Class"
 NAME_NEXT_CLASS = "Next Class"
-NAME_FIRST_CLASS = "First Class"
+NAME_NEXT_LESSON_TO_WAKE_UP = "Next lesson to wake up"
 
 SCAN_INTERVAL = 60 * 5  # 5min
 

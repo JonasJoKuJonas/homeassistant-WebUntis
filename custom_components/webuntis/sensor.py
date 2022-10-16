@@ -11,8 +11,8 @@ from .const import (
     DOMAIN,
     ICON_NEXT_CLASS,
     NAME_NEXT_CLASS,
-    ICON_FIRST_CLASS,
-    NAME_FIRST_CLASS,
+    ICON_NEXT_LESSON_TO_WAKE_UP,
+    NAME_NEXT_LESSON_TO_WAKE_UP,
 )
 
 
@@ -25,7 +25,10 @@ async def async_setup_entry(
     server = hass.data[DOMAIN][config_entry.unique_id]
 
     # Create entities list.
-    entities = [WebUntisNextClassSensor(server), WebUntisFirstClassSensor(server)]
+    entities = [
+        WebUntisNextClassSensor(server),
+        WebUntisNextLessonToWakeUpSensor(server),
+    ]
 
     # Add sensor entities.
     async_add_entities(entities, True)
@@ -70,19 +73,19 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
         self._attr_native_value = self._server.next_class
 
 
-class WebUntisFirstClassSensor(WebUntisSensorEntity):
-    """Representation of a Web Untis first class sensor."""
+class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
+    """Representation of a Web Untis next lesson to wake up sensor."""
 
     def __init__(self, server: WebUntis) -> None:
-        """Initialize first class sensor."""
+        """Initialize next lesson to wake up sensor."""
         super().__init__(
             server=server,
-            type_name=NAME_FIRST_CLASS,
-            icon=ICON_FIRST_CLASS,
+            type_name=NAME_NEXT_LESSON_TO_WAKE_UP,
+            icon=ICON_NEXT_LESSON_TO_WAKE_UP,
             unit=None,
             device_class="timestamp",
         )
 
     async def async_update(self) -> None:
-        """Update first class."""
-        self._attr_native_value = self._server.first_class
+        """Update next lesson to wake up."""
+        self._attr_native_value = self._server.next_lesson_to_wake_up
