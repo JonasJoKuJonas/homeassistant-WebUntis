@@ -283,17 +283,21 @@ class WebUntis:
             if lesson.code != "cancelled":
                 time_list.append(lesson.start)
 
+        day = now
         time_list_new = []
         for time in sorted(time_list):
-            if time < now:
-                now = now.replace(
+            if time < day:
+                day = now.replace(
                     hour=0, minute=0, second=0, microsecond=0
                 ) + timedelta(days=1)
                 continue
             else:
                 time_list_new.append(time)
 
-        return sorted(time_list_new)[0].astimezone()
+        if len(time_list_new) > 1:
+            return sorted(time_list_new)[0].astimezone()
+        else:
+            return None
 
 
 class WebUntisEntity(Entity):
