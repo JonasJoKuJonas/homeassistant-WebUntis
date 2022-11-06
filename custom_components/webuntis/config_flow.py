@@ -135,7 +135,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
-        await self.async_set_unique_id("unique_id")
+        await self.async_set_unique_id(
+            "{username}@{school}"
+                .format(**user_input)
+                .lower()
+                .replace(" ", "-"))
         self._abort_if_unique_id_configured()
 
         errors = {}
