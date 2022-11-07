@@ -33,7 +33,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required("password"): str,
         vol.Required("timetable_source"): selector.SelectSelector(
             selector.SelectSelectorConfig(
-                options=["student", "klasse"],  # "teacher", "subject", "room"
+                options=["student", "klasse", "teacher"],  # "subject", "room"
                 mode="dropdown",
             )
         ),
@@ -50,7 +50,7 @@ async def validate_input(
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
-    if user_input["timetable_source"] == "student":
+    if user_input["timetable_source"] in ["student", "teacher"]:
         for char in [",", " "]:
             split = user_input["timetable_source_id"].split(char)
             if len(split) == 2:
@@ -95,12 +95,16 @@ async def validate_input(
             )
         except Exception as exc:
             raise StudentNotFound from exc
-        # source = session.get_student(timetable_source_id[1], timetable_source_id[0])
     elif timetable_source == "klasse":
         klassen = await hass.async_add_executor_job(session.klassen)
         source = klassen.filter(name=timetable_source_id)[0]
     elif timetable_source == "teacher":
-        pass
+        try:
+            source = await hass.async_add_executor_job(
+                session.get_teacher, timetable_source_id[1], timetable_source_id[0]
+            )
+        except Exception as exc:
+            raise TeacherNotFound from exc
     elif timetable_source == "subject":
         pass
     elif timetable_source == "room":
@@ -136,10 +140,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
         await self.async_set_unique_id(
-            "{username}@{school}"
-                .format(**user_input)
-                .lower()
-                .replace(" ", "-"))
+            "{username}@{school}".format(**user_input).lower().replace(" ", "-")
+        )
         self._abort_if_unique_id_configured()
 
         errors = {}
@@ -162,6 +164,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "name_split_error"
         except StudentNotFound:
             errors["base"] = "student_not_found"
+        except TeacherNotFound:
+            errors["base"] = "teacher_not_found"
         except NoRightsForTimetable:
             errors["base"] = "no_rights_for_timetable"
 
@@ -192,7 +196,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             options=[
                                 "student",
                                 "klasse",
-                            ],  # "teacher", "subject", "room"
+                                "teacher",
+                            ],  # "subject", "room"
                             mode="dropdown",
                         )
                     ),
@@ -227,6 +232,10 @@ class NameSplitError(HomeAssistantError):
 
 class StudentNotFound(HomeAssistantError):
     """Error to indicate there is no student with this name."""
+
+
+class TeacherNotFound(HomeAssistantError):
+    """Error to indicate there is no teacher with this name."""
 
 
 class NoRightsForTimetable(HomeAssistantError):

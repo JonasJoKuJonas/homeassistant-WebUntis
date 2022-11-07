@@ -10,6 +10,7 @@
             "school_not_found": "Ungültiger Schulname/-id",
             "name_split_error": "Ungültiger Name. Versuche \"vor_name, nach_name\".",
             "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
+            "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
             "no_rights_for_timetable": "Keine rechte für Stundenplan.",
             "unknown": "Unerwarteter Fehler"
         },
