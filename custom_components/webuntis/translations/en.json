@@ -10,6 +10,7 @@
             "school_not_found": "Invalid school name/id",
             "name_split_error": "Invalid name. Try \"first_name, last_name\".",
             "student_not_found": "Student not found. Check the name or pick other source.",
+            "teacher_not_found": "Teacher not found. Check the name or pick other source.",
             "no_rights_for_timetable": "No rights for timetable.",
             "unknown": "Unexpected error"
         },

@@ -209,7 +209,9 @@ class WebUntis:
             # pylint: disable=maybe-no-member
             source = klassen.filter(name=self.timetable_source_id)[0]
         elif self.timetable_source == "teacher":
-            pass
+            source = self.session.get_teacher(
+                self.timetable_source_id[1], self.timetable_source_id[0]
+            )
         elif self.timetable_source == "subject":
             pass
         elif self.timetable_source == "room":
@@ -228,7 +230,11 @@ class WebUntis:
 
         for lesson in table:
             # pylint: disable=maybe-no-member
-            if lesson.start < now < lesson.end and lesson.code != "cancelled" and lesson.subjects != "":
+            if (
+                lesson.start < now < lesson.end
+                and lesson.code != "cancelled"
+                and lesson.subjects != ""
+            ):
                 return True
         return False
 
@@ -245,7 +251,11 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if lesson.start > now and lesson.code != "cancelled" and lesson.subjects != "":
+            if (
+                lesson.start > now
+                and lesson.code != "cancelled"
+                and lesson.subjects != ""
+            ):
                 time_list.append(lesson.start)
 
         return sorted(time_list)[0].astimezone()
