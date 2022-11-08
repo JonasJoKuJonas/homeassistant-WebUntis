@@ -21,7 +21,7 @@ Copy all files from custom_components/webuntis/ to custom_components/webuntis/ i
 ## Configuration
 
 ### Server & School
-visit https://webuntis.com click on your school
+Visit https://webuntis.com and click on your school
 
 ```
 https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
