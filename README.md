@@ -21,8 +21,9 @@ Copy all files from custom_components/webuntis/ to custom_components/webuntis/ i
 ## Configuration
 
 ### Server & School
-Visit https://webuntis.com and click on your school
+Visit https://webuntis.com and click on your school.
 
+In the URL you should find the information you need:
 ```
 https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
         ^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^
