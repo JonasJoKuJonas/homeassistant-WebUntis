@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 import logging
 from typing import Any
 
+# pylint: disable=import-self
 import webuntis
 
 from homeassistant.config_entries import ConfigEntry
@@ -87,6 +88,7 @@ class WebUntis:
         self.timetable_source = config_data["timetable_source"]
         self.timetable_source_id = config_data["timetable_source_id"]
 
+        # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
             password=self.password,
@@ -139,6 +141,7 @@ class WebUntis:
             self.next_class = None
             self.next_lesson_to_wake_up = None
 
+            # pylint: disable=maybe-no-member
             self.session = webuntis.Session(
                 username=self.username,
                 password=self.password,

@@ -20,6 +20,7 @@
       "name_split_error": "[%key:common::config_flow::error::name_split_error%]",
       "student_not_found": "[%key:common::config_flow::error::student_not_found%]",
       "teacher_not_found": "[%key:common::config_flow::error::teacher_not_found%]",
+      "class_not_found": "[%key:common::config_flow::error::class_not_found%]",
       "no_rights_for_timetable": "[%key:common::config_flow::error::no_rights_for_timetable%]",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },

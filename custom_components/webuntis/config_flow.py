@@ -68,6 +68,7 @@ async def validate_input(
         raise CannotConnect from exc
 
     try:
+        # pylint: disable=maybe-no-member
         session = webuntis.Session(
             server=user_input["server"],
             school=user_input["school"],
@@ -80,7 +81,7 @@ async def validate_input(
         raise BadCredentials from ext
     except requests.exceptions.ConnectionError as exc:
         raise CannotConnect from exc
-    except webuntis.errors.RemoteError as exc:
+    except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
         raise SchoolNotFound from exc
     except Exception as exc:
         raise InvalidAuth from exc
@@ -97,7 +98,10 @@ async def validate_input(
             raise StudentNotFound from exc
     elif timetable_source == "klasse":
         klassen = await hass.async_add_executor_job(session.klassen)
-        source = klassen.filter(name=timetable_source_id)[0]
+        try:
+            source = klassen.filter(name=timetable_source_id)[0]
+        except Exception as exc:
+            raise ClassNotFound from exc
     elif timetable_source == "teacher":
         try:
             source = await hass.async_add_executor_job(
@@ -140,7 +144,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
         await self.async_set_unique_id(
-            "{username}@{school}".format(**user_input).lower().replace(" ", "-")
+            "{username}@{timetable_source_id}@{school}".format(**user_input)
+            .lower()
+            .replace(" ", "-")
         )
         self._abort_if_unique_id_configured()
 
@@ -166,6 +172,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "student_not_found"
         except TeacherNotFound:
             errors["base"] = "teacher_not_found"
+        except ClassNotFound:
+            errors["base"] = "class_not_found"
         except NoRightsForTimetable:
             errors["base"] = "no_rights_for_timetable"
 
@@ -236,6 +244,10 @@ class StudentNotFound(HomeAssistantError):
 
 class TeacherNotFound(HomeAssistantError):
     """Error to indicate there is no teacher with this name."""
+
+
+class ClassNotFound(HomeAssistantError):
+    """Error to indicate there is no class with this name."""
 
 
 class NoRightsForTimetable(HomeAssistantError):
