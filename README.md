@@ -33,3 +33,6 @@ https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
 ### Timetable Timetable source & Full name/ Class/ Subject/ Room
 With the timetable source, you can select where the data for the sensor should come from.
 The final configuration field allows you to specify a name or class from which the data is pulled.
+
+### Docker
+If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
