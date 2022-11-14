@@ -233,11 +233,7 @@ class WebUntis:
 
         for lesson in table:
             # pylint: disable=maybe-no-member
-            if (
-                lesson.start < now < lesson.end
-                and lesson.code != "cancelled"
-                and lesson.subjects != ""
-            ):
+            if lesson.start < now < lesson.end and self.checkLesson(lesson):
                 return True
         return False
 
@@ -254,11 +250,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if (
-                lesson.start > now
-                and lesson.code != "cancelled"
-                and lesson.subjects != ""
-            ):
+            if lesson.start > now and self.checkLesson(lesson):
                 time_list.append(lesson.start)
 
         return sorted(time_list)[0].astimezone()
@@ -273,7 +265,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if lesson.code != "cancelled" and lesson.subjects != "":
+            if self.checkLesson(lesson):
                 time_list.append(lesson.start)
 
         if len(time_list) > 1:
@@ -293,7 +285,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if lesson.code != "cancelled" and lesson.subjects != "":
+            if self.checkLesson(lesson):
                 time_list.append(lesson.start)
 
         day = now
@@ -311,6 +303,12 @@ class WebUntis:
             return sorted(time_list_new)[0].astimezone()
         else:
             return None
+
+    def checkLesson(self, x):
+        if x.code != "cancelled" and x.subjects:
+            return True
+        else:
+            return False
 
 
 class WebUntisEntity(Entity):
