@@ -6,11 +6,13 @@ import logging
 # from msilib.schema import Error
 from typing import Any
 
-import webuntis
 import socket
-import requests
+
 import datetime
 from urllib.parse import urlparse
+import requests
+
+import webuntis
 
 import voluptuous as vol
 
@@ -144,6 +146,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
         await self.async_set_unique_id(
+            # pylint: disable=consider-using-f-string
             "{username}@{timetable_source_id}@{school}".format(**user_input)
             .lower()
             .replace(" ", "-")

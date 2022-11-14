@@ -1,19 +1,16 @@
 """The Web Untis integration."""
 from __future__ import annotations
-from asyncio.log import logger
 
-from collections.abc import Mapping
-from datetime import datetime, timedelta, date
 import logging
+from asyncio.log import logger
+from collections.abc import Mapping
+from datetime import date, datetime, timedelta
 from typing import Any
 
 # pylint: disable=import-self
 import webuntis
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-
-
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -121,6 +118,7 @@ class WebUntis:
         if self._stop_periodic_update:
             self._stop_periodic_update()
 
+    # pylint: disable=unused-argument
     async def async_update(self, now: datetime | None = None) -> None:
         """Get server data from 3rd party library and update properties."""
 
@@ -233,7 +231,7 @@ class WebUntis:
 
         for lesson in table:
             # pylint: disable=maybe-no-member
-            if lesson.start < now < lesson.end and self.checkLesson(lesson):
+            if lesson.start < now < lesson.end and self.check_lesson(lesson):
                 return True
         return False
 
@@ -250,7 +248,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if lesson.start > now and self.checkLesson(lesson):
+            if lesson.start > now and self.check_lesson(lesson):
                 time_list.append(lesson.start)
 
         return sorted(time_list)[0].astimezone()
@@ -265,7 +263,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if self.checkLesson(lesson):
+            if self.check_lesson(lesson):
                 time_list.append(lesson.start)
 
         if len(time_list) > 1:
@@ -285,7 +283,7 @@ class WebUntis:
 
         time_list = []
         for lesson in table:
-            if self.checkLesson(lesson):
+            if self.check_lesson(lesson):
                 time_list.append(lesson.start)
 
         day = now
@@ -304,11 +302,9 @@ class WebUntis:
         else:
             return None
 
-    def checkLesson(self, x):
-        if x.code != "cancelled" and x.subjects:
-            return True
-        else:
-            return False
+    def check_lesson(self, lesson) -> bool:
+        """Checks if a lesson is taking place"""
+        return lesson.code != "cancelled" and lesson.subjects
 
 
 class WebUntisEntity(Entity):
