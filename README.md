@@ -34,3 +34,13 @@ The final configuration field allows you to specify a name or class from which t
 
 ### Docker
 If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
+
+## Entities
+
+The integration creates multiple entities in the format `sensor.NAME_entity`.
+
+|Sensor  |Type|Description
+|:-----------|:---|:------------
+|`binary_sensor.NAME_class`| bool | indicates if a lesson is currently taking place.
+|`sensor.NAME_next_class`| datetime | the start time of the next lesson.
+|`sensor.NAME_next_lesson_to_wake_up`| datetime | the start of the next first lesson of the day.
