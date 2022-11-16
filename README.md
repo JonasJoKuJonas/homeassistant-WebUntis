@@ -16,7 +16,7 @@ This component is easiest installed using [HACS](https://github.com/custom-compo
 Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
 
 
-## Configuration
+## Configuration via UI
 
 ### Server & School
 Visit https://webuntis.com and click on your school.
