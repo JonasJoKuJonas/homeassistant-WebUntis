@@ -19,9 +19,12 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
+from homeassistant.components.calendar import CalendarEvent
+import homeassistant.util.dt as dt_util
+
 from .const import DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -100,6 +103,7 @@ class WebUntis:
         self.is_class = None
         self.next_class = None
         self.next_lesson_to_wake_up = None
+        self.calendar_events = None
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -192,6 +196,20 @@ class WebUntis:
 
             _LOGGER.warning(
                 "Updating the propertie next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
+            self.calendar_events = await self._hass.async_add_executor_job(
+                self._get_events
+            )
+        except OSError as error:
+            self.calendar_events = None
+
+            _LOGGER.warning(
+                "Updating the propertie calendar_events of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -301,6 +319,27 @@ class WebUntis:
             return sorted(time_list_new)[0].astimezone()
         else:
             return None
+
+    def _get_events(self):
+        today = date.today()
+        now = datetime.now()
+        in_x_days = today + timedelta(days=14)
+        timetable_object = self.get_timetable_object()
+
+        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
+
+        event_list = []
+
+        for lesson in table:
+            event_list.append(
+                CalendarEvent(
+                    start=lesson.start.astimezone(),
+                    end=lesson.end.astimezone(),
+                    summary=lesson.subjects[0].long_name,
+                    # description=lesson.lstext,
+                )
+            )
+        return event_list
 
     def check_lesson(self, lesson) -> bool:
         """Checks if a lesson is taking place"""
