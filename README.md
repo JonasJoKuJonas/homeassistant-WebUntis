@@ -28,6 +28,11 @@ https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
               Server                          School
 ```
 
+### Username and Password
+Unfortunately, it is not possible to use the Untis API with an anonymous user.
+
+You can ask the school administration to give you an access, otherwise it won't work.
+
 ### Timetable Timetable source & Full name/ Class/ Subject/ Room
 With the timetable source, you can select where the data for the sensor should come from.
 The final configuration field allows you to specify a name or class from which the data is pulled.
