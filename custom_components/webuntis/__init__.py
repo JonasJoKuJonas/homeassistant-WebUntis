@@ -6,6 +6,7 @@ from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
+import json
 
 # pylint: disable=import-self
 import webuntis
@@ -331,19 +332,52 @@ class WebUntis:
         event_list = []
 
         for lesson in table:
-            event_list.append(
-                CalendarEvent(
-                    start=lesson.start.astimezone(),
-                    end=lesson.end.astimezone(),
-                    summary=lesson.subjects[0].long_name,
-                    # description=lesson.lstext,
+            if self.check_lesson(lesson):
+                event_list.append(
+                    CalendarEvent(
+                        start=lesson.start.astimezone(),
+                        end=lesson.end.astimezone(),
+                        summary=lesson.subjects[0].long_name,
+                        description=self.get_lesson_json(lesson),
+                    )
                 )
-            )
         return event_list
 
     def check_lesson(self, lesson) -> bool:
         """Checks if a lesson is taking place"""
         return lesson.code != "cancelled" and lesson.subjects
+
+    def get_lesson_json(self, lesson) -> str:
+        """returns info about lesson in json"""
+        dic = {
+            "start": str(lesson.start.astimezone()),
+            "end": str(lesson.end.astimezone()),
+            "id": int(lesson.id),
+            "code": str(lesson.code),
+            "type": str(lesson.type),
+            "subjects": [
+                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                for subject in lesson.subjects
+            ],
+            "rooms": [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.rooms
+            ],
+            "klassen": [
+                {"name": str(klasse.name), "long_name": str(klasse.long_name)}
+                for klasse in lesson.klassen
+            ],
+            "original_rooms": [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.original_rooms
+            ],
+            "original_teachers": [
+                {"name": str(teacher.name), "long_name": str(teacher.long_name)}
+                for teacher in lesson.original_teachers
+            ],
+            # "teachers": str(lesson.teachers),
+        }
+        return str(json.dumps(dic))
 
 
 class WebUntisEntity(Entity):
