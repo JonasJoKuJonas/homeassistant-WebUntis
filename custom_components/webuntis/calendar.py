@@ -1,28 +1,15 @@
 """Demo platform that has two fake binary sensors."""
 from __future__ import annotations
 
-import copy
 import datetime
 
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-import homeassistant.util.dt as dt_util
 
-
-from homeassistant import core
-from homeassistant.const import STATE_OFF, STATE_ON
 from homeassistant.components.calendar import CalendarEntity
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import callback
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity_platform import DiscoveryInfoType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 
 from .const import DOMAIN, ICON_CALENDER, NAME_CALENDER
@@ -38,13 +25,15 @@ async def async_setup_entry(
     server = hass.data[DOMAIN][config_entry.unique_id]
 
     # Create entities list.
-    entities = [MyCalendar(server)]
+    entities = [UntisCalendar(server)]
 
     # Add binary sensor entities.
     async_add_entities(entities, True)
 
 
-class MyCalendar(WebUntisEntity, CalendarEntity):
+class UntisCalendar(WebUntisEntity, CalendarEntity):
+    """Representation of a Web Untis Calendar sensor."""
+
     def __init__(self, server: WebUntis) -> None:
         """Initialize status binary sensor."""
         super().__init__(

@@ -323,7 +323,6 @@ class WebUntis:
 
     def _get_events(self):
         today = date.today()
-        now = datetime.now()
         in_x_days = today + timedelta(days=14)
         timetable_object = self.get_timetable_object()
 
