@@ -332,14 +332,22 @@ class WebUntis:
 
         for lesson in table:
             if self.check_lesson(lesson):
-                event_list.append(
-                    CalendarEvent(
-                        start=lesson.start.astimezone(),
-                        end=lesson.end.astimezone(),
-                        summary=lesson.subjects[0].long_name,
-                        description=self.get_lesson_json(lesson),
+                try:
+                    event_list.append(
+                        CalendarEvent(
+                            start=lesson.start.astimezone(),
+                            end=lesson.end.astimezone(),
+                            summary=lesson.subjects[0].long_name,
+                            description=self.get_lesson_json(lesson),
+                        )
                     )
-                )
+                except OSError as error:
+                    _LOGGER.warning(
+                        "Updating of a calendar_event of '%s@%s' failed - OSError: %s",
+                        self.school,
+                        self.username,
+                        error,
+                    )
         return event_list
 
     def check_lesson(self, lesson) -> bool:
