@@ -44,7 +44,8 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         )
         self._name = NAME_CALENDER
         self.events = self._server.calendar_events
-        self.events.sort(key=lambda e: (e.start, e.end))
+        if self.event is not None:
+            self.events.sort(key=lambda e: (e.start, e.end))
 
     @property
     def name(self) -> str:
