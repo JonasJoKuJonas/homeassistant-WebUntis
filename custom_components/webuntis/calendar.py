@@ -60,7 +60,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
             now = datetime.datetime.now()
 
             for event in self.events:
-                if event.start_datetime_local >= now.astimezone():
+                if event.end_datetime_local > now.astimezone():
                     return event
         else:
             return None
