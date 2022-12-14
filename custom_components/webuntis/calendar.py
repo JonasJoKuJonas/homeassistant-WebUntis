@@ -45,7 +45,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         self._name = NAME_CALENDER
         self.events = self._server.calendar_events
         if self.event is not None:
-            self.events.sort(key=lambda e: (e.start, e.end))
+            self.events.sort(key=lambda e: (e.end))
 
     @property
     def name(self) -> str:
@@ -60,7 +60,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
             now = datetime.datetime.now()
 
             for event in self.events:
-                if event.end_datetime_local > now.astimezone():
+                if event.end_datetime_local.astimezone() > now.astimezone():
                     return event
         else:
             return None
