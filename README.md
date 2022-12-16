@@ -57,7 +57,7 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 ```
 {% set json = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
 
-{% for state in json -%}
-  {{ state.subjects.0.long_name + "\n" }}
+{% for lesson in json -%}
+  {{ lesson.subjects.0.long_name + "\n" }}
 {%- endfor %}
 ```
