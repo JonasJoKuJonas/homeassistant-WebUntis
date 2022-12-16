@@ -14,3 +14,5 @@ NAME_CALENDER = " WebUntis Calender"
 SCAN_INTERVAL = 60 * 5  # 5min
 
 SIGNAL_NAME_PREFIX = f"signal_{DOMAIN}"
+
+DAYS_TO_FUTURE = 30
