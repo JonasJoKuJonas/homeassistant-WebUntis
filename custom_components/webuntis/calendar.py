@@ -44,8 +44,9 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         )
         self._name = NAME_CALENDER
         self.events = self._server.calendar_events
-        if self.event is not None:
+        if self.events is not None:
             self.events.sort(key=lambda e: (e.end))
+        self._event = None
 
     @property
     def name(self) -> str:
@@ -55,15 +56,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
     @property
     def event(self) -> CalendarEvent:
         """Return the next upcoming event."""
-        if self.events:
-
-            now = datetime.datetime.now()
-
-            for event in self.events:
-                if event.end_datetime_local.astimezone() > now.astimezone():
-                    return event
-        else:
-            return None
+        return self._event
 
     async def async_get_events(
         self,
@@ -77,3 +70,14 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
     async def async_update(self) -> None:
         """Update status."""
         self.events = self._server.calendar_events
+
+        if self.events:
+
+            now = datetime.datetime.now()
+
+            for event in self.events:
+                if event.end_datetime_local.astimezone() > now.astimezone():
+                    self._event = event
+                    break
+        else:
+            self._event = None
