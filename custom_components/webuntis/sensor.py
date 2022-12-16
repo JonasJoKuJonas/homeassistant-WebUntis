@@ -71,6 +71,7 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
     async def async_update(self) -> None:
         """Update next class."""
         self._attr_native_value = self._server.next_class
+        self._attr_extra_state_attributes = {"lesson": self._server.next_class_json}
 
 
 class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
@@ -85,7 +86,9 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
             unit=None,
             device_class="timestamp",
         )
+        self._attr_extra_state_attributes = {}
 
     async def async_update(self) -> None:
         """Update next lesson to wake up."""
         self._attr_native_value = self._server.next_lesson_to_wake_up
+        self._attr_extra_state_attributes = {"day": self._server.next_day_json}
