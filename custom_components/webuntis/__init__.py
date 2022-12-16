@@ -9,7 +9,6 @@ from typing import Any
 import json
 
 # pylint: disable=import-self
-import webuntis
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -22,6 +21,8 @@ from homeassistant.helpers.event import async_track_time_interval
 
 from homeassistant.components.calendar import CalendarEvent
 import homeassistant.util.dt as dt_util
+
+import webuntis
 
 from .const import DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
 
@@ -103,8 +104,10 @@ class WebUntis:
         # Data provided by 3rd party library
         self.is_class = None
         self.next_class = None
+        self.next_class_json = None
         self.next_lesson_to_wake_up = None
         self.calendar_events = None
+        self.next_day_json = None
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -203,6 +206,20 @@ class WebUntis:
             )
 
         try:
+            self.next_day_json = await self._hass.async_add_executor_job(
+                self._next_day_json
+            )
+        except OSError as error:
+            self.next_day_json = None
+
+            _LOGGER.warning(
+                "Updating the propertie next_day_json of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
             self.calendar_events = await self._hass.async_add_executor_job(
                 self._get_events
             )
@@ -265,12 +282,18 @@ class WebUntis:
 
         now = datetime.now()
 
-        time_list = []
+        lesson_list = []
         for lesson in table:
             if lesson.start > now and self.check_lesson(lesson):
-                time_list.append(lesson.start)
+                lesson_list.append(lesson)
 
-        return sorted(time_list)[0].astimezone()
+        lesson_list.sort(key=lambda e: (e.start))
+
+        lesson = lesson_list[0]
+
+        self.next_class_json = self.get_lesson_json(lesson)
+
+        return lesson.start.astimezone()
 
     def _first_class(self):
         """returns time of first class."""
@@ -320,6 +343,19 @@ class WebUntis:
             return sorted(time_list_new)[0].astimezone()
         else:
             return None
+
+    def _next_day_json(self):
+        day = self.next_lesson_to_wake_up
+        timetable_object = self.get_timetable_object()
+
+        table = self.session.timetable(start=day, end=day, **timetable_object)
+
+        json_str = "["
+        for lesson in table:
+            json_str += str(self.get_lesson_json(lesson)) + ","
+        json_str = json_str[:-1] + "]"
+
+        return json_str
 
     def _get_events(self):
         today = date.today()
