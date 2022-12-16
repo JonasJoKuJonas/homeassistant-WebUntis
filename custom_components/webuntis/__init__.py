@@ -24,7 +24,7 @@ import homeassistant.util.dt as dt_util
 
 import webuntis
 
-from .const import DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .const import DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX, DAYS_TO_FUTURE
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -274,7 +274,7 @@ class WebUntis:
     def _next_class(self):
         """returns time of next class."""
         today = date.today()
-        in_x_days = today + timedelta(days=14)
+        in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
         timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
@@ -289,14 +289,23 @@ class WebUntis:
 
         lesson_list.sort(key=lambda e: (e.start))
 
-        lesson = lesson_list[0]
+        try:
+            lesson = lesson_list[0]
+        except IndexError:
+            _LOGGER.warning(
+                "Updating the propertie _next_class of '%s@%s' failed - No lesson in the next %s days",
+                self.school,
+                self.username,
+                DAYS_TO_FUTURE,
+            )
+            return None
 
         self.next_class_json = self.get_lesson_json(lesson)
 
         return lesson.start.astimezone()
 
-    def _first_class(self):
-        """returns time of first class."""
+    """def _first_class(self):
+        ""returns time of first class.""
         today = date.today()
         timetable_object = self.get_timetable_object()
 
@@ -311,13 +320,13 @@ class WebUntis:
         if len(time_list) > 1:
             return sorted(time_list)[0].astimezone()
         else:
-            return None
+            return None"""
 
     def _next_lesson_to_wake_up(self):
         """returns time of the next lesson to weak up."""
         today = date.today()
         now = datetime.now()
-        in_x_days = today + timedelta(days=14)
+        in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
         timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
@@ -339,9 +348,15 @@ class WebUntis:
             else:
                 time_list_new.append(time)
 
-        if len(time_list_new) > 1:
+        try:
             return sorted(time_list_new)[0].astimezone()
-        else:
+        except IndexError:
+            _LOGGER.warning(
+                "Updating the propertie _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
+                self.school,
+                self.username,
+                DAYS_TO_FUTURE,
+            )
             return None
 
     def _next_day_json(self):
@@ -359,7 +374,7 @@ class WebUntis:
 
     def _get_events(self):
         today = date.today()
-        in_x_days = today + timedelta(days=14)
+        in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
         timetable_object = self.get_timetable_object()
 
         table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
