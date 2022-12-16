@@ -405,6 +405,7 @@ class WebUntis:
         """Checks if a lesson is taking place"""
         return lesson.code != "cancelled" and lesson.subjects
 
+    # pylint: disable=bare-except
     def get_lesson_json(self, lesson) -> str:
         """returns info about lesson in json"""
         dic = {}
@@ -412,57 +413,57 @@ class WebUntis:
         dic["end"] = str(lesson.end.astimezone())
         try:
             dic["id"] = int(lesson.id)
-        except OSError:
+        except:
             pass
         try:
             dic["code"] = str(lesson.code)
-        except OSError:
+        except:
             pass
         try:
             dic["type"] = str(lesson.type)
-        except OSError:
+        except:
             pass
         try:
             dic["subjects"] = [
                 {"name": str(subject.name), "long_name": str(subject.long_name)}
                 for subject in lesson.subjects
             ]
-        except OSError:
+        except:
             pass
         try:
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except OSError:
+        except:
             pass
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except OSError:
+        except:
             pass
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except OSError:
+        except:
             pass
         try:
             dic["teachers"] = [
                 {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                 for teacher in lesson.teachers
             ]
-        except OSError:
+        except:
             pass
         try:
             dic["original_teachers"] = [
                 {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                 for teacher in lesson.original_teachers
             ]
-        except OSError:
+        except:
             pass
 
         return str(json.dumps(dic))
