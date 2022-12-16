@@ -49,3 +49,15 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 |`binary_sensor.NAME_class`| bool | indicates if a lesson is currently taking place.
 |`sensor.NAME_next_class`| datetime | the start time of the next lesson.
 |`sensor.NAME_next_lesson_to_wake_up`| datetime | the start of the next first lesson of the day.
+|`calendar.NAME_webuntis_calender`| calendar | Calendar entry
+
+## Template
+
+### List lessons from next day
+```
+{% set json = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
+
+{% for state in json -%}
+  {{ state.subjects.0.long_name + "\n" }}
+{%- endfor %}
+```
