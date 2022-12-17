@@ -61,3 +61,13 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
   {{ lesson.subjects.0.long_name + "\n" }}
 {%- endfor %}
 ```
+
+```
+{% set lessonList = namespace(lesson=[]) %}
+{% set lessons = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
+
+{% for lesson in lessons -%}
+  {% set lessonList.lesson = lessonList.lesson + [lesson.subjects.0.long_name] %}
+{%- endfor %}
+{{ lessonList.lesson | unique | join(', ') }}
+```
