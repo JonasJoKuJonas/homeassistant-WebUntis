@@ -388,7 +388,7 @@ class WebUntis:
                         CalendarEvent(
                             start=lesson.start.astimezone(),
                             end=lesson.end.astimezone(),
-                            summary=lesson.subjects[0].long_name,
+                            summary=lesson.subjects[0].name,  #summary=lesson.subjects[0].long_name,
                             description=self.get_lesson_json(lesson),
                         )
                     )
@@ -425,7 +425,7 @@ class WebUntis:
             pass
         try:
             dic["subjects"] = [
-                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                {"name": str(subject.name), "long_name": str(subject.name)} #"long_name": str(subject.long_name)
                 for subject in lesson.subjects
             ]
         except:
