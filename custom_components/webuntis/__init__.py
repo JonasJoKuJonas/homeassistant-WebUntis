@@ -360,6 +360,8 @@ class WebUntis:
             return None
 
     def _next_day_json(self):
+        if self.next_lesson_to_wake_up is None:
+            return None
         day = self.next_lesson_to_wake_up
         timetable_object = self.get_timetable_object()
 
