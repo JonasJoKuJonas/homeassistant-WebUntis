@@ -389,6 +389,7 @@ class WebUntis:
                             start=lesson.start.astimezone(),
                             end=lesson.end.astimezone(),
                             summary=lesson.subjects[0].name,  #summary=lesson.subjects[0].long_name,
+                            location=lesson.rooms[0].long_name, #add Room as location
                             description=self.get_lesson_json(lesson),
                         )
                     )
