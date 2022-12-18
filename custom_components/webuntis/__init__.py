@@ -24,7 +24,13 @@ import homeassistant.util.dt as dt_util
 
 import webuntis
 
-from .const import DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX, DAYS_TO_FUTURE
+from .const import (
+    DOMAIN,
+    SCAN_INTERVAL,
+    SIGNAL_NAME_PREFIX,
+    DAYS_TO_FUTURE,
+    CONFIG_ENTRY_VERSION,
+)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -34,6 +40,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WebUntis from a config entry."""
     domain_data = hass.data.setdefault(DOMAIN, {})
+
+    if entry.version < CONFIG_ENTRY_VERSION:
+        await _async_migrate_entry(hass, entry)
 
     # Create and store server instance.
     assert entry.unique_id
@@ -51,6 +60,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Set up platforms.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    return True
+
+
+async def _async_migrate_entry(hass, config_entry: ConfigEntry):
+    """Migrate old entry."""
+    _LOGGER.debug("Migrating from version %s", config_entry.version)
+
+    if config_entry.version == 1:
+
+        new = {**config_entry.data}
+
+        new["calendar_long_name"] = True
+
+        config_entry.version = 2
+        hass.config_entries.async_update_entry(config_entry, data=new)
+
+    _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
 
@@ -89,6 +116,8 @@ class WebUntis:
         self.password = config_data["password"]
         self.timetable_source = config_data["timetable_source"]
         self.timetable_source_id = config_data["timetable_source_id"]
+
+        self.calendar_long_name = config_data["calendar_long_name"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -390,8 +419,10 @@ class WebUntis:
                         CalendarEvent(
                             start=lesson.start.astimezone(),
                             end=lesson.end.astimezone(),
-                            summary=lesson.subjects[0].long_name,
-                            location=lesson.rooms[0].long_name, #add Room as location
+                            summary=lesson.subjects[0].long_name
+                            if self.calendar_long_name
+                            else lesson.subjects[0].name,
+                            location=lesson.rooms[0].long_name,  # add Room as location
                             description=self.get_lesson_json(lesson),
                         )
                     )

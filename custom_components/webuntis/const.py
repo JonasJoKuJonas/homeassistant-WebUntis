@@ -1,6 +1,8 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
+CONFIG_ENTRY_VERSION = 2
+
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"
 ICON_NEXT_LESSON_TO_WAKE_UP = "mdi:clock-start"
