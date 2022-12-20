@@ -29,7 +29,6 @@ from .const import (
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
     DAYS_TO_FUTURE,
-    CONFIG_ENTRY_VERSION,
 )
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -40,9 +39,6 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WebUntis from a config entry."""
     domain_data = hass.data.setdefault(DOMAIN, {})
-
-    if entry.version < CONFIG_ENTRY_VERSION:
-        await _async_migrate_entry(hass, entry)
 
     # Create and store server instance.
     assert entry.unique_id
@@ -64,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-async def _async_migrate_entry(hass, config_entry: ConfigEntry):
+async def async_migrate_entry(hass, config_entry: ConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 

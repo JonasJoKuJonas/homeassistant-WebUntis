@@ -22,12 +22,12 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
-from .const import DOMAIN
+from .const import DOMAIN, CONFIG_ENTRY_VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
 
-STEP_USER_DATA_SCHEMA = vol.Schema(
+"""STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("server"): str,
         vol.Required("school"): str,
@@ -41,7 +41,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         ),
         vol.Required("timetable_source_id"): str,
     }
-)
+)"""
 
 
 async def validate_input(
@@ -135,16 +135,16 @@ def test_timetable(session, timetable_source, source):
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for webuntisnew."""
 
-    VERSION = 1
+    VERSION = CONFIG_ENTRY_VERSION
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
         if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
-            )
+            # return self.async_step_optional()
+            return self._show_form_user()
+
         await self.async_set_unique_id(
             # pylint: disable=consider-using-f-string
             "{username}@{timetable_source_id}@{school}".format(**user_input)
@@ -192,16 +192,32 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else user_input["timetable_source_id"]
         )
 
+        user_input["timetable_source_id"] = timetable_source_id
+
+        return self._show_form_user(user_input, errors)
+
+    def _show_form_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        if user_input is None:
+            user_input = {}
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required("server", default=user_input["server"]): str,
-                    vol.Required("school", default=user_input["school"]): str,
-                    vol.Required("username", default=user_input["username"]): str,
-                    vol.Required("password", default=user_input["password"]): str,
+                    vol.Required("server", default=user_input.get("server", "")): str,
+                    vol.Required("school", default=user_input.get("school", "")): str,
                     vol.Required(
-                        "timetable_source", default=user_input["timetable_source"]
+                        "username", default=user_input.get("username", "")
+                    ): str,
+                    vol.Required(
+                        "password", default=user_input.get("password", "")
+                    ): str,
+                    vol.Required(
+                        "timetable_source", default=user_input.get("timetable_source")
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -213,11 +229,28 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         )
                     ),
                     vol.Required(
-                        "timetable_source_id", default=timetable_source_id
+                        "timetable_source_id",
+                        default=user_input.get("timetable_source_id", ""),
                     ): str,
                 }
             ),
             errors=errors,
+        )
+
+    def async_step_optional(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handels optional keys"""
+
+        return self.async_show_form(
+            step_id="optional",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "calendar_long_name", default=True
+                    ): selector.BooleanSelector()
+                }
+            ),
         )
 
 
