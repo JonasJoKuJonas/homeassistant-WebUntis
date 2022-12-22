@@ -27,5 +27,17 @@
                 }
             }
         }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "calendar_long_name": "Calendar long name"
+                },
+                "data_description": {
+                    "calendar_long_name": "Use the long name of the hours in the calendar."
+                }
+            }
+        }
     }
 }
