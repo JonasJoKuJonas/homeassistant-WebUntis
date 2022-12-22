@@ -49,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data["school"],
     )
 
-    server = WebUntis(hass, unique_id, entry.data)
+    server = WebUntis(hass, unique_id, entry)
     domain_data[unique_id] = server
     await server.async_update()
     server.start_periodic_update()
@@ -57,7 +57,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Set up platforms.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    # Register update listener.
+    entry.async_on_unload(entry.add_update_listener(async_update_entry))
+
     return True
+
+
+async def async_update_entry(hass, entry):
+    """Handle options update."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_migrate_entry(hass, config_entry: ConfigEntry):
@@ -66,12 +74,12 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if config_entry.version == 1:
 
-        new = {**config_entry.data}
+        new_options = {**config_entry.options}
 
-        new["calendar_long_name"] = True
+        new_options["calendar_long_name"] = True
 
         config_entry.version = 2
-        hass.config_entries.async_update_entry(config_entry, data=new)
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
@@ -99,21 +107,21 @@ class WebUntis:
     """Representation of a WebUntis client."""
 
     def __init__(
-        self, hass: HomeAssistant, unique_id: str, config_data: Mapping[str, Any]
+        self, hass: HomeAssistant, unique_id: str, config: Mapping[str, Any]
     ) -> None:
         """Initialize client instance."""
         self._hass = hass
 
         # Server data
         self.unique_id = unique_id
-        self.server = config_data["server"]
-        self.school = config_data["school"]
-        self.username = config_data["username"]
-        self.password = config_data["password"]
-        self.timetable_source = config_data["timetable_source"]
-        self.timetable_source_id = config_data["timetable_source_id"]
+        self.server = config.data["server"]
+        self.school = config.data["school"]
+        self.username = config.data["username"]
+        self.password = config.data["password"]
+        self.timetable_source = config.data["timetable_source"]
+        self.timetable_source_id = config.data["timetable_source_id"]
 
-        self.calendar_long_name = config_data["calendar_long_name"]
+        self.calendar_long_name = config.options["calendar_long_name"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -131,7 +139,7 @@ class WebUntis:
         self.next_class = None
         self.next_class_json = None
         self.next_lesson_to_wake_up = None
-        self.calendar_events = None
+        self.calendar_events = []
         self.next_day_json = None
 
         # Dispatcher signal name
@@ -249,7 +257,7 @@ class WebUntis:
                 self._get_events
             )
         except OSError as error:
-            self.calendar_events = None
+            self.calendar_events = []
 
             _LOGGER.warning(
                 "Updating the propertie calendar_events of '%s@%s' failed - OSError: %s",
@@ -328,24 +336,6 @@ class WebUntis:
         self.next_class_json = self.get_lesson_json(lesson)
 
         return lesson.start.astimezone()
-
-    """def _first_class(self):
-        ""returns time of first class.""
-        today = date.today()
-        timetable_object = self.get_timetable_object()
-
-        # pylint: disable=maybe-no-member
-        table = self.session.timetable(start=today, end=today, **timetable_object)
-
-        time_list = []
-        for lesson in table:
-            if self.check_lesson(lesson):
-                time_list.append(lesson.start)
-
-        if len(time_list) > 1:
-            return sorted(time_list)[0].astimezone()
-        else:
-            return None"""
 
     def _next_lesson_to_wake_up(self):
         """returns time of the next lesson to weak up."""
