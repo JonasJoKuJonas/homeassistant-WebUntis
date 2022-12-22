@@ -17,7 +17,7 @@ import webuntis
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
@@ -137,6 +137,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = CONFIG_ENTRY_VERSION
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
+        """Create the options flow."""
+        return OptionsFlowHandler(config_entry)
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -184,7 +192,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            return self.async_create_entry(title=info["title"], data=user_input)
+            return self.async_create_entry(
+                title=info["title"],
+                data=user_input,
+                options={"calendar_long_name": True},
+            )
 
         timetable_source_id = (
             ", ".join(user_input["timetable_source_id"])
@@ -237,18 +249,29 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    def async_step_optional(
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle the option flow for WebUntis."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handels optional keys"""
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
-            step_id="optional",
+            step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "calendar_long_name", default=True
-                    ): selector.BooleanSelector()
+                        "calendar_long_name",
+                        default=self.config_entry.options.get("calendar_long_name"),
+                    ): selector.BooleanSelector(),
                 }
             ),
         )
