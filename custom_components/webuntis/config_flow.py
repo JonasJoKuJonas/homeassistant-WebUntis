@@ -272,6 +272,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "calendar_long_name",
                         default=self.config_entry.options.get("calendar_long_name"),
                     ): selector.BooleanSelector(),
+                    vol.Required(
+                        "calendar_show_cancelled_lessons",
+                        default=self.config_entry.options.get(
+                            "calendar_show_cancelled_lessons"
+                        ),
+                    ): selector.BooleanSelector(),
                 }
             ),
         )

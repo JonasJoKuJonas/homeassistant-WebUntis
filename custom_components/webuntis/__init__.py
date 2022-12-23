@@ -81,6 +81,15 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 2
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 2:
+
+        new_options = {**config_entry.options}
+
+        new_options["calendar_show_cancelled_lessons"] = False
+
+        config_entry.version = 3
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -122,6 +131,9 @@ class WebUntis:
         self.timetable_source_id = config.data["timetable_source_id"]
 
         self.calendar_long_name = config.options["calendar_long_name"]
+        self.calendar_show_cancelled_lessons = config.options[
+            "calendar_show_cancelled_lessons"
+        ]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -409,6 +421,29 @@ class WebUntis:
                             if self.calendar_long_name
                             else lesson.subjects[0].name,
                             location=lesson.rooms[0].long_name,  # add Room as location
+                            description=self.get_lesson_json(lesson),
+                        )
+                    )
+                except OSError as error:
+                    _LOGGER.warning(
+                        "Updating of a calendar_event of '%s@%s' failed - OSError: %s",
+                        self.school,
+                        self.username,
+                        error,
+                    )
+            elif lesson.code == "cancelled" and self.calendar_show_cancelled_lessons:
+                try:
+                    summary = (
+                        lesson.subjects[0].long_name
+                        if self.calendar_long_name
+                        else lesson.subjects[0].name
+                    )
+                    summary = f"Cancelled: {summary}"
+                    event_list.append(
+                        CalendarEvent(
+                            start=lesson.start.astimezone(),
+                            end=lesson.end.astimezone(),
+                            summary=summary,
                             description=self.get_lesson_json(lesson),
                         )
                     )

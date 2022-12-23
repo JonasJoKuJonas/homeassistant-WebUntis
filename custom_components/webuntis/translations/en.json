@@ -32,10 +32,12 @@
         "step": {
             "init": {
                 "data": {
-                    "calendar_long_name": "Calendar long name"
+                    "calendar_long_name": "Calendar long name",
+                    "calendar_show_cancelled_lessons": "Cancelled lessons"
                 },
                 "data_description": {
-                    "calendar_long_name": "Use the long name of the hours in the calendar."
+                    "calendar_long_name": "Use the long name of the hours in the calendar.",
+                    "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar."
                 }
             }
         }
