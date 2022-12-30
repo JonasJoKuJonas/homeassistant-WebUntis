@@ -431,7 +431,7 @@ class WebUntis:
                         self.username,
                         error,
                     )
-            elif lesson.code == "cancelled" and self.calendar_show_cancelled_lessons:
+            elif self.calendar_show_cancelled_lessons and lesson.code == "cancelled":
                 try:
                     summary = (
                         lesson.subjects[0].long_name
