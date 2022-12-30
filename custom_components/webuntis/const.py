@@ -13,7 +13,7 @@ NAME_NEXT_CLASS = "Next Class"
 NAME_NEXT_LESSON_TO_WAKE_UP = "Next lesson to wake up"
 NAME_CALENDER = " WebUntis Calender"
 
-SCAN_INTERVAL = 60 * 5  # 5min
+SCAN_INTERVAL = 60 * 2  # 5min
 
 SIGNAL_NAME_PREFIX = f"signal_{DOMAIN}"
 

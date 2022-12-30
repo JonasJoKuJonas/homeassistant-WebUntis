@@ -131,7 +131,6 @@ class WebUntis:
             useragent="foo",
             school=self.school,
         )
-
         self._last_status_request_failed = False
 
         # Data provided by 3rd party library
@@ -173,32 +172,41 @@ class WebUntis:
         self.is_class = False
 
         try:
-            await self._hass.async_add_executor_job(self.session.login)
-        except OSError as error:
-            # Login error, set all properties to unknown.
-            self.is_class = None
-            self.next_class = None
-            self.next_lesson_to_wake_up = None
+            self.session.config["jsessionid"]
+        except KeyError:
+            _LOGGER.debug("No session found, logging in")
 
-            # pylint: disable=maybe-no-member
-            self.session = webuntis.Session(
-                username=self.username,
-                password=self.password,
-                server=self.server,
-                useragent="foo",
-                school=self.school,
-            )
+            try:
+                await self._hass.async_add_executor_job(self.session.login)
+                _LOGGER.debug("Login successful")
+            except OSError as error:
+                # Login error, set all properties to unknown.
+                self.is_class = None
+                self.next_class = None
+                self.next_class_json = None
+                self.next_lesson_to_wake_up = None
+                self.calendar_events = []
+                self.next_day_json = None
 
-            # Inform user once about failed update if necessary.
-            if not self._last_status_request_failed:
-                _LOGGER.warning(
-                    "Login to WebUntis '%s@%s' failed - OSError: %s",
+                # Inform user once about failed update if necessary.
+                if not self._last_status_request_failed:
+                    _LOGGER.warning(
+                        "Login to WebUntis '%s@%s' failed - OSError: %s",
+                        self.school,
+                        self.username,
+                        error,
+                    )
+                self._last_status_request_failed = True
+                return
+            except error as error:
+                _LOGGER.error(
+                    "Login to WebUntis '%s@%s' failed - ERROR: %s",
                     self.school,
                     self.username,
                     error,
                 )
-            self._last_status_request_failed = True
-            return
+
+        _LOGGER.debug("updating data")
 
         try:
             self.is_class = await self._hass.async_add_executor_job(self._is_class)
@@ -266,7 +274,7 @@ class WebUntis:
                 error,
             )
 
-        await self._hass.async_add_executor_job(self.session.logout)
+        # await self._hass.async_add_executor_job(self.session.logout)
 
     def get_timetable_object(self):
         """return the object to request the timetable"""
