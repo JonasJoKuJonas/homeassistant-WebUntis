@@ -34,7 +34,7 @@ assignees: ''
   If you come across any trace or error logs, please provide them.
 -->
 
-```txt
+```
 
 ```
 
