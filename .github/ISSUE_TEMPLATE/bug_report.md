@@ -2,37 +2,40 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## The problem
+<!-- 
+  Describe the issue you are experiencing here to communicate to the
+  maintainers. Tell us what you were trying to do and what happened.
+-->
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Environment
+<!--
+  Provide details about the versions you are using, which helps us to reproduce
+  and find the issue quicker. Version information is found in the
+  Home Assistant frontend: Settings -> About.
+-->
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+- Home Assistant version: 
+- Operating environment (OS/Container/Supervised/Core): 
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+- WebUntis version: 
+- Last working WebUntis version (if known): 
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
 
-**Additional context**
-Add any other context about the problem here.
+
+## Traceback/Error logs
+<!--
+  If you come across any trace or error logs, please provide them.
+-->
+
+```txt
+
+```
+
+## Additional information
