@@ -50,11 +50,12 @@ body:
     id: webuntis_version
     attributes:
       label: Version of WebUntis
-      placeholder: v
+      placeholder: v0.
   - type: input
     id: webuntis_version_working
     attributes:
       label: Last working WebUntis version
+      placeholder: v0.
       description: |
         (if known)
 
@@ -67,3 +68,8 @@ body:
       label: Traceback/Error logs
       description: >-
         If you come across any trace or error logs, please provide them.
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >-
+        Additional information that might help to solve your problem
