@@ -22,7 +22,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
-from .const import DOMAIN, CONFIG_ENTRY_VERSION
+from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -195,7 +195,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(
                 title=info["title"],
                 data=user_input,
-                options={"calendar_long_name": True},
+                options=DEFAULT_OPTIONS,
             )
 
         timetable_source_id = (

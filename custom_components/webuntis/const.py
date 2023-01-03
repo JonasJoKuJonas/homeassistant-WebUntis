@@ -18,3 +18,5 @@ SCAN_INTERVAL = 60 * 5  # 5min
 SIGNAL_NAME_PREFIX = f"signal_{DOMAIN}"
 
 DAYS_TO_FUTURE = 30
+
+DEFAULT_OPTIONS = {"calendar_long_name": True, "calendar_show_cancelled_lessons": False}
