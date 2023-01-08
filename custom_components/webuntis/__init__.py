@@ -131,6 +131,7 @@ class WebUntis:
             useragent="foo",
             school=self.school,
         )
+        self._loged_in = False
         self._last_status_request_failed = False
 
         # Data provided by 3rd party library
@@ -169,16 +170,27 @@ class WebUntis:
 
     async def _async_status_request(self) -> None:
         """Request status and update properties."""
-        self.is_class = False
 
-        try:
-            self.session.config["jsessionid"]
-        except KeyError:
-            _LOGGER.debug("No session found, logging in")
+        if self._loged_in:
+            # Check if there is a session id.
+            if "jsessionid" not in self.session.config:
+                _LOGGER.debug("No session id found")
+                self._loged_in = False
+            else:
+                # Check if session id is still valid.
+                try:
+                    await self._hass.async_add_executor_job(self.session.schoolyears)
+                except webuntis.errors.NotLoggedInError:
+                    _LOGGER.debug("Session invalid")
+                    self._loged_in = False
+
+        if not self._loged_in:
+            _LOGGER.debug("logging in")
 
             try:
                 await self._hass.async_add_executor_job(self.session.login)
                 _LOGGER.debug("Login successful")
+                self._loged_in = True
             except OSError as error:
                 # Login error, set all properties to unknown.
                 self.is_class = None
@@ -275,6 +287,7 @@ class WebUntis:
             )
 
         # await self._hass.async_add_executor_job(self.session.logout)
+        # self._loged_in = False
 
     def get_timetable_object(self):
         """return the object to request the timetable"""
