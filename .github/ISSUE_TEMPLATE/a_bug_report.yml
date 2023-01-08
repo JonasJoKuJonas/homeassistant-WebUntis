@@ -1,0 +1,75 @@
+name: Bug report
+description: Create a report to help us improve.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue form is for reporting bugs only!
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: The problem
+      description: >-
+        Describe the issue you are experiencing here
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+  - type: input
+    id: version
+    validations:
+      required: true
+    attributes:
+      label: Version of Home Assistant?
+      description: >
+        Can be found in: [Settings -> About](https://my.home-assistant.io/redirect/info/).
+
+        [![Open your Home Assistant instance and show your Home Assistant version information.](https://my.home-assistant.io/badges/info.svg)](https://my.home-assistant.io/redirect/info/)
+
+  - type: dropdown
+    validations:
+      required: true
+    attributes:
+      label: What type of installation are you running?
+      description: >
+        Can be found in: [Settings -> System-> Repairs -> Three Dots in Upper Right -> System information](https://my.home-assistant.io/redirect/system_health/).
+
+        [![Open your Home Assistant instance and show health information about your system.](https://my.home-assistant.io/badges/system_health.svg)](https://my.home-assistant.io/redirect/system_health/)
+      options:
+        - Home Assistant OS
+        - Home Assistant Container
+        - Home Assistant Supervised
+        - Home Assistant Core
+
+  - type: input
+    validations:
+      required: true
+    id: webuntis_version
+    attributes:
+      label: Version of WebUntis
+      placeholder: v0.
+  - type: input
+    id: webuntis_version_working
+    attributes:
+      label: Last working WebUntis version
+      placeholder: v0.
+      description: |
+        (if known)
+
+  - type: markdown
+    attributes:
+      value: |
+        # Details
+  - type: textarea
+    attributes:
+      label: Traceback/Error logs
+      description: >-
+        If you come across any trace or error logs, please provide them.
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: >-
+        Additional information that might help to solve your problem

@@ -81,6 +81,15 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 2
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 2:
+
+        new_options = {**config_entry.options}
+
+        new_options["calendar_show_cancelled_lessons"] = False
+
+        config_entry.version = 3
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -122,6 +131,9 @@ class WebUntis:
         self.timetable_source_id = config.data["timetable_source_id"]
 
         self.calendar_long_name = config.options["calendar_long_name"]
+        self.calendar_show_cancelled_lessons = config.options[
+            "calendar_show_cancelled_lessons"
+        ]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -407,19 +419,28 @@ class WebUntis:
         event_list = []
 
         for lesson in table:
-            if self.check_lesson(lesson):
+            if self.check_lesson(
+                lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
+            ):
                 try:
-                    event_list.append(
-                        CalendarEvent(
-                            start=lesson.start.astimezone(),
-                            end=lesson.end.astimezone(),
-                            summary=lesson.subjects[0].long_name
-                            if self.calendar_long_name
-                            else lesson.subjects[0].name,
-                            location=lesson.rooms[0].long_name,  # add Room as location
-                            description=self.get_lesson_json(lesson),
-                        )
-                    )
+                    event = {}
+                    if self.calendar_long_name:
+                        event["summary"] = lesson.subjects[0].long_name
+                    else:
+                        event["summary"] = lesson.subjects[0].name
+
+                    if lesson.code == "cancelled":
+                        event["summary"] = "Cancelled: " + event["summary"]
+
+                    event["start"] = lesson.start.astimezone()
+                    event["end"] = lesson.end.astimezone()
+                    event["description"] = self.get_lesson_json(lesson)
+
+                    # add Room as location
+                    if lesson.rooms:
+                        event["location"] = lesson.rooms[0].long_name
+
+                    event_list.append(CalendarEvent(**event))
                 except OSError as error:
                     _LOGGER.warning(
                         "Updating of a calendar_event of '%s@%s' failed - OSError: %s",
@@ -427,11 +448,12 @@ class WebUntis:
                         self.username,
                         error,
                     )
+
         return event_list
 
-    def check_lesson(self, lesson) -> bool:
+    def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
         """Checks if a lesson is taking place"""
-        return lesson.code != "cancelled" and lesson.subjects
+        return (lesson.code != "cancelled" or ignor_cancelled) and lesson.subjects
 
     # pylint: disable=bare-except
     def get_lesson_json(self, lesson) -> str:
