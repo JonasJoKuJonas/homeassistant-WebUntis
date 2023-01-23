@@ -84,9 +84,14 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     if config_entry.version == 2:
 
         new_options = {**config_entry.options}
-
         new_options["calendar_show_cancelled_lessons"] = False
+        config_entry.version = 3
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 3:
+
+        new_options = {**config_entry.options}
+        new_options["keep_loged_in"] = False
         config_entry.version = 3
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
@@ -134,6 +139,8 @@ class WebUntis:
         self.calendar_show_cancelled_lessons = config.options[
             "calendar_show_cancelled_lessons"
         ]
+
+        self.keep_loged_in = config.options["keep_loged_in"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -298,8 +305,10 @@ class WebUntis:
                 error,
             )
 
-        # await self._hass.async_add_executor_job(self.session.logout)
-        # self._loged_in = False
+        if not self.keep_loged_in:
+            await self._hass.async_add_executor_job(self.session.logout)
+            _LOGGER.debug("Logout successful")
+            self._loged_in = False
 
     def get_timetable_object(self):
         """return the object to request the timetable"""

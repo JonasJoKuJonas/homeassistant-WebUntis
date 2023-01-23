@@ -27,23 +27,6 @@ from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
 _LOGGER = logging.getLogger(__name__)
 
 
-"""STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required("server"): str,
-        vol.Required("school"): str,
-        vol.Required("username"): str,
-        vol.Required("password"): str,
-        vol.Required("timetable_source"): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                options=["student", "klasse", "teacher"],  # "subject", "room"
-                mode="dropdown",
-            )
-        ),
-        vol.Required("timetable_source_id"): str,
-    }
-)"""
-
-
 async def validate_input(
     hass: HomeAssistant, user_input: dict[str, Any]
 ) -> dict[str, Any]:
