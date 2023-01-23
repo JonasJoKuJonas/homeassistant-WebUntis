@@ -236,6 +236,8 @@ class WebUntis:
                     self.username,
                     error,
                 )
+                self._last_status_request_failed = True
+                return
 
         _LOGGER.debug("updating data")
 
