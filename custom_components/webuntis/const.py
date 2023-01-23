@@ -1,7 +1,13 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 3
+CONFIG_ENTRY_VERSION = 4
+
+DEFAULT_OPTIONS = {
+    "calendar_long_name": True,
+    "calendar_show_cancelled_lessons": False,
+    "keep_loged_in": False,
+}
 
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"
@@ -18,5 +24,3 @@ SCAN_INTERVAL = 60 * 5  # 5min
 SIGNAL_NAME_PREFIX = f"signal_{DOMAIN}"
 
 DAYS_TO_FUTURE = 30
-
-DEFAULT_OPTIONS = {"calendar_long_name": True, "calendar_show_cancelled_lessons": False}
