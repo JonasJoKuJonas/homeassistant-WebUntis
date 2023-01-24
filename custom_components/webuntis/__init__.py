@@ -92,8 +92,17 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         new_options = {**config_entry.options}
         new_options["keep_loged_in"] = False
-        config_entry.version = 3
+        config_entry.version == 4
         hass.config_entries.async_update_entry(config_entry, options=new_options)
+
+    if config_entry.version == 4:
+
+        new_options = {**config_entry.options}
+        new_options["filter_mode"] = None
+        new_options["filter_subjects"] = []
+        config_entry.version == 5
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
@@ -142,8 +151,8 @@ class WebUntis:
 
         self.keep_loged_in = config.options["keep_loged_in"]
 
-        self.filter_mode = "BLACKLIST" # BLACKLIST, WHITELIST, None
-        self.filter_subjects = []
+        self.filter_mode = config.options["filter_mode"] # BLACKLIST, WHITELIST, None
+        self.filter_subjects = config.options["filter_subjects"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
