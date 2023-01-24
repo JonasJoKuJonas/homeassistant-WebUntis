@@ -489,9 +489,9 @@ class WebUntis:
 
     def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
         """Checks if a lesson is taking place"""
-        if self.filter_mode = "BLACKLIST" and lesson.subjects in self.filter_subjects:
+        if self.filter_mode == "BLACKLIST" and lesson.subjects in self.filter_subjects:
             return False
-        elif self.filter_mode = "WHITELIST" and lesson.subjects not in self.filter_subjects:
+        elif self.filter_mode == "WHITELIST" and lesson.subjects not in self.filter_subjects:
             return False
         return (lesson.code != "cancelled" or ignor_cancelled) and lesson.subjects
 
