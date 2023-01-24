@@ -142,6 +142,9 @@ class WebUntis:
 
         self.keep_loged_in = config.options["keep_loged_in"]
 
+        self.filter_mode = "BLACKLIST" # BLACKLIST, WHITELIST, None
+        self.filter_subjects = []
+
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
@@ -477,6 +480,10 @@ class WebUntis:
 
     def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
         """Checks if a lesson is taking place"""
+        if self.filter_mode = "BLACKLIST" and lesson.subjects in self.filter_subjects:
+            return False
+        elif self.filter_mode = "WHITELIST" and lesson.subjects not in self.filter_subjects:
+            return False
         return (lesson.code != "cancelled" or ignor_cancelled) and lesson.subjects
 
     # pylint: disable=bare-except
