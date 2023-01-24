@@ -7,8 +7,8 @@ DEFAULT_OPTIONS = {
     "calendar_long_name": True,
     "calendar_show_cancelled_lessons": False,
     "keep_loged_in": False,
-    "filter_mode" = None,
-    "filter_subjects" = []
+    "filter_mode": None,
+    "filter_subjects": []
 }
 
 ICON_STATUS = "mdi:school-outline"
