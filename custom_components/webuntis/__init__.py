@@ -92,17 +92,16 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         new_options = {**config_entry.options}
         new_options["keep_loged_in"] = False
-        config_entry.version == 4
+        config_entry.version = 4
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 4:
 
         new_options = {**config_entry.options}
-        new_options["filter_mode"] = None
+        new_options["filter_mode"] = "None"
         new_options["filter_subjects"] = []
-        config_entry.version == 5
+        config_entry.version = 5
         hass.config_entries.async_update_entry(config_entry, options=new_options)
-
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
@@ -151,8 +150,13 @@ class WebUntis:
 
         self.keep_loged_in = config.options["keep_loged_in"]
 
-        self.filter_mode = config.options["filter_mode"] # BLACKLIST, WHITELIST, None
+        self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
+
+        if self.filter_mode and not self.filter_subjects:
+            new_options = {**config.options}
+            new_options["filter_mode"] = "None"
+            hass.config_entries.async_update_entry(config, options=new_options)
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -172,6 +176,8 @@ class WebUntis:
         self.next_lesson_to_wake_up = None
         self.calendar_events = []
         self.next_day_json = None
+
+        self.subjects = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -252,6 +258,20 @@ class WebUntis:
                 return
 
         _LOGGER.debug("updating data")
+
+        try:
+            self.subjects = await self._hass.async_add_executor_job(
+                self.session.subjects
+            )
+        except OSError as error:
+            self.subjects = []
+
+            _LOGGER.warning(
+                "Updating the propertie subjects of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
 
         try:
             self.is_class = await self._hass.async_add_executor_job(self._is_class)
@@ -489,11 +509,22 @@ class WebUntis:
 
     def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
         """Checks if a lesson is taking place"""
-        if self.filter_mode == "BLACKLIST" and lesson.subjects in self.filter_subjects:
+        if lesson.code == "cancelled" and not ignor_cancelled:
             return False
-        elif self.filter_mode == "WHITELIST" and lesson.subjects not in self.filter_subjects:
+
+        if not lesson.subjects:
             return False
-        return (lesson.code != "cancelled" or ignor_cancelled) and lesson.subjects
+
+        if self.filter_mode == "Blacklist":
+            if any(subject.name in self.filter_subjects for subject in lesson.subjects):
+                return False
+        if self.filter_mode == "Whitelist" and self.filter_subjects:
+            if not any(
+                subject.name in self.filter_subjects for subject in lesson.subjects
+            ):
+                return False
+
+        return True
 
     # pylint: disable=bare-except
     def get_lesson_json(self, lesson) -> str:

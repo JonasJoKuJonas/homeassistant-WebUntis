@@ -1,45 +1,49 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "cannot_connect": "Failed to connect. Please check the host.",
-            "invalid_auth": "Invalid authentication",
-            "bad_credentials": "Invalid user name and/or password",
-            "school_not_found": "Invalid school name/id",
-            "name_split_error": "Invalid name. Try \"first_name, last_name\".",
-            "student_not_found": "Student not found. Check the name or pick other source.",
-            "teacher_not_found": "Teacher not found. Check the name or pick other source.",
-            "class_not_found": "Class not found. Check the class or pick other source.",
-            "no_rights_for_timetable": "No rights for timetable.",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "server": "Server",
-                    "school": "School",
-                    "username": "Username",
-                    "password": "Password",
-                    "timetable_source": "Timetable source",
-                    "timetable_source_id": "Full name/ Class/ Subject/ Room"
-                }
-            }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "Device is already configured"
     },
-    "options": {
-        "step": {
-            "init": {
-                "data": {
-                    "calendar_long_name": "Calendar - long name",
-                    "calendar_show_cancelled_lessons": "Calendar - cancelled lessons"
-                },
-                "data_description": {
-                    "calendar_long_name": "Use the long name of the hours in the calendar.",
-                    "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar."
-                }
-            }
+    "error": {
+      "cannot_connect": "Failed to connect. Please check the host.",
+      "invalid_auth": "Invalid authentication",
+      "bad_credentials": "Invalid user name and/or password",
+      "school_not_found": "Invalid school name/id",
+      "name_split_error": "Invalid name. Try \"first_name, last_name\".",
+      "student_not_found": "Student not found. Check the name or pick other source.",
+      "teacher_not_found": "Teacher not found. Check the name or pick other source.",
+      "class_not_found": "Class not found. Check the class or pick other source.",
+      "no_rights_for_timetable": "No rights for timetable.",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "server": "Server",
+          "school": "School",
+          "username": "Username",
+          "password": "Password",
+          "timetable_source": "Timetable source",
+          "timetable_source_id": "Full name/ Class/ Subject/ Room"
         }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "calendar_long_name": "Calendar - long name",
+          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
+          "keep_loged_in": "Keep logged in",
+          "filter_mode": "Filter mode",
+          "filter_subjects": "Filter mode - subjects"
+        },
+        "data_description": {
+          "calendar_long_name": "Use the long name of the hours in the calendar.",
+          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
+          "keep_loged_in": "Try to save the session data. (BETA)"
+        }
+      }
+    }
+  }
 }
