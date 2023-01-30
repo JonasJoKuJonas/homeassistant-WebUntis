@@ -12,8 +12,6 @@ import datetime
 from urllib.parse import urlparse
 import requests
 
-import webuntis
-
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -21,6 +19,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+
+
+import webuntis
 
 from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
 
@@ -241,9 +242,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self.config_entry = config_entry
 
     async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
+        self,
+        user_input: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the options."""
+
+        server = self.hass.data[DOMAIN][self.config_entry.unique_id]
+
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
@@ -261,9 +266,45 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             "calendar_show_cancelled_lessons"
                         ),
                     ): selector.BooleanSelector(),
+                    vol.Required(
+                        "keep_loged_in",
+                        default=self.config_entry.options.get("keep_loged_in"),
+                    ): selector.BooleanSelector(),
+                    vol.Required(
+                        "filter_mode",
+                        default=str(self.config_entry.options.get("filter_mode")),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "None",
+                                "Blacklist",
+                                "Whitelist",
+                            ],
+                            mode="dropdown",
+                        )
+                    ),
+                    vol.Required(
+                        "filter_subjects",
+                        default=self.config_entry.options.get("filter_subjects"),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_create_subject_list(server),
+                            multiple=True,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                            # custom_values=True,
+                        ),
+                    ),
                 }
             ),
         )
+
+
+def _create_subject_list(server):
+    """Create a list of subjects."""
+
+    subjects = server.subjects
+
+    return [subject.name for subject in subjects]
 
 
 class CannotConnect(HomeAssistantError):

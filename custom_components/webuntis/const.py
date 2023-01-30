@@ -1,12 +1,14 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 4
+CONFIG_ENTRY_VERSION = 5
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
     "calendar_show_cancelled_lessons": False,
     "keep_loged_in": False,
+    "filter_mode": "None",
+    "filter_subjects": [],
 }
 
 ICON_STATUS = "mdi:school-outline"
