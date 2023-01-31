@@ -493,8 +493,12 @@ class WebUntis:
                     event["description"] = self.get_lesson_json(lesson)
 
                     # add Room as location
-                    if lesson.rooms:
-                        event["location"] = lesson.rooms[0].long_name
+                    try:
+                        if lesson.rooms:
+                            event["location"] = lesson.rooms[0].long_name
+                    except IndexError:
+                        # server does not return rooms
+                        pass
 
                     event_list.append(CalendarEvent(**event))
                 except OSError as error:
