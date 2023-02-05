@@ -103,6 +103,15 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         config_entry.version = 5
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 5:
+
+        new_options = {**config_entry.options}
+        new_options["exclude_data"] = []
+        new_options["generate_json"] = False
+        config_entry.version = 6
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -129,10 +138,14 @@ class WebUntis:
     """Representation of a WebUntis client."""
 
     def __init__(
-        self, hass: HomeAssistant, unique_id: str, config: Mapping[str, Any]
+        self,
+        hass: HomeAssistant,
+        unique_id: str,
+        config: Mapping[str, Any],
     ) -> None:
         """Initialize client instance."""
         self._hass = hass
+        self._config = config
 
         # Server data
         self.unique_id = unique_id
@@ -152,6 +165,9 @@ class WebUntis:
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
+
+        self.exclude_data = config.options["exclude_data"]
+        self.generate_json = config.options["generate_json"]
 
         if self.filter_mode and not self.filter_subjects:
             new_options = {**config.options}
@@ -533,6 +549,8 @@ class WebUntis:
     # pylint: disable=bare-except
     def get_lesson_json(self, lesson) -> str:
         """returns info about lesson in json"""
+        if not self.generate_json:
+            return "JSON data is disabled - activate it in the options"
         dic = {}
         dic["start"] = str(lesson.start.astimezone())
         dic["end"] = str(lesson.end.astimezone())
@@ -576,22 +594,42 @@ class WebUntis:
             ]
         except:
             pass
-        try:
-            dic["teachers"] = [
-                {"name": str(teacher.name), "long_name": str(teacher.long_name)}
-                for teacher in lesson.teachers
-            ]
-        except:
-            pass
-        try:
-            dic["original_teachers"] = [
-                {"name": str(teacher.name), "long_name": str(teacher.long_name)}
-                for teacher in lesson.original_teachers
-            ]
-        except:
-            pass
+
+        if "teachers" not in self.exclude_data:
+            try:
+                dic["teachers"] = [
+                    {"name": str(teacher.name), "long_name": str(teacher.long_name)}
+                    for teacher in lesson.teachers
+                ]
+            except OSError as error:
+                if "no right for getTeachers()" in str(error):
+                    self.exclude_data_("teachers")
+                    _LOGGER.info(
+                        "No rights for getTeachers() for '%s@%s', getTeachers is now on blacklist",
+                        self.school,
+                        self.username,
+                    )
+            except:
+                pass
+
+            try:
+                dic["original_teachers"] = [
+                    {"name": str(teacher.name), "long_name": str(teacher.long_name)}
+                    for teacher in lesson.original_teachers
+                ]
+            except:
+                pass
 
         return str(json.dumps(dic))
+
+    def exclude_data_(self, data):
+        """adds data to exclude_data list"""
+
+        new_options = {**self._config.options}
+        new_options["exclude_data"] = [*new_options["exclude_data"], data]
+
+        self._hass.config_entries.async_update_entry(self._config, options=new_options)
+        self.exclude_data.append(data)
 
 
 class WebUntisEntity(Entity):
