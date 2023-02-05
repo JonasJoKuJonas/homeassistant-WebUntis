@@ -291,7 +291,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             options=_create_subject_list(server),
                             multiple=True,
                             mode=selector.SelectSelectorMode.DROPDOWN,
-                            # custom_values=True,
+                        ),
+                    ),
+                    vol.Required(
+                        "generate_json",
+                        default=self.config_entry.options.get("generate_json"),
+                    ): selector.BooleanSelector(),
+                    vol.Required(
+                        "exclude_data",
+                        default=self.config_entry.options.get("exclude_data"),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=["teachers"],
+                            multiple=True,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
                 }

@@ -36,12 +36,15 @@
           "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden",
           "keep_loged_in": "Eingeloggt bleiben",
           "filter_mode": "Fächer Filter",
-          "filter_subjects": "Fächer Filter - Fächer"
+          "filter_subjects": "Fächer Filter - Fächer",
+          "generate_json": "JSON generieren",
+          "exclude_data": "Daten von request ausschließen"
         },
         "data_description": {
           "calendar_long_name": "Verwende den langen Namen der Stunden im Kalender.",
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
-          "keep_loged_in": "Versucht die Session zu speichern. (BETA)"
+          "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
+          "generate_json": "Generiert JSON in Sensor Attribute - nur aktivieren wenn es benötigt wird."
         }
       }
     }

@@ -36,12 +36,15 @@
           "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
           "keep_loged_in": "Keep logged in",
           "filter_mode": "Filter mode",
-          "filter_subjects": "Filter mode - subjects"
+          "filter_subjects": "Filter mode - subjects",
+          "generate_json": "Generate JSON",
+          "exclude_data": "Exclude data from request"
         },
         "data_description": {
           "calendar_long_name": "Use the long name of the hours in the calendar.",
           "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
-          "keep_loged_in": "Try to save the session data. (BETA)"
+          "keep_loged_in": "Try to save the session data. (BETA)",
+          "generate_json": "Generate JSON in Sensor Attributes - enable only if needed."
         }
       }
     }
