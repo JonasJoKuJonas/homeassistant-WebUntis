@@ -15,6 +15,8 @@ This component is easiest installed using [HACS](https://github.com/custom-compo
 
 Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
 
+### Docker
+If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
 
 ## Configuration via UI
 
@@ -37,8 +39,13 @@ You can ask the school administration to give you an access, otherwise it won't 
 With the timetable source, you can select where the data for the sensor should come from.
 The final configuration field allows you to specify a name or class from which the data is pulled.
 
-### Docker
-If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
+## Optional Configurations
+
+### exclude_data
+This option is used to prevent errors in logs. You don't need to edit it. 
+It is used to store permission errors and stop them from happening again.
+
+
 
 ## Entities
 
