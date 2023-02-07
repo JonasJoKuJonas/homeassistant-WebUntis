@@ -18,7 +18,9 @@ Custom component to access data from Web Untis in Home Assistant
 
 ### Manual installation 
 
-Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
+1. Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
+2. Restart Home Assistant
+4. Add Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis)
 
 ### Docker
 If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
