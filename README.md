@@ -3,15 +3,20 @@
 ![Version](https://img.shields.io/github/v/release/JonasJoKuJonas/homeassistant-WebUntis)
 [![Downloads](https://img.shields.io/github/downloads/JonasJoKuJonas/homeassistant-WebUntis/total)](https://tooomm.github.io/github-release-stats/?username=JonasJoKuJonas&repository=HomeAssistant-WebUntis)
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JonasJoKuJonas&repository=Homeassistant-WebUntis)
+
 Custom component to access data from Web Untis in Home Assistant
 
 ## Installation
 
 ### HACS
 
-This component is easiest installed using [HACS](https://github.com/custom-components/hacs).
+1. Install [HACS](https://github.com/custom-components/hacs).
+2. Install Integration.
+3. Restart Home Assistant
+4. Add Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis)
 
-### Manual installation
+### Manual installation 
 
 Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
 
