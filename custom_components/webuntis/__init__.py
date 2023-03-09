@@ -1,35 +1,27 @@
 """The Web Untis integration."""
 from __future__ import annotations
 
+import json
 import logging
 from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
-import json
 
+import homeassistant.util.dt as dt_util
+from homeassistant.components.calendar import CalendarEvent
 # pylint: disable=import-self
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
-from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
-    async_dispatcher_send,
-)
+from homeassistant.helpers.dispatcher import (async_dispatcher_connect,
+                                              async_dispatcher_send)
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
-from homeassistant.components.calendar import CalendarEvent
-import homeassistant.util.dt as dt_util
-
 import webuntis
 
-from .const import (
-    DOMAIN,
-    SCAN_INTERVAL,
-    SIGNAL_NAME_PREFIX,
-    DAYS_TO_FUTURE,
-)
+from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -474,10 +466,12 @@ class WebUntis:
 
         table = self.session.timetable(start=day, end=day, **timetable_object)
 
-        json_str = "["
+        lessons = []
         for lesson in table:
-            json_str += str(self.get_lesson_json(lesson)) + ","
-        json_str = json_str[:-1] + "]"
+            if self.check_lesson(lesson):
+                lessons.append(str(self.get_lesson_json(lesson)))
+
+        json_str = "[" + ", ".join(lessons) + "]"
 
         return json_str
 
