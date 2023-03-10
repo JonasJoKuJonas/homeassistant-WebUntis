@@ -234,6 +234,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
+OPTIONS_MENU = {
+    "filter": "Filter",
+    "calendar": "Calendar",
+    "backend": "Backend",
+}
+
+
 class OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle the option flow for WebUntis."""
 
@@ -246,30 +253,41 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the options."""
+        return self.async_show_menu(step_id="user", menu_options=OPTIONS_MENU)
+
+    async def save(self, user_input):
+        """Save the options"""
+        _LOGGER.debug("Saving options: %s", user_input)
+        options = dict(self.config_entry.options)  # old options
+        options.update(user_input)  # update old options with new options
+        return self.async_create_entry(title="", data=options)
+
+    async def async_step_filter(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Manage the filter options."""
+        if user_input is not None:
+            if not "filter_description" in user_input:
+                user_input["filter_description"] = []
+
+            if user_input["filter_mode"] and not user_input["filter_subjects"]:
+                user_input["filter_mode"] = "None"
+
+            if user_input["filter_description"]:
+                user_input["extended_timetable"] = True
+                user_input["filter_description"] = user_input[
+                    "filter_description"
+                ].split(",")
+                user_input["filter_description"] = [
+                    s.strip() for s in user_input["filter_description"] if s != ""
+                ]
+
+            return await self.save(user_input)
 
         server = self.hass.data[DOMAIN][self.config_entry.unique_id]
 
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-
         return self.async_show_form(
-            step_id="init",
+            step_id="filter",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "calendar_long_name",
-                        default=self.config_entry.options.get("calendar_long_name"),
-                    ): selector.BooleanSelector(),
-                    vol.Required(
-                        "calendar_show_cancelled_lessons",
-                        default=self.config_entry.options.get(
-                            "calendar_show_cancelled_lessons"
-                        ),
-                    ): selector.BooleanSelector(),
-                    vol.Required(
-                        "keep_loged_in",
-                        default=self.config_entry.options.get("keep_loged_in"),
-                    ): selector.BooleanSelector(),
                     vol.Required(
                         "filter_mode",
                         default=str(self.config_entry.options.get("filter_mode")),
@@ -293,6 +311,68 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
+                    vol.Optional(
+                        "filter_description",
+                        description={
+                            "suggested_value": ", ".join(
+                                self.config_entry.options.get("filter_description")
+                            )
+                        },
+                    ): selector.TextSelector(
+                        selector.TextSelectorConfig(multiline=True)
+                    ),
+                }
+            ),
+        )
+
+    async def async_step_calendar(
+        self, user_input: dict[str, str] = None
+    ) -> FlowResult:
+        """Manage the calendar options."""
+        if user_input is not None:
+            return await self.save(user_input)
+
+        return self.async_show_form(
+            step_id="calendar",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "calendar_long_name",
+                        default=self.config_entry.options.get("calendar_long_name"),
+                    ): selector.BooleanSelector(),
+                    vol.Required(
+                        "calendar_show_cancelled_lessons",
+                        default=self.config_entry.options.get(
+                            "calendar_show_cancelled_lessons"
+                        ),
+                    ): selector.BooleanSelector(),
+                }
+            ),
+        )
+
+    async def async_step_backend(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the backend options."""
+        if user_input is not None:
+            if (
+                not user_input["extended_timetable"]
+                and self.config_entry.options["filter_description"]
+            ):
+                errors = {"base": "extended_timetable"}
+            else:
+                return await self.save(user_input)
+
+        return self.async_show_form(
+            step_id="backend",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "keep_loged_in",
+                        default=self.config_entry.options.get("keep_loged_in"),
+                    ): selector.BooleanSelector(),
                     vol.Required(
                         "generate_json",
                         default=self.config_entry.options.get("generate_json"),
@@ -307,8 +387,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
+                    vol.Required(
+                        "extended_timetable",
+                        default=self.config_entry.options.get("extended_timetable"),
+                    ): selector.BooleanSelector(),
                 }
             ),
+            errors=errors,
         )
 
 

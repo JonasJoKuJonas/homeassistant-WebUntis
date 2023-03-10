@@ -1,27 +1,35 @@
 """The Web Untis integration."""
 from __future__ import annotations
 
-import json
 import logging
 from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
+import json
 
-import homeassistant.util.dt as dt_util
-from homeassistant.components.calendar import CalendarEvent
 # pylint: disable=import-self
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
-from homeassistant.helpers.dispatcher import (async_dispatcher_connect,
-                                              async_dispatcher_send)
+from homeassistant.helpers.dispatcher import (
+    async_dispatcher_connect,
+    async_dispatcher_send,
+)
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
+from homeassistant.components.calendar import CalendarEvent
+import homeassistant.util.dt as dt_util
+
 import webuntis
 
-from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .const import (
+    DOMAIN,
+    SCAN_INTERVAL,
+    SIGNAL_NAME_PREFIX,
+    DAYS_TO_FUTURE,
+)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -65,7 +73,6 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
     if config_entry.version == 1:
-
         new_options = {**config_entry.options}
 
         new_options["calendar_long_name"] = True
@@ -74,21 +81,18 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 2:
-
         new_options = {**config_entry.options}
         new_options["calendar_show_cancelled_lessons"] = False
         config_entry.version = 3
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 3:
-
         new_options = {**config_entry.options}
         new_options["keep_loged_in"] = False
         config_entry.version = 4
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 4:
-
         new_options = {**config_entry.options}
         new_options["filter_mode"] = "None"
         new_options["filter_subjects"] = []
@@ -96,11 +100,18 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 5:
-
         new_options = {**config_entry.options}
         new_options["exclude_data"] = []
         new_options["generate_json"] = False
         config_entry.version = 6
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
+    if config_entry.version == 6:
+        new_options = {**config_entry.options}
+        new_options["filter_description"] = []
+        new_options["extended_timetable"] = False
+        config_entry.version = 7
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
@@ -159,12 +170,10 @@ class WebUntis:
         self.filter_subjects = config.options["filter_subjects"]
 
         self.exclude_data = config.options["exclude_data"]
+        self.filter_description = config.options["filter_description"]
         self.generate_json = config.options["generate_json"]
 
-        if self.filter_mode and not self.filter_subjects:
-            new_options = {**config.options}
-            new_options["filter_mode"] = "None"
-            hass.config_entries.async_update_entry(config, options=new_options)
+        self.extended_timetable = config.options["extended_timetable"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -373,12 +382,21 @@ class WebUntis:
 
         return {self.timetable_source: source}
 
+    def get_timetable(self, start, end):
+        """Get the timetable for the given time period"""
+        timetable_object = self.get_timetable_object()
+
+        if self.extended_timetable:
+            return self.session.timetable_extended(
+                start=start, end=end, **timetable_object
+            )
+        return self.session.timetable(start=start, end=end, **timetable_object)
+
     def _is_class(self):
         """return if is class"""
         today = date.today()
-        timetable_object = self.get_timetable_object()
 
-        table = self.session.timetable(start=today, end=today, **timetable_object)
+        table = self.get_timetable(start=today, end=today)
 
         now = datetime.now()
 
@@ -392,10 +410,9 @@ class WebUntis:
         """returns time of next class."""
         today = date.today()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
-        timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
-        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
+        table = self.get_timetable(start=today, end=in_x_days)
 
         now = datetime.now()
 
@@ -426,10 +443,9 @@ class WebUntis:
         today = date.today()
         now = datetime.now()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
-        timetable_object = self.get_timetable_object()
 
         # pylint: disable=maybe-no-member
-        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
+        table = self.get_timetable(start=today, end=in_x_days)
 
         time_list = []
         for lesson in table:
@@ -462,9 +478,8 @@ class WebUntis:
         if self.next_lesson_to_wake_up is None:
             return None
         day = self.next_lesson_to_wake_up
-        timetable_object = self.get_timetable_object()
 
-        table = self.session.timetable(start=day, end=day, **timetable_object)
+        table = self.get_timetable(start=day, end=day)
 
         lessons = []
         for lesson in table:
@@ -478,9 +493,8 @@ class WebUntis:
     def _get_events(self):
         today = date.today()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
-        timetable_object = self.get_timetable_object()
 
-        table = self.session.timetable(start=today, end=in_x_days, **timetable_object)
+        table = self.get_timetable(start=today, end=in_x_days)
 
         event_list = []
 
@@ -529,6 +543,13 @@ class WebUntis:
         if not lesson.subjects:
             return False
 
+        for filter_description in self.filter_description:
+            if (
+                filter_description in lesson.lstext  # Vertretungstext
+                or filter_description in lesson.substText  # Informationen zur Stunde
+            ):
+                return False
+
         if self.filter_mode == "Blacklist":
             if any(subject.name in self.filter_subjects for subject in lesson.subjects):
                 return False
@@ -567,6 +588,17 @@ class WebUntis:
             ]
         except:
             pass
+
+        if self.extended_timetable:
+            try:
+                dic["lstext"] = str(lesson.lstext)
+            except:
+                pass
+            try:
+                dic["substText"] = str(lesson.substText)
+            except:
+                pass
+
         try:
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}

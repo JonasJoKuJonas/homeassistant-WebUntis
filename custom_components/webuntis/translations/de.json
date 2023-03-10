@@ -29,22 +29,48 @@
     }
   },
   "options": {
+    "error": {
+      "extended_timetable": "Für die Option \"Fächer Filter - Beschreibung\" wird \"Erweiterte Stundenplan anfordern\" benötigt",
+      "unknown": "Unerwarteter Fehler"
+    },
     "step": {
-      "init": {
+      "filter": {
+        "title": "Filter Einstellungen",
+        "description": "Einstellungen zur herausfiltern von unerwünschten Fächern.",
         "data": {
-          "calendar_long_name": "Kalender - langer Name",
-          "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden",
-          "keep_loged_in": "Eingeloggt bleiben",
           "filter_mode": "Fächer Filter",
           "filter_subjects": "Fächer Filter - Fächer",
-          "generate_json": "JSON generieren",
-          "exclude_data": "Daten von request ausschließen"
+          "filter_description": "Fächer Filtern - Beschreibung"
+        },
+        "data_description": {
+          "filter_description": "Verstecke Stunden die folgende Ausdrücke  in der Beschreibung beinhalten. (Kommagetrennte Liste)"
+        }
+      },
+      "calendar": {
+        "title": "Kalender Einstellungen",
+        "description": "Einstellungen zur Kalender Darstellung.",
+        "data": {
+          "calendar_long_name": "Kalender - langer Name",
+          "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden"
         },
         "data_description": {
           "calendar_long_name": "Verwende den langen Namen der Stunden im Kalender.",
-          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
+          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an."
+        }
+      },
+      "backend": {
+        "title": "Server Einstellungen",
+        "description": "Einstellungen zur Verbindung und der Datenverarbeitung.",
+        "data": {
+          "keep_loged_in": "Eingeloggt bleiben",
+          "generate_json": "JSON generieren",
+          "exclude_data": "Daten von request ausschließen",
+          "extended_timetable": "Erweiterte Stundenplan anfordern"
+        },
+        "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
-          "generate_json": "Generiert JSON in Sensor Attribute - nur aktivieren wenn es benötigt wird."
+          "generate_json": "Generiert JSON in Sensor Attribute - nur aktivieren wenn es benötigt wird.",
+          "extended_timetable": "Fordere erweiterte Stundenplan an. (Wird für Fächer Filter - Beschreibung benötigt)"
         }
       }
     }
