@@ -29,21 +29,47 @@
     }
   },
   "options": {
+    "error": {
+      "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" option",
+      "unknown": "Unexpected error"
+    },
     "step": {
-      "init": {
+      "filter": {
+        "title": "Filter Settings",
+        "description": "Settings to filter out unwanted subjects.",
         "data": {
-          "calendar_long_name": "Calendar - long name",
-          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
-          "keep_loged_in": "Keep logged in",
           "filter_mode": "Filter mode",
           "filter_subjects": "Filter mode - subjects",
-          "generate_json": "Generate JSON",
-          "exclude_data": "Exclude data from request"
+          "filter_description": "Filter Mode - Description"
         },
         "data_description": {
+          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list)"
+        }
+        },
+        "calendar": {
+          "title": "Calendar Settings",
+          "description": "Settings to customize the calendar.",
+          "data": {
+            "calendar_long_name": "Calendar - long name",
+            "calendar_show_cancelled_lessons": "Calendar - cancelled lessons"
+          },
+          "data_description": {
           "calendar_long_name": "Use the long name of the hours in the calendar.",
-          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
+          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar."
+          }
+        },
+        "backend": {
+          "title": "Backend Settings",
+          "description": "Connection and data processing settings.",
+          "data": {
+            "keep_loged_in": "Keep logged in",
+            "generate_json": "Generate JSON",
+            "exclude_data": "Exclude data from request",
+            "extended_timetable": "Request extended timetable"
+          },
+        "data_description": {
           "keep_loged_in": "Try to save the session data. (BETA)",
+          "filter_description": "Hide lessons with phrase in description.",
           "generate_json": "Generate JSON in Sensor Attributes - enable only if needed."
         }
       }
