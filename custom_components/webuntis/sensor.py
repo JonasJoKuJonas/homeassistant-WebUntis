@@ -18,6 +18,24 @@ from .const import (
 )
 
 
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the Web Untis sensor platform."""
+    server = hass.data[DOMAIN][config_entry.unique_id]
+
+    # Create entities list.
+    entities = [
+        WebUntisNextClassSensor(server),
+        WebUntisNextLessonToWakeUpSensor(server),
+    ]
+
+    # Add sensor entities.
+    async_add_entities(entities, True)
+    
+
 class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
     """Representation of a Web Untis sensor base entity."""
 
@@ -35,6 +53,7 @@ class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
         super().__init__(server, type_name, icon, device_class)
         self._attr_native_unit_of_measurement = self.unit
 
+    @property
     def available(self) -> bool:
         """Return sensor availability."""
         return True
@@ -54,7 +73,8 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
             icon=ICON_NEXT_CLASS,
             device_class=self.device_class,
         )
-
+        
+    @property
     def available(self) -> bool:
         """Return sensor availability."""
         return bool(self._server.next_class)
@@ -83,5 +103,3 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
         """Update next lesson to wake up."""
         self._attr_native_value = self._server.next_lesson_to_wake_up
         self._attr_extra_state_attributes = {"day": self._server.next_day_json}
-        
-        
