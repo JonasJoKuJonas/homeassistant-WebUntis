@@ -66,7 +66,9 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 |`calendar.NAME_webuntis_calender`| calendar | Calendar entry
 
 ## Template
+Before you can use templates you need to enable the option generate JSON in the options flow. (Backend - generate JSON)
 
+Now you can copy this examples and don't forget to change the sensor names. (Replace NAME with your name)
 ### List lessons from next day
 ```
 {% set json = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
