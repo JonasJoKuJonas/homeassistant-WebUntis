@@ -1,0 +1,77 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Het apparaat is al geconfigureerd"
+    },
+    "error": {
+      "cannot_connect": "Kan geen verbinding maken. Controleer de host.",
+      "invalid_auth": "Ongeldige verificatie",
+      "bad_credentials": "Ongeldige gebruikersnaam en/of wachtwoord",
+      "school_not_found": "Invalid school name/id",
+      "name_split_error": "Ongeldige naam. Probeer \"voornaam, achternaam\".",
+      "student_not_found": "Student niet gevonden. Controleer de naam of kies een andere bron.",
+      "teacher_not_found": "Leraar niet gevonden. Controleer de naam of kies een andere bron.",
+      "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
+      "no_rights_for_timetable": "Geen rechten voor het tijdschema.",
+      "unknown": "Onverwachte fout"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "server": "Server",
+          "school": "School",
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "timetable_source": "Tijdschema bron",
+          "timetable_source_id": "Volledige naam/ Klas/ Onderwerp/ Kamer"
+        }
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "extended_timetable": "\"Uitgebreid rooster aanvragen\" is vereist voor de optie \"Onderwerpfilter - Beschrijving\"",
+      "unknown": "Onverwachte fout"
+    },
+    "step": {
+      "filter": {
+        "title": "Filterinstellingen",
+        "description": "Instellingen om ongewenste onderwerpen uit te filteren.",
+        "data": {
+          "filter_mode": "Filter modus",
+          "filter_subjects": "Filtermodus - onderwerpen",
+          "filter_description": "Filtermodus - Beschrijving"
+        },
+        "data_description": {
+          "filter_description": "Verberg lessen die de volgende zinnen in de beschrijving bevatten. (Door komma's gescheiden lijst)"
+        }
+      },
+      "calendar": {
+        "title": "Kalenderinstellingen",
+        "description": "Instellingen om de kalender aan te passen.",
+        "data": {
+          "calendar_long_name": "Kalender - lange naam",
+          "calendar_show_cancelled_lessons": "Kalender - geannuleerde lessen"
+        },
+        "data_description": {
+          "calendar_long_name": "Gebruik de lange naam van de uren in de kalender.",
+          "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender."
+        }
+      },
+      "backend": {
+        "title": "Instellingen achterzijde",
+        "description": "Instellingen voor verbinding en gegevensverwerking.",
+        "data": {
+          "keep_loged_in": "Ingelogd blijven",
+          "generate_json": "JSON genereren",
+          "exclude_data": "Gegevens uitsluiten van verzoek",
+          "extended_timetable": "Verzoek om verlengd tijdschema"
+        },
+        "data_description": {
+          "keep_loged_in": "Probeer de sessiegegevens op te slaan. (BETA)",
+          "generate_json": "Genereer JSON in Sensorattributen - alleen inschakelen indien nodig."
+        }
+      }
+    }
+  }
+}

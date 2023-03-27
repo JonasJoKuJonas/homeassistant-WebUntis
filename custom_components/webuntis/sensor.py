@@ -1,6 +1,8 @@
 """The Web Untis sensor platform."""
 from __future__ import annotations
 
+from typing import Optional
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -32,22 +34,24 @@ async def async_setup_entry(
 
     # Add sensor entities.
     async_add_entities(entities, True)
-
+    
 
 class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
     """Representation of a Web Untis sensor base entity."""
+
+    unit: Optional[str] = None
+    device_class: Optional[str] = None
 
     def __init__(
         self,
         server: WebUntis,
         type_name: str,
         icon: str,
-        unit: str | None,
-        device_class: str | None = None,
+        device_class: Optional[str] = None,
     ) -> None:
         """Initialize sensor base entity."""
         super().__init__(server, type_name, icon, device_class)
-        self._attr_native_unit_of_measurement = unit
+        self._attr_native_unit_of_measurement = self.unit
 
     @property
     def available(self) -> bool:
@@ -58,15 +62,22 @@ class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
 class WebUntisNextClassSensor(WebUntisSensorEntity):
     """Representation of a Web Untis next class sensor."""
 
+    unit: Optional[str] = None
+    device_class: Optional[str] = "timestamp"
+
     def __init__(self, server: WebUntis) -> None:
         """Initialize next class sensor."""
         super().__init__(
             server=server,
             type_name=NAME_NEXT_CLASS,
             icon=ICON_NEXT_CLASS,
-            unit=None,
-            device_class="timestamp",
+            device_class=self.device_class,
         )
+        
+    @property
+    def available(self) -> bool:
+        """Return sensor availability."""
+        return bool(self._server.next_class)
 
     async def async_update(self) -> None:
         """Update next class."""
