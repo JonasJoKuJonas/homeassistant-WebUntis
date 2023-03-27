@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 
 # from msilib.schema import Error
-from typing import Any
+from typing import Any, Optional
 
 import socket
 
@@ -23,7 +23,7 @@ from homeassistant.helpers import selector
 
 import webuntis
 
-from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
+from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, COLOR_CALENDAR, COLOR_NEXT_CLASS, COLOR_NEXT_LESSON_TO_WAKE_UP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ async def validate_input(
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
+    global source
     if user_input["timetable_source"] in ["student", "teacher"]:
         for char in [",", " "]:
             split = user_input["timetable_source_id"].split(char)
@@ -321,34 +322,51 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.TextSelector(
                         selector.TextSelectorConfig(multiline=True)
                     ),
+                    vol.Optional("notify", self.config_entry.options.get("notify"), default=True): bool,
                 }
             ),
         )
 
-    async def async_step_calendar(
-        self, user_input: dict[str, str] = None
+    async def async_step_options(
+            self, user_input: Optional[dict[str, Any]] = None
     ) -> FlowResult:
-        """Manage the calendar options."""
+        """Manage the options."""
         if user_input is not None:
-            return await self.save(user_input)
-
-        return self.async_show_form(
-            step_id="calendar",
-            data_schema=vol.Schema(
+            # Save color options to configuration.
+            self.config_entry.options.update(
                 {
-                    vol.Required(
-                        "calendar_long_name",
-                        default=self.config_entry.options.get("calendar_long_name"),
-                    ): selector.BooleanSelector(),
-                    vol.Required(
-                        "calendar_show_cancelled_lessons",
-                        default=self.config_entry.options.get(
-                            "calendar_show_cancelled_lessons"
-                        ),
-                    ): selector.BooleanSelector(),
+                    COLOR_NEXT_CLASS: user_input[COLOR_NEXT_CLASS],
+                    COLOR_NEXT_LESSON_TO_WAKE_UP: user_input[
+                        COLOR_NEXT_LESSON_TO_WAKE_UP
+                    ],
+                    COLOR_CALENDAR: user_input[COLOR_CALENDAR],
                 }
-            ),
+            )
+            return self.async_create_entry(title="", data={})
+
+        # Get color options from configuration.
+        color_next_class = self.config_entry.options.get(COLOR_NEXT_CLASS)
+        color_next_lesson_to_wake_up = self.config_entry.options.get(
+            COLOR_NEXT_LESSON_TO_WAKE_UP
         )
+        color_calendar = self.config_entry.options.get(COLOR_CALENDAR)
+
+        # Create options form.
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    COLOR_NEXT_CLASS, default=color_next_class
+                ): str,
+                vol.Required(
+                    COLOR_NEXT_LESSON_TO_WAKE_UP, default=color_next_lesson_to_wake_up
+                ): str,
+                vol.Required(
+                    COLOR_CALENDAR, default=color_calendar
+                ): str,
+            }
+        )
+
+        return self.async_show_form(step_id="options", data_schema=data_schema)
 
     async def async_step_backend(
         self,

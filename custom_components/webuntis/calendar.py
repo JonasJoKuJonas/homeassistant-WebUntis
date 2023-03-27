@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 import datetime
+from typing import Optional
 
-
+from homeassistant.components.calendar import CalendarEntity, CalendarEvent
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from homeassistant.components.calendar import CalendarEntity
-from homeassistant.components.calendar import CalendarEvent
-from homeassistant.config_entries import ConfigEntry
-
-
-from .const import DOMAIN, ICON_CALENDER, NAME_CALENDER
 from . import WebUntis, WebUntisEntity
+from .const import COLOR_CALENDAR, DOMAIN, ICON_CALENDER, NAME_CALENDER
 
 
 async def async_setup_entry(
@@ -34,13 +31,14 @@ async def async_setup_entry(
 class UntisCalendar(WebUntisEntity, CalendarEntity):
     """Representation of a Web Untis Calendar sensor."""
 
-    def __init__(self, server: WebUntis) -> None:
+    def __init__(self, server: WebUntis, color: Optional[str] = None) -> None:
         """Initialize status binary sensor."""
         super().__init__(
             server=server,
             type_name=NAME_CALENDER,
             icon=ICON_CALENDER,
             device_class=None,
+            color=color,  # Neue Zeile für die Farbe
         )
         self._name = NAME_CALENDER
         self.events = self._server.calendar_events
@@ -70,7 +68,6 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         self.events = self._server.calendar_events
 
         if self.events:
-
             self.events.sort(key=lambda e: (e.end))
             now = datetime.datetime.now()
 
@@ -80,3 +77,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
                     break
         else:
             self._event = None
+
+        self._attr_extra_state_attributes = {
+            COLOR_CALENDAR: self.color,  # Neue Zeile für die Farbe
+        }

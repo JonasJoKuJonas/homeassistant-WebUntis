@@ -108,9 +108,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     if config_entry.version == 6:
-        new_options = {**config_entry.options}
-        new_options["filter_description"] = []
-        new_options["extended_timetable"] = False
+        new_options = {**config_entry.options, "filter_description": [], "extended_timetable": False}
         config_entry.version = 7
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
@@ -141,10 +139,10 @@ class WebUntis:
     """Representation of a WebUntis client."""
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        unique_id: str,
-        config: Mapping[str, Any],
+            self,
+            hass: HomeAssistant,
+            unique_id: str,
+            config: Mapping[str, Any],
     ) -> None:
         """Initialize client instance."""
         self._hass = hass
@@ -222,7 +220,7 @@ class WebUntis:
         # Notify sensors about new data.
         async_dispatcher_send(self._hass, self.signal_name)
 
-    async def _async_status_request(self) -> None:
+    async def _async_status_request(self, error=None) -> None:
         """Request status and update properties."""
 
         if self._loged_in:
@@ -363,6 +361,7 @@ class WebUntis:
 
     def get_timetable_object(self):
         """return the object to request the timetable"""
+        global source
         if self.timetable_source == "student":
             source = self.session.get_student(
                 self.timetable_source_id[1], self.timetable_source_id[0]
@@ -500,7 +499,7 @@ class WebUntis:
 
         for lesson in table:
             if self.check_lesson(
-                lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
+                    lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
                 try:
                     event = {}
@@ -545,8 +544,8 @@ class WebUntis:
 
         for filter_description in self.filter_description:
             if (
-                filter_description in lesson.lstext  # Vertretungstext
-                or filter_description in lesson.substText  # Informationen zur Stunde
+                    filter_description in lesson.lstext  # Vertretungstext
+                    or filter_description in lesson.substText  # Informationen zur Stunde
             ):
                 return False
 
@@ -555,7 +554,7 @@ class WebUntis:
                 return False
         if self.filter_mode == "Whitelist" and self.filter_subjects:
             if not any(
-                subject.name in self.filter_subjects for subject in lesson.subjects
+                    subject.name in self.filter_subjects for subject in lesson.subjects
             ):
                 return False
 
@@ -657,6 +656,14 @@ class WebUntis:
         self._hass.config_entries.async_update_entry(self._config, options=new_options)
         self.exclude_data.append(data)
 
+    def get_schedule(self):
+        # Get current schedule from WebUntis API.
+        return "Current schedule"
+
+    @property
+    def hass(self):
+        return self._hass
+
 
 class WebUntisEntity(Entity):
     """Representation of a Web Untis base entity."""
@@ -665,11 +672,11 @@ class WebUntisEntity(Entity):
     _attr_should_poll = False
 
     def __init__(
-        self,
-        server: WebUntis,
-        type_name: str,
-        icon: str,
-        device_class: str | None,
+            self,
+            server: WebUntis,
+            type_name: str,
+            icon: str,
+            device_class: str | None,
     ) -> None:
         """Initialize base entity."""
         self._server = server
