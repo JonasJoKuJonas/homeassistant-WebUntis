@@ -30,7 +30,7 @@
   },
   "options": {
     "error": {
-      "extended_timetable": "Für die Option \"Fächer Filter - Beschreibung\" wird \"Erweiterte Stundenplan anfordern\" benötigt",
+      "extended_timetable": "Für die Option \"Fächer Filter - Beschreibung\" und \"Calender Beschreibung\" (Lesson Info) wird \"Erweiterte Stundenplan anfordern\" benötigt",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
@@ -51,11 +51,13 @@
         "description": "Einstellungen zur Kalender Darstellung.",
         "data": {
           "calendar_long_name": "Kalender - langer Name",
-          "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden"
+          "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden",
+          "calendar_description": "Kalender Beschreibung"
         },
         "data_description": {
           "calendar_long_name": "Verwende den langen Namen der Stunden im Kalender.",
-          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an."
+          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
+          "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll."
         }
       },
       "backend": {

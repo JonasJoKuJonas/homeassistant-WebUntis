@@ -34,7 +34,7 @@ async def async_setup_entry(
 
     # Add sensor entities.
     async_add_entities(entities, True)
-    
+
 
 class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
     """Representation of a Web Untis sensor base entity."""
@@ -73,7 +73,7 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
             icon=ICON_NEXT_CLASS,
             device_class=self.device_class,
         )
-        
+
     @property
     def available(self) -> bool:
         """Return sensor availability."""
@@ -94,7 +94,6 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
             server=server,
             type_name=NAME_NEXT_LESSON_TO_WAKE_UP,
             icon=ICON_NEXT_LESSON_TO_WAKE_UP,
-            unit=None,
             device_class="timestamp",
         )
         self._attr_extra_state_attributes = {}

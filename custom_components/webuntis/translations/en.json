@@ -30,7 +30,7 @@
   },
   "options": {
     "error": {
-      "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" option",
+      "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" and \"Calendar Description\" (Lesson Info) option",
       "unknown": "Unexpected error"
     },
     "step": {
@@ -51,11 +51,13 @@
         "description": "Settings to customize the calendar.",
         "data": {
           "calendar_long_name": "Calendar - long name",
-          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons"
+          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
+          "calendar_description": "Calendar description"
         },
         "data_description": {
           "calendar_long_name": "Use the long name of the hours in the calendar.",
-          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar."
+          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
+          "calendar_description": "Determine what should be in the description of a calendar event."
         }
       },
       "backend": {

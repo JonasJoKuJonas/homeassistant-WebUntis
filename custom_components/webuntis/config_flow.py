@@ -330,6 +330,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the calendar options."""
         if user_input is not None:
+            if user_input["calendar_description"] == "Lesson Info":
+                user_input["extended_timetable"] = True
+
             return await self.save(user_input)
 
         return self.async_show_form(
@@ -346,6 +349,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             "calendar_show_cancelled_lessons"
                         ),
                     ): selector.BooleanSelector(),
+                    vol.Required(
+                        "calendar_description",
+                        default=str(
+                            self.config_entry.options.get("calendar_description")
+                        ),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "None",
+                                "JSON",
+                                "Lesson Info",
+                            ],
+                            mode="dropdown",
+                        )
+                    ),
                 }
             ),
         )
@@ -362,9 +380,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 and self.config_entry.options["filter_description"]
             ):
                 errors = {"base": "extended_timetable"}
+            elif (
+                user_input["extended_timetable"] is False
+                and self.config_entry.options["calendar_description"] == "Lesson Info"
+            ):
+                errors = {"base": "extended_timetable"}
             else:
                 return await self.save(user_input)
-
         return self.async_show_form(
             step_id="backend",
             data_schema=vol.Schema(

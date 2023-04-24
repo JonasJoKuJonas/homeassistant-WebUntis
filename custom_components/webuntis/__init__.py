@@ -115,6 +115,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 7:
+        new_options = {**config_entry.options}
+        new_options["calendar_description"] = "JSON"
+        config_entry.version = 8
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -163,6 +170,7 @@ class WebUntis:
         self.calendar_show_cancelled_lessons = config.options[
             "calendar_show_cancelled_lessons"
         ]
+        self.calendar_description = config.options["calendar_description"]
 
         self.keep_loged_in = config.options["keep_loged_in"]
 
@@ -514,7 +522,10 @@ class WebUntis:
 
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
-                    event["description"] = self.get_lesson_json(lesson)
+                    if self.calendar_description == "JSON":
+                        event["description"] = self.get_lesson_json(lesson, True)
+                    elif self.calendar_description == "Lesson Info":
+                        event["description"] = str(lesson.substText)
 
                     # add Room as location
                     try:
@@ -562,9 +573,9 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson) -> str:
+    def get_lesson_json(self, lesson, force=False) -> str:
         """returns info about lesson in json"""
-        if not self.generate_json:
+        if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
         dic = {}
         dic["start"] = str(lesson.start.astimezone())
