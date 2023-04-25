@@ -19,7 +19,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
-
+from .utils import is_service
 
 import webuntis
 
@@ -238,6 +238,7 @@ OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
     "backend": "Backend",
+    "notify": "Notify",
 }
 
 
@@ -413,6 +414,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "extended_timetable",
                         default=self.config_entry.options.get("extended_timetable"),
                     ): selector.BooleanSelector(),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_notify(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the notify options."""
+        if user_input is not None:
+            if not is_service(self.hass, user_input["notify_entity_id"]):
+                errors = {"base": "unknown_service"}
+            else:
+                return await self.save(user_input)
+        return self.async_show_form(
+            step_id="notify",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "notify_entity_id",
+                        default=self.config_entry.options.get("notify_entity_id"),
+                    ): str,
                 }
             ),
             errors=errors,
