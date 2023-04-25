@@ -1,3 +1,8 @@
+
+# Project Title
+
+A brief description of what this project does and who it's for
+
 # WebUntis
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ![Version](https://img.shields.io/github/v/release/JonasJoKuJonas/homeassistant-WebUntis)
@@ -48,9 +53,27 @@ The final configuration field allows you to specify a name or class from which t
 
 ## Optional Configurations
 
-### exclude_data
-This option is used to prevent errors in logs. You don't need to edit it. 
-It is used to store permission errors and stop them from happening again.
+### Filter
+|Option|Description
+|:-----|:----------
+|filter_mode|The mode of the filter. e.g. `Blacklist`
+|filter_subjects|Subjects that will be excludet from any data.
+|filter_description|Exclude all lessons with specific text in the lesson info
+
+### Calendar
+|Option|Description|Default
+|:-----|:----------|-------
+|calendar_long_name|Use the long subjct name.|`True`
+|calendar_show_cancelled_lessons|Show canceled lessons.|`False`
+|calendar_description|Pick what will be shown in events description.|`JSON`
+
+### Backend
+|Option|Description|Default
+|:-----|:----------|-------
+|keep_loged_in|Keep the client loged in. (Beta)|`False`
+|generate_json|Generate JSON in sensore attributes.|`False`
+|exclude_data|Will be set automatic if user don't have rights to prevent logger from spaming errors.|`None`
+|extended_timetable|Request extendet timetable. Is needet for `filter_description` and `calendar_description(Lesson Info)`|`False`
 
 
 
