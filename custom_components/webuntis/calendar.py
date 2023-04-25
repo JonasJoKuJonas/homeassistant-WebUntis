@@ -63,14 +63,17 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         end_date: datetime.datetime,
     ) -> list[CalendarEvent]:
         """Return calendar events within a datetime range."""
-        return self.events
+        return [
+            event
+            for event in self.events
+            if event.start >= start_date and event.end <= end_date
+        ]
 
     async def async_update(self) -> None:
         """Update status."""
         self.events = self._server.calendar_events
 
         if self.events:
-
             self.events.sort(key=lambda e: (e.end))
             now = datetime.datetime.now()
 
