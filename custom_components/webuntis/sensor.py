@@ -88,13 +88,16 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
 class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
     """Representation of a Web Untis next lesson to wake up sensor."""
 
+    unit: Optional[str] = None
+    device_class: Optional[str] = "timestamp"
+
     def __init__(self, server: WebUntis) -> None:
         """Initialize next lesson to wake up sensor."""
         super().__init__(
             server=server,
             type_name=NAME_NEXT_LESSON_TO_WAKE_UP,
             icon=ICON_NEXT_LESSON_TO_WAKE_UP,
-            device_class="timestamp",
+            device_class=self.device_class,
         )
         self._attr_extra_state_attributes = {}
 
