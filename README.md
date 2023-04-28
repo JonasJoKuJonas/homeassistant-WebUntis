@@ -12,7 +12,7 @@
 
 
 
-[![Discord Banner 4](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner4)](https://discord.gg/ucrTMc9gER)
+[![Discord Banner 4](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner4)](https://discord.gg/34EHnHQaPm)
 
 
 
