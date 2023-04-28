@@ -8,7 +8,6 @@ from datetime import date, datetime, timedelta
 from typing import Any
 import json
 
-
 # pylint: disable=import-self
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -19,7 +18,6 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
-
 
 from homeassistant.components.calendar import CalendarEvent
 import homeassistant.util.dt as dt_util
@@ -185,9 +183,6 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.notify_entity_id = "notify_entity_id"
-        self.notify = bool(self.notify_entity_id)
-
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
@@ -208,9 +203,6 @@ class WebUntis:
         self.next_day_json = None
 
         self.subjects = []
-
-        self.event_list = []
-        self.event_list_old = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -372,17 +364,6 @@ class WebUntis:
                 error,
             )
 
-        if self.notify:
-            try:
-                await self.update_notify()
-            except OSError as error:
-                _LOGGER.warning(
-                    "Updating notify '%s@%s' failed - OSError: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
-
         if not self.keep_loged_in:
             await self._hass.async_add_executor_job(self.session.logout)
             _LOGGER.debug("Logout successful")
@@ -526,9 +507,6 @@ class WebUntis:
         event_list = []
 
         for lesson in table:
-            if self.notify:
-                self.event_list.append(self.get_lesson_json(lesson, True))
-
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
@@ -545,7 +523,7 @@ class WebUntis:
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
                     if self.calendar_description == "JSON":
-                        event["description"] = self.get_lesson_json(lesson, force=True)
+                        event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "Lesson Info":
                         event["description"] = str(lesson.substText)
 
@@ -679,8 +657,6 @@ class WebUntis:
             except:
                 pass
 
-            dic["lsnumber"] = lesson.lsnumber
-
         return str(json.dumps(dic))
 
     def exclude_data_(self, data):
@@ -691,44 +667,6 @@ class WebUntis:
 
         self._hass.config_entries.async_update_entry(self._config, options=new_options)
         self.exclude_data.append(data)
-
-    async def update_notify(self):
-        """Update data and notify"""
-
-        if self.event_list != self.event_list_old and self.event_list_old:
-            _LOGGER.debug("Timetable has chaged!")
-
-            updated_items = []
-            for new_item in self.event_list:
-                for old_item in self.event_list_old:
-                    if (
-                        new_item["lsnumber"] == old_item["lsnumber"]
-                        and new_item != old_item
-                    ):
-                        updated_items.append(new_item)
-                        break
-
-            _LOGGER.debug(updated_items)
-
-            try:
-                await async_notify(
-                    self._hass,
-                    "notify.persistent_notification",
-                    "WebUntis",
-                    "Your timetable has changed!\n" + updated_items,
-                )
-            except:
-                pass
-        self.event_list_old = self.event_list
-
-
-async def async_notify(hass, service, title, message):
-    """Show a notification"""
-    domain = service.split(".")[0]
-    service = service.split(".")[1]
-    data = {"message": message, "title": title}
-    if not await hass.services.async_call(domain, service, data, blocking=True):
-        _LOGGER.error("Unable to call service %s.%s due to an error.", domain, service)
 
 
 class WebUntisEntity(Entity):

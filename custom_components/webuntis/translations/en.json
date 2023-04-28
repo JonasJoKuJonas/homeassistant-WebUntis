@@ -73,13 +73,6 @@
           "keep_loged_in": "Try to save the session data. (BETA)",
           "generate_json": "Generate JSON in Sensor Attributes - enable only if needed."
         }
-      },
-      "notify": {
-        "title": "Notify Settings",
-        "description": "Notification Settings",
-        "data": {
-          "notify_entity_id": "Notify Service ID (e.g: notify.discord)"
-        }
       }
     }
   }
