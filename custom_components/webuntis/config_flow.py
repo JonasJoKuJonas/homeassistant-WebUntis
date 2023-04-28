@@ -238,7 +238,6 @@ OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
     "backend": "Backend",
-    "notify": "Notify",
 }
 
 
