@@ -74,6 +74,7 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         self.events = self._server.calendar_events
 
         if self.events:
+
             self.events.sort(key=lambda e: (e.end))
             now = datetime.datetime.now()
 

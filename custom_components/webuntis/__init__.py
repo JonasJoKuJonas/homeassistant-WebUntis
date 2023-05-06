@@ -200,9 +200,6 @@ class WebUntis:
 
         self.subjects = []
 
-        self.event_list = []
-        self.event_list_old = []
-
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
 
@@ -362,17 +359,6 @@ class WebUntis:
                 self.username,
                 error,
             )
-
-        if self.notify:
-            try:
-                await self.update_notify()
-            except OSError as error:
-                _LOGGER.warning(
-                    "Updating notify '%s@%s' failed - OSError: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
 
         if not self.keep_loged_in:
             await self._hass.async_add_executor_job(self.session.logout)
@@ -539,7 +525,7 @@ class WebUntis:
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
                     if self.calendar_description == "JSON":
-                        event["description"] = self.get_lesson_json(lesson, force=True)
+                        event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "Lesson Info":
                         event["description"] = str(lesson.substText)
 
