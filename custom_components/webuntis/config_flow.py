@@ -234,6 +234,7 @@ OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
     "backend": "Backend",
+    "notify": "Notify",
 }
 
 
@@ -433,10 +434,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "notify_entity_id",
                         default=self.config_entry.options.get("notify_entity_id"),
                     ): str,
-                    vol.Optional(
-                        "notify_range",
-                        default=self.config_entry.options.get("notify_range"),
-                    ): selector.IntFlag(),
                 }
             ),
             errors=errors,
