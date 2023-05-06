@@ -1,15 +1,16 @@
 """The Web Untis integration."""
 from __future__ import annotations
 
+import json
 import logging
 from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
-import json
 
-
-# pylint: disable=import-self
+import homeassistant.util.dt as dt_util
+import webuntis  # pylint: disable=import-self
+from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -20,18 +21,8 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
-
-from homeassistant.components.calendar import CalendarEvent
-import homeassistant.util.dt as dt_util
-
-import webuntis
-
-from .const import (
-    DOMAIN,
-    SCAN_INTERVAL,
-    SIGNAL_NAME_PREFIX,
-    DAYS_TO_FUTURE,
-)
+from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .utils import is_different
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -185,7 +176,7 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.notify_entity_id = "notify_entity_id"
+        self.notify_entity_id = config.options["notify_entity_id"]
         self.notify = bool(self.notify_entity_id)
 
         # pylint: disable=maybe-no-member
@@ -524,10 +515,13 @@ class WebUntis:
         table = self.get_timetable(start=today, end=in_x_days)
 
         event_list = []
+        self.event_list = []
 
         for lesson in table:
             if self.notify:
-                self.event_list.append(self.get_lesson_json(lesson, True))
+                self.event_list.append(
+                    self.get_lesson_json(lesson, True, output_str=False)
+                )
 
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
@@ -595,7 +589,7 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson, force=False) -> str:
+    def get_lesson_json(self, lesson, force=False, output_str=True) -> str:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
@@ -679,9 +673,10 @@ class WebUntis:
             except:
                 pass
 
-            dic["lsnumber"] = lesson.lsnumber
+        if output_str:
+            return str(json.dumps(dic))
 
-        return str(json.dumps(dic))
+        return dic
 
     def exclude_data_(self, data):
         """adds data to exclude_data list"""
@@ -695,30 +690,59 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        if self.event_list != self.event_list_old and self.event_list_old:
+        _LOGGER.debug("New " + str(len(self.event_list)))
+        _LOGGER.debug("Old " + str(len(self.event_list_old)))
+
+        updated_items = []
+        old_items = []
+
+        if not self.event_list_old or not is_different(
+            self.event_list, self.event_list_old
+        ):
+            self.event_list_old = self.event_list
+            return
+
+        for new_item in self.event_list:
+            for old_item in self.event_list_old:
+                if (
+                    new_item["id"] == old_item["id"]
+                    and new_item["code"] != old_item["code"]
+                ):
+                    updated_items.append(new_item)
+                    old_items.append(old_item)
+                    _LOGGER.debug("lsnummer " + str(new_item["lsnumber"]))
+                    _LOGGER.debug("id " + str(new_item["id"]))
+                    _LOGGER.debug("old code " + old_item["code"])
+                    _LOGGER.debug("new code " + new_item["code"])
+                    break
+
+        if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
-            updated_items = []
-            for new_item in self.event_list:
-                for old_item in self.event_list_old:
-                    if (
-                        new_item["lsnumber"] == old_item["lsnumber"]
-                        and new_item != old_item
-                    ):
-                        updated_items.append(new_item)
-                        break
+            _LOGGER.debug("OLD:" + str(old_items))
+            _LOGGER.debug("NEW:" + str(updated_items))
 
-            _LOGGER.debug(updated_items)
+            for lesson in updated_items:
+                title = "WebUntis - "
+                if lesson["code"] == "cancelled":
+                    title += "Lesson canceled"
 
-            try:
-                await async_notify(
-                    self._hass,
-                    "notify.persistent_notification",
-                    "WebUntis",
-                    "Your timetable has changed!\n" + updated_items,
-                )
-            except:
-                pass
+                message = f"""
+                            Subject: {lesson['subjects'][0]['long_name']}\n
+                            Date: {lesson['start'].strftime('%d.%m.%Y')}"""
+                try:
+                    await async_notify(
+                        self._hass,
+                        service=self.notify_entity_id,
+                        title=title,
+                        message=message,
+                    )
+                except error as error:
+                    _LOGGER.warning(
+                        "Sending notification to %s failed - %s",
+                        self.notify_entity_id,
+                        error,
+                    )
         self.event_list_old = self.event_list
 
 

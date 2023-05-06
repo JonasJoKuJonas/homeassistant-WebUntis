@@ -1,29 +1,25 @@
 """Config flow for webuntisnew integration."""
 from __future__ import annotations
 
+import datetime
 import logging
+import socket
 
 # from msilib.schema import Error
 from typing import Any
-
-import socket
-
-import datetime
 from urllib.parse import urlparse
+
 import requests
-
 import voluptuous as vol
-
+import webuntis
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+
+from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN
 from .utils import is_service
-
-import webuntis
-
-from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -434,10 +430,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="notify",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
+                    vol.Optional(
                         "notify_entity_id",
                         default=self.config_entry.options.get("notify_entity_id"),
                     ): str,
+                    vol.Optional(
+                        "notify_range",
+                        default=self.config_entry.options.get("notify_range"),
+                    ): selector.IntFlag(),
                 }
             ),
             errors=errors,
