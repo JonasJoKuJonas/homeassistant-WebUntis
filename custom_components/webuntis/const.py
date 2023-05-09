@@ -1,7 +1,7 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 9
+CONFIG_ENTRY_VERSION = 10
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
@@ -15,6 +15,7 @@ DEFAULT_OPTIONS = {
     "extended_timetable": False,
     "calendar_description": "JSON",
     "calendar_room": "long name",
+    "calendar_show_room_change": False,
 }
 
 ICON_STATUS = "mdi:school-outline"

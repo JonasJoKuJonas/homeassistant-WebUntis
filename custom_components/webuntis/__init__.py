@@ -127,6 +127,11 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         new_options["calendar_room"] = "Room long name"
         config_entry.version = 9
 
+    if config_entry.version == 9:
+        new_options = {**config_entry.options}
+        new_options["calendar_show_room_change"] = False
+        config_entry.version = 10
+
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
@@ -177,6 +182,7 @@ class WebUntis:
         self.calendar_show_cancelled_lessons = config.options[
             "calendar_show_cancelled_lessons"
         ]
+        self.calendar_show_room_change = config.options["calendar_show_room_change"]
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
 
@@ -534,10 +540,15 @@ class WebUntis:
             ):
                 try:
                     event = {}
+
+                    prefix = ""
+                    if self.calendar_show_room_change and lesson.original_rooms:
+                        prefix = "Room change: "
                     if self.calendar_long_name:
-                        event["summary"] = lesson.subjects[0].long_name
+                        event["summary"] = prefix + lesson.subjects[0].long_name
+
                     else:
-                        event["summary"] = lesson.subjects[0].name
+                        event["summary"] = prefix + lesson.subjects[0].name
 
                     if lesson.code == "cancelled":
                         event["summary"] = "Cancelled: " + event["summary"]

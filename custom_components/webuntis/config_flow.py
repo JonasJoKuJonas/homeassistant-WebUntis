@@ -350,6 +350,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): selector.BooleanSelector(),
                     vol.Required(
+                        "calendar_show_room_change",
+                        default=self.config_entry.options.get(
+                            "calendar_show_room_change"
+                        ),
+                    ): selector.BooleanSelector(),
+                    vol.Required(
                         "calendar_description",
                         default=str(
                             self.config_entry.options.get("calendar_description")

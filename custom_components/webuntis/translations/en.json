@@ -53,13 +53,15 @@
           "calendar_long_name": "Calendar - long name",
           "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
           "calendar_description": "Calendar - description",
-          "calendar_room": "Calendar - Location"
+          "calendar_room": "Calendar - Location",
+          "calendar_show_room_change": "Calender - Room change"
         },
         "data_description": {
           "calendar_long_name": "Use the long name of the hours in the calendar.",
           "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
           "calendar_description": "Determine what should be in the description of a calendar event.",
-          "calendar_room": "Specify what to display location."
+          "calendar_room": "Specify what to display location.",
+          "calendar_show_room_change": "Show room changes in the calendar."
         }
       },
       "backend": {
