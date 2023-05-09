@@ -124,7 +124,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if config_entry.version == 8:
         new_options = {**config_entry.options}
-        new_options["calendar_room"] = "long name"
+        new_options["calendar_room"] = "Room long name"
         config_entry.version = 9
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
