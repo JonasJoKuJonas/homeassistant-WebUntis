@@ -361,6 +361,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode="dropdown",
                         )
                     ),
+                    vol.Required(
+                        "calendar_room",
+                        default=str(self.config_entry.options.get("calendar_room")),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "Room long name",
+                                "Room short name",
+                                "Room short-long name",
+                                "None",
+                            ],
+                            mode="dropdown",
+                        )
+                    ),
                 }
             ),
         )

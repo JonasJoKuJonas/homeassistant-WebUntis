@@ -115,6 +115,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 8:
+        new_options = {**config_entry.options}
+        new_options["calendar_room"] = "Room long name"
+        config_entry.version = 9
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -164,6 +171,7 @@ class WebUntis:
             "calendar_show_cancelled_lessons"
         ]
         self.calendar_description = config.options["calendar_description"]
+        self.calendar_room = config.options["calendar_room"]
 
         self.keep_loged_in = config.options["keep_loged_in"]
 
@@ -531,8 +539,15 @@ class WebUntis:
 
                     # add Room as location
                     try:
-                        if lesson.rooms:
-                            event["location"] = lesson.rooms[0].long_name
+                        if lesson.rooms and not self.calendar_room == "None":
+                            if self.calendar_room == "Room long name":
+                                event["location"] = lesson.rooms[0].long_name
+                            elif self.calendar_room == "Room short name":
+                                event["location"] = lesson.rooms[0].name
+                            elif self.calendar_room == "Room short-long name":
+                                event[
+                                    "location"
+                                ] = f"{lesson.rooms[0].name} - {lesson.rooms[0].long_name}"
                     except IndexError:
                         # server does not return rooms
                         pass
