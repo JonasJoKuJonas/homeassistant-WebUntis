@@ -212,6 +212,8 @@ class WebUntis:
 
         self.subjects = []
 
+        self.today = [None, None]
+
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
 
@@ -367,6 +369,18 @@ class WebUntis:
 
             _LOGGER.warning(
                 "Updating the propertie calendar_events of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
+            self.today = await self._hass.async_add_executor_job(self._today)
+        except OSError as error:
+            self.today = [None, None]
+
+            _LOGGER.warning(
+                "Updating the propertie today-sensor of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -560,6 +574,30 @@ class WebUntis:
                     )
 
         return event_list
+
+    def _today(self):
+        today = date.today()
+
+        # pylint: disable=maybe-no-member
+        table = self.get_timetable(start=today, end=today)
+
+        time_list_start = []
+        for lesson in table:
+            if self.check_lesson(lesson):
+                time_list_start.append(lesson.start)
+
+        time_list_end = []
+        for lesson in table:
+            if self.check_lesson(lesson):
+                time_list_end.append(lesson.end)
+
+        try:
+            return [
+                sorted(time_list_start)[0].astimezone(),
+                sorted(time_list_end)[-1].astimezone(),
+            ]
+        except IndexError:
+            return [None, None]
 
     def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
         """Checks if a lesson is taking place"""
