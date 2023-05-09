@@ -12,9 +12,13 @@ from . import WebUntis, WebUntisEntity
 from .const import (
     DOMAIN,
     ICON_NEXT_CLASS,
-    NAME_NEXT_CLASS,
     ICON_NEXT_LESSON_TO_WAKE_UP,
+    ICON_TODAY_END,
+    ICON_TODAY_START,
+    NAME_NEXT_CLASS,
     NAME_NEXT_LESSON_TO_WAKE_UP,
+    NAME_TODAY_END,
+    NAME_TODAY_START,
 )
 
 
@@ -30,6 +34,8 @@ async def async_setup_entry(
     entities = [
         WebUntisNextClassSensor(server),
         WebUntisNextLessonToWakeUpSensor(server),
+        WebUntisToayStart(server),
+        WebUntisToayEnd(server),
     ]
 
     # Add sensor entities.
@@ -105,3 +111,45 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
         """Update next lesson to wake up."""
         self._attr_native_value = self._server.next_lesson_to_wake_up
         self._attr_extra_state_attributes = {"day": self._server.next_day_json}
+
+
+class WebUntisToayStart(WebUntisSensorEntity):
+    """Representation of a Web Untis Today start sensor."""
+
+    unit: Optional[str] = None
+    device_class: Optional[str] = "timestamp"
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize sensor."""
+        super().__init__(
+            server=server,
+            type_name=NAME_TODAY_START,
+            icon=ICON_TODAY_START,
+            device_class=self.device_class,
+        )
+        self._attr_extra_state_attributes = {}
+
+    async def async_update(self) -> None:
+        """Update sensor data."""
+        self._attr_native_value = self._server.today[0]
+
+
+class WebUntisToayEnd(WebUntisSensorEntity):
+    """Representation of a Web Untis Today end sensor."""
+
+    unit: Optional[str] = None
+    device_class: Optional[str] = "timestamp"
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize sensor."""
+        super().__init__(
+            server=server,
+            type_name=NAME_TODAY_END,
+            icon=ICON_TODAY_END,
+            device_class=self.device_class,
+        )
+        self._attr_extra_state_attributes = {}
+
+    async def async_update(self) -> None:
+        """Update sensor data."""
+        self._attr_native_value = self._server.today[-1]
