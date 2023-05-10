@@ -22,6 +22,7 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .utils import is_different
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -189,6 +190,9 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
+        self.notify_entity_id = "notify_entity_id"
+        self.notify = bool(self.notify_entity_id)
+
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
@@ -211,6 +215,9 @@ class WebUntis:
         self.subjects = []
 
         self.today = [None, None]
+
+        self.event_list = []
+        self.event_list_old = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -384,6 +391,17 @@ class WebUntis:
                 error,
             )
 
+        if self.notify:
+            try:
+                await self.update_notify()
+            except OSError as error:
+                _LOGGER.warning(
+                    "Updating notify '%s@%s' failed - OSError: %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+
         if not self.keep_loged_in:
             await self._hass.async_add_executor_job(self.session.logout)
             _LOGGER.debug("Logout successful")
@@ -525,8 +543,14 @@ class WebUntis:
         table = self.get_timetable(start=today, end=in_x_days)
 
         event_list = []
+        self.event_list = []
 
         for lesson in table:
+            if self.notify:
+                self.event_list.append(
+                    self.get_lesson_json(lesson, force=True, output_str=False)
+                )
+
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
@@ -629,7 +653,7 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson, force=False) -> str:
+    def get_lesson_json(self, lesson, force=False, output_str=True) -> str:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
@@ -712,8 +736,9 @@ class WebUntis:
                 ]
             except:
                 pass
-
-        return str(json.dumps(dic))
+        if output_str:
+            return str(json.dumps(dic))
+        return dic
 
     def exclude_data_(self, data):
         """adds data to exclude_data list"""
@@ -723,6 +748,74 @@ class WebUntis:
 
         self._hass.config_entries.async_update_entry(self._config, options=new_options)
         self.exclude_data.append(data)
+
+    async def update_notify(self):
+        """Update data and notify"""
+
+        _LOGGER.debug("New " + str(len(self.event_list)))
+        _LOGGER.debug("Old " + str(len(self.event_list_old)))
+
+        updated_items = []
+        old_items = []
+
+        if not self.event_list_old or not is_different(
+            self.event_list, self.event_list_old
+        ):
+            self.event_list_old = self.event_list
+            return
+
+        for new_item in self.event_list:
+            for old_item in self.event_list_old:
+                if (
+                    new_item["id"] == old_item["id"]
+                    and new_item["code"] != old_item["code"]
+                ):
+                    updated_items.append(new_item)
+                    old_items.append(old_item)
+                    _LOGGER.debug("lsnummer " + str(new_item["lsnumber"]))
+                    _LOGGER.debug("id " + str(new_item["id"]))
+                    _LOGGER.debug("old code " + old_item["code"])
+                    _LOGGER.debug("new code " + new_item["code"])
+                    break
+
+        if updated_items:
+            _LOGGER.debug("Timetable has chaged!")
+
+            _LOGGER.debug("OLD:" + str(old_items))
+            _LOGGER.debug("NEW:" + str(updated_items))
+
+            for lesson in updated_items:
+                title = "WebUntis - "
+                if lesson["code"] == "cancelled":
+                    title += "Lesson canceled"
+
+                message = f"""
+                            Subject: {lesson['subjects'][0]['long_name']}\n
+                            Date: {lesson['start'].strftime('%d.%m.%Y')}"""
+                try:
+                    await self.async_notify(
+                        self._hass,
+                        service=self.notify_entity_id,
+                        title=title,
+                        message=message,
+                    )
+                except error as error:
+                    _LOGGER.warning(
+                        "Sending notification to %s failed - %s",
+                        self.notify_entity_id,
+                        error,
+                    )
+        self.event_list_old = self.event_list
+
+    async def async_notify(self, hass, service, title, message):
+        """Show a notification"""
+        domain = service.split(".")[0]
+        service = service.split(".")[1]
+        data = {"message": message, "title": title}
+        if not await hass.services.async_call(domain, service, data, blocking=True):
+            _LOGGER.error(
+                "Unable to call service %s.%s due to an error.", domain, service
+            )
 
 
 class WebUntisEntity(Entity):

@@ -17,6 +17,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
 from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN
+from .utils import is_service
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -230,6 +231,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
+    "notify": "Notify",
     "backend": "Backend",
 }
 
@@ -426,6 +428,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "extended_timetable",
                         default=self.config_entry.options.get("extended_timetable"),
                     ): selector.BooleanSelector(),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_notify(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the notify options."""
+        if user_input is not None:
+            if not is_service(self.hass, user_input["notify_entity_id"]):
+                errors = {"base": "unknown_service"}
+            else:
+                return await self.save(user_input)
+        return self.async_show_form(
+            step_id="notify",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "notify_entity_id",
+                        default=self.config_entry.options.get("notify_entity_id"),
+                    ): str
                 }
             ),
             errors=errors,
