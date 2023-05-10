@@ -1,29 +1,22 @@
 """Config flow for webuntisnew integration."""
 from __future__ import annotations
 
-import logging
-
-# from msilib.schema import Error
-from typing import Any
-
-import socket
-
 import datetime
+import logging
+import socket
+from typing import Any
 from urllib.parse import urlparse
+
 import requests
-
 import voluptuous as vol
-
+import webuntis
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
-
-import webuntis
-
-from .const import DOMAIN, CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS
+from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -250,7 +243,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(
         self,
-        user_input: dict[str, Any] | None = None,
+        user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
         return self.async_show_menu(step_id="user", menu_options=OPTIONS_MENU)

@@ -3,17 +3,13 @@ from __future__ import annotations
 
 import datetime
 
-
+from homeassistant.components.calendar import CalendarEntity, CalendarEvent
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from homeassistant.components.calendar import CalendarEntity
-from homeassistant.components.calendar import CalendarEvent
-from homeassistant.config_entries import ConfigEntry
-
-
-from .const import DOMAIN, ICON_CALENDER, NAME_CALENDER
 from . import WebUntis, WebUntisEntity
+from .const import DOMAIN, ICON_CALENDER, NAME_CALENDER
 
 
 async def async_setup_entry(
@@ -74,7 +70,6 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         self.events = self._server.calendar_events
 
         if self.events:
-
             self.events.sort(key=lambda e: (e.end))
             now = datetime.datetime.now()
 

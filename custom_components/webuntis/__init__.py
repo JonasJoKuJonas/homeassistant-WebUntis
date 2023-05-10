@@ -1,14 +1,16 @@
 """The Web Untis integration."""
 from __future__ import annotations
 
+import json
 import logging
 from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
-import json
 
-# pylint: disable=import-self
+import homeassistant.util.dt as dt_util
+import webuntis  # pylint: disable=import-self
+from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -19,17 +21,7 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
-from homeassistant.components.calendar import CalendarEvent
-import homeassistant.util.dt as dt_util
-
-import webuntis
-
-from .const import (
-    DOMAIN,
-    SCAN_INTERVAL,
-    SIGNAL_NAME_PREFIX,
-    DAYS_TO_FUTURE,
-)
+from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
