@@ -770,16 +770,24 @@ class WebUntis:
 
         for new_item in self.event_list:
             for old_item in self.event_list_old:
-                if new_item["id"] == old_item["id"] and (
-                    new_item["code"] != old_item["code"]
-                    or new_item["rooms"] != old_item["rooms"]
-                ):
-                    updated_items.append(new_item)
-                    old_items.append(old_item)
-                    _LOGGER.debug("id " + str(new_item["id"]))
-                    _LOGGER.debug("old code " + old_item["code"])
-                    _LOGGER.debug("new code " + new_item["code"])
-                    break
+                if new_item["id"] == old_item["id"]:
+                    if new_item["code"] != old_item["code"]:
+                        updated_items.append(new_item)
+                        old_items.append(old_item)
+                        _LOGGER.debug("id " + str(new_item["id"]))
+                        _LOGGER.debug("old code " + old_item["code"])
+                        _LOGGER.debug("new code " + new_item["code"])
+
+                    try:
+                        if new_item["rooms"] != old_item["rooms"]:
+                            old_items.append(old_item)
+                            _LOGGER.debug("id " + str(new_item["id"]))
+                            _LOGGER.debug("old rooms " + old_item["rooms"])
+                            _LOGGER.debug("new rooms " + new_item["rooms"])
+                    except IndexError:
+                        _LOGGER.info("New " + str(self.event_list))
+                        _LOGGER.info("Old " + str(self.event_list_old))
+                break
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
