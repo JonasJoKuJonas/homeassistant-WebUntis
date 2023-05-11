@@ -190,7 +190,7 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.notify_entity_id = "notify_entity_id"
+        self.notify_entity_id = config.options["notify_entity_id"]
         self.notify = bool(self.notify_entity_id)
 
         # pylint: disable=maybe-no-member
@@ -658,8 +658,12 @@ class WebUntis:
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
         dic = {}
-        dic["start"] = str(lesson.start.astimezone())
-        dic["end"] = str(lesson.end.astimezone())
+        if output_str:
+            dic["start"] = str(lesson.start.astimezone())
+            dic["end"] = str(lesson.end.astimezone())
+        else:
+            dic["start"] = lesson.start.astimezone()
+            dic["end"] = lesson.end.astimezone()
         try:
             dic["id"] = int(lesson.id)
         except:
@@ -766,13 +770,12 @@ class WebUntis:
 
         for new_item in self.event_list:
             for old_item in self.event_list_old:
-                if (
-                    new_item["id"] == old_item["id"]
-                    and new_item["code"] != old_item["code"]
+                if new_item["id"] == old_item["id"] and (
+                    new_item["code"] != old_item["code"]
+                    or new_item["rooms"] != old_item["rooms"]
                 ):
                     updated_items.append(new_item)
                     old_items.append(old_item)
-                    _LOGGER.debug("lsnummer " + str(new_item["lsnumber"]))
                     _LOGGER.debug("id " + str(new_item["id"]))
                     _LOGGER.debug("old code " + old_item["code"])
                     _LOGGER.debug("new code " + new_item["code"])
@@ -785,13 +788,18 @@ class WebUntis:
             _LOGGER.debug("NEW:" + str(updated_items))
 
             for lesson in updated_items:
-                title = "WebUntis - "
+                title = "WebUntis"
                 if lesson["code"] == "cancelled":
-                    title += "Lesson canceled"
+                    title += " - Lesson canceled"
 
-                message = f"""
-                            Subject: {lesson['subjects'][0]['long_name']}\n
-                            Date: {lesson['start'].strftime('%d.%m.%Y')}"""
+                message = ""
+                try:
+                    message += f"Subject: {lesson['subjects'][0]['long_name']}\n"
+                except IndexError:
+                    pass
+
+                message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
+
                 try:
                     await self.async_notify(
                         self._hass,
@@ -799,7 +807,7 @@ class WebUntis:
                         title=title,
                         message=message,
                     )
-                except error as error:
+                except Exception as error:
                     _LOGGER.warning(
                         "Sending notification to %s failed - %s",
                         self.notify_entity_id,
