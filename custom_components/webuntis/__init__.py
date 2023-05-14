@@ -262,11 +262,11 @@ class WebUntis:
                     self._loged_in = False
 
         if not self._loged_in:
-            _LOGGER.debug("logging in")
+            # _LOGGER.debug("logging in")
 
             try:
                 await self._hass.async_add_executor_job(self.session.login)
-                _LOGGER.debug("Login successful")
+                # _LOGGER.debug("Login successful")
                 self._loged_in = True
             except OSError as error:
                 # Login error, set all properties to unknown.
@@ -297,7 +297,7 @@ class WebUntis:
                 self._last_status_request_failed = True
                 return
 
-        _LOGGER.debug("updating data")
+        # _LOGGER.debug("updating data")
 
         try:
             self.subjects = await self._hass.async_add_executor_job(
@@ -404,7 +404,7 @@ class WebUntis:
 
         if not self.keep_loged_in:
             await self._hass.async_add_executor_job(self.session.logout)
-            _LOGGER.debug("Logout successful")
+            # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
     def get_timetable_object(self):
@@ -546,7 +546,7 @@ class WebUntis:
         self.event_list = []
 
         for lesson in table:
-            if self.notify:
+            if self.notify and self.check_lesson(lesson, ignor_cancelled=True):
                 self.event_list.append(
                     self.get_lesson_json(lesson, force=True, output_str=False)
                 )
@@ -756,8 +756,8 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        _LOGGER.debug("New " + str(len(self.event_list)))
-        _LOGGER.debug("Old " + str(len(self.event_list_old)))
+        # _LOGGER.debug("New " + str(len(self.event_list)))
+        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
 
         updated_items = []
         old_items = []
