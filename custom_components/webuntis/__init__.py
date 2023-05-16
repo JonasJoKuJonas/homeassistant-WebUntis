@@ -22,7 +22,6 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
-from .utils import is_different
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -762,9 +761,7 @@ class WebUntis:
         updated_items = []
         old_items = []
 
-        if not self.event_list_old or not is_different(
-            self.event_list, self.event_list_old
-        ):
+        if not self.event_list_old:
             self.event_list_old = self.event_list
             return
 
@@ -787,7 +784,7 @@ class WebUntis:
                     except IndexError:
                         _LOGGER.info("New " + str(self.event_list))
                         _LOGGER.info("Old " + str(self.event_list_old))
-                break
+                    break
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
