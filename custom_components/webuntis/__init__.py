@@ -755,11 +755,17 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        # _LOGGER.debug("New " + str(len(self.event_list)))
-        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
+        _LOGGER.debug("New " + str(len(self.event_list)))
+        _LOGGER.debug("Old " + str(len(self.event_list_old)))
 
         updated_items = []
-        old_items = []
+
+        """
+        # DEBUG TEST
+        try:
+            self.event_list_old[3]["code"] = "te"
+        except IndexError:
+            pass"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -769,18 +775,12 @@ class WebUntis:
             for old_item in self.event_list_old:
                 if new_item["id"] == old_item["id"]:
                     if new_item["code"] != old_item["code"]:
-                        updated_items.append(new_item)
-                        old_items.append(old_item)
-                        _LOGGER.debug("id " + str(new_item["id"]))
-                        _LOGGER.debug("old code " + old_item["code"])
-                        _LOGGER.debug("new code " + new_item["code"])
+                        print("dssd")
+                        updated_items.append(["code", new_item, old_item])
 
                     try:
                         if new_item["rooms"] != old_item["rooms"]:
-                            old_items.append(old_item)
-                            _LOGGER.debug("id " + str(new_item["id"]))
-                            _LOGGER.debug("old rooms " + old_item["rooms"])
-                            _LOGGER.debug("new rooms " + new_item["rooms"])
+                            updated_items.append(["code", new_item, old_item])
                     except IndexError:
                         _LOGGER.info("New " + str(self.event_list))
                         _LOGGER.info("Old " + str(self.event_list_old))
@@ -789,13 +789,11 @@ class WebUntis:
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
-            _LOGGER.debug("OLD:" + str(old_items))
             _LOGGER.debug("NEW:" + str(updated_items))
 
-            for lesson in updated_items:
+            for change, lesson, lesson_old in updated_items:
                 title = "WebUntis"
-                if lesson["code"] == "cancelled":
-                    title += " - Lesson canceled"
+                title += " - " + {"code": "Status changed"}[change]
 
                 message = ""
                 try:
@@ -804,6 +802,10 @@ class WebUntis:
                     pass
 
                 message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
+
+                message += (
+                    f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
+                )
 
                 try:
                     await self.async_notify(
