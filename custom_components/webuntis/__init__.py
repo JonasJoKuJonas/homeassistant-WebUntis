@@ -546,9 +546,7 @@ class WebUntis:
 
         for lesson in table:
             if self.notify and self.check_lesson(lesson, ignor_cancelled=True):
-                self.event_list.append(
-                    self.get_lesson_json(lesson, force=True, output_str=False)
-                )
+                self.event_list.append(self.get_lesson_for_notify(lesson))
 
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
@@ -692,6 +690,10 @@ class WebUntis:
                 dic["substText"] = str(lesson.substText)
             except:
                 pass
+            try:
+                dic["lsnumber"] = str(lesson.lsnumber)
+            except:
+                pass
 
         try:
             dic["rooms"] = [
@@ -743,6 +745,51 @@ class WebUntis:
             return str(json.dumps(dic))
         return dic
 
+    def get_lesson_for_notify(self, lesson) -> str:
+        """returns info about for notify test"""
+        dic = {}
+
+        dic["start"] = lesson.start.astimezone()
+        dic["end"] = lesson.end.astimezone()
+
+        dic["subject_id"] = lesson.subjects[0].id
+        dic["id"] = int(lesson.id)
+        dic["lsnumber"] = int(lesson.lsnumber)
+
+        try:
+            dic["code"] = str(lesson.code)
+        except:
+            pass
+        try:
+            dic["type"] = str(lesson.type)
+        except:
+            pass
+        try:
+            dic["subjects"] = [
+                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                for subject in lesson.subjects
+            ]
+        except:
+            pass
+
+        try:
+            dic["rooms"] = [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.rooms
+            ]
+        except:
+            pass
+
+        try:
+            dic["original_rooms"] = [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.original_rooms
+            ]
+        except:
+            pass
+
+        return dic
+
     def exclude_data_(self, data):
         """adds data to exclude_data list"""
 
@@ -760,12 +807,13 @@ class WebUntis:
 
         updated_items = []
 
-        """
         # DEBUG TEST
         try:
-            self.event_list_old[3]["code"] = "te"
+            self.event_list_old[3]["code"] = "test"
         except IndexError:
-            pass"""
+            pass
+
+        print(self.event_list)
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -773,14 +821,17 @@ class WebUntis:
 
         for new_item in self.event_list:
             for old_item in self.event_list_old:
-                if new_item["id"] == old_item["id"]:
+                if (
+                    new_item["subject_id"] == old_item["subject_id"]
+                    and new_item["start"] == old_item["start"]
+                ):
                     if new_item["code"] != old_item["code"]:
-                        print("dssd")
+                        _LOGGER.info("CODE HAS CHANGED")
                         updated_items.append(["code", new_item, old_item])
 
                     try:
                         if new_item["rooms"] != old_item["rooms"]:
-                            updated_items.append(["code", new_item, old_item])
+                            updated_items.append(["rooms", new_item, old_item])
                     except IndexError:
                         _LOGGER.info("New " + str(self.event_list))
                         _LOGGER.info("Old " + str(self.event_list_old))
@@ -793,7 +844,9 @@ class WebUntis:
 
             for change, lesson, lesson_old in updated_items:
                 title = "WebUntis"
-                title += " - " + {"code": "Status changed"}[change]
+                title += (
+                    " - " + {"code": "Status changed", "rooms": "Room changed"}[change]
+                )
 
                 message = ""
                 try:
