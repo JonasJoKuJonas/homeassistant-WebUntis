@@ -802,18 +802,18 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        _LOGGER.debug("New " + str(len(self.event_list)))
-        _LOGGER.debug("Old " + str(len(self.event_list_old)))
+        # _LOGGER.debug("New " + str(len(self.event_list)))
+        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
 
         updated_items = []
 
         # DEBUG TEST
-        try:
+        """try:
             self.event_list_old[3]["code"] = "test"
         except IndexError:
             pass
 
-        print(self.event_list)
+        print(self.event_list)"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -824,6 +824,10 @@ class WebUntis:
                 if (
                     new_item["subject_id"] == old_item["subject_id"]
                     and new_item["start"] == old_item["start"]
+                    and not (
+                        new_item["code"] == "irregular"
+                        and old_item["code"] == "cancelled"
+                    )
                 ):
                     if new_item["code"] != old_item["code"]:
                         _LOGGER.info("CODE HAS CHANGED")
