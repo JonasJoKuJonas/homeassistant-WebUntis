@@ -126,6 +126,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 10:
+        new_options = {**config_entry.options}
+        new_options["notify_entity_id"] = []
+        config_entry.version = 11
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
