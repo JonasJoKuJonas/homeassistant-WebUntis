@@ -211,6 +211,8 @@ class WebUntis:
         self._last_status_request_failed = False
 
         # Data provided by 3rd party library
+        self.school_year = None
+
         self.is_class = None
         self.next_class = None
         self.next_class_json = None
@@ -304,6 +306,19 @@ class WebUntis:
                 return
 
         # _LOGGER.debug("updating data")
+
+        try:
+            self.school_year = await self._hass.async_add_executor_job(
+                self.session.schoolyears
+            )
+
+        except OSError as error:
+            _LOGGER.warning(
+                "Request for schoolyears of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
 
         try:
             self.subjects = await self._hass.async_add_executor_job(
@@ -438,6 +453,11 @@ class WebUntis:
         """Get the timetable for the given time period"""
         timetable_object = self.get_timetable_object()
 
+        school_year_end = self.school_year.current.end.date()
+
+        # set end to school year end if out of school year
+        end = min(end, school_year_end)
+
         if self.extended_timetable:
             return self.session.timetable_extended(
                 start=start, end=end, **timetable_object
@@ -529,7 +549,7 @@ class WebUntis:
     def _next_day_json(self):
         if self.next_lesson_to_wake_up is None:
             return None
-        day = self.next_lesson_to_wake_up
+        day = self.next_lesson_to_wake_up.date()
 
         table = self.get_timetable(start=day, end=day)
 
