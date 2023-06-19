@@ -22,6 +22,7 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -834,13 +835,12 @@ class WebUntis:
 
         updated_items = []
 
-        # DEBUG TEST
-        """try:
-            self.event_list_old[3]["code"] = "test"
+        """# DEBUG TEST
+        try:
+            self.event_list_old[0]["code"] = "test"
+            self.event_list_old[1]["code"] = "test"
         except IndexError:
-            pass
-
-        print(self.event_list)"""
+            pass"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -871,6 +871,8 @@ class WebUntis:
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
+            updated_items = compact_list(updated_items)
+
             _LOGGER.debug("NEW:" + str(updated_items))
 
             for change, lesson, lesson_old in updated_items:
@@ -886,6 +888,7 @@ class WebUntis:
                     pass
 
                 message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
+                message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
 
                 message += (
                     f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
