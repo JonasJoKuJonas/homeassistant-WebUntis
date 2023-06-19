@@ -64,3 +64,5 @@ def compact_list(lst, type=None):
                     continue
             compacted_list.append(item)
             i += 1
+
+    return compacted_list

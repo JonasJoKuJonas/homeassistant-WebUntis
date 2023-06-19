@@ -231,7 +231,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
-    "notify": "Notify",
+    # "notify": "Notify",
     "backend": "Backend",
 }
 

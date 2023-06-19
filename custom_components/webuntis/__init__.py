@@ -391,7 +391,7 @@ class WebUntis:
             self.calendar_events = await self._hass.async_add_executor_job(
                 self._get_events
             )
-            self.calendar_events = compact_list(self.calendar_events)
+            self.calendar_events = compact_list(self.calendar_events, "calendar")
         except OSError as error:
             self.calendar_events = []
 
@@ -872,7 +872,7 @@ class WebUntis:
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
-            updated_items = compact_list(updated_items)
+            updated_items = compact_list(updated_items, "notify")
 
             _LOGGER.debug("NEW:" + str(updated_items))
 
