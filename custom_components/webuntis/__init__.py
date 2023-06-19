@@ -22,6 +22,7 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -377,6 +378,7 @@ class WebUntis:
             self.calendar_events = await self._hass.async_add_executor_job(
                 self._get_events
             )
+            self.calendar_events = compact_list(self.calendar_events)
         except OSError as error:
             self.calendar_events = []
 
