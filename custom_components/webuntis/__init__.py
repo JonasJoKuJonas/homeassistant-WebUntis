@@ -21,7 +21,14 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
-from .const import DAYS_TO_FUTURE, DOMAIN, SCAN_INTERVAL, SIGNAL_NAME_PREFIX
+from .const import (
+    DAYS_TO_FUTURE,
+    DOMAIN,
+    SCAN_INTERVAL,
+    SIGNAL_NAME_PREFIX,
+    DEFAULT_OPTIONS,
+    CONFIG_ENTRY_VERSION,
+)
 from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -65,74 +72,14 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
-    if config_entry.version == 1:
-        new_options = {**config_entry.options}
+    options = {**config_entry.options}
 
-        new_options["calendar_long_name"] = True
+    for option, default in DEFAULT_OPTIONS.items():
+        if not option in options:
+            options[option] = default
 
-        config_entry.version = 2
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 2:
-        new_options = {**config_entry.options}
-        new_options["calendar_show_cancelled_lessons"] = False
-        config_entry.version = 3
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 3:
-        new_options = {**config_entry.options}
-        new_options["keep_loged_in"] = False
-        config_entry.version = 4
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 4:
-        new_options = {**config_entry.options}
-        new_options["filter_mode"] = "None"
-        new_options["filter_subjects"] = []
-        config_entry.version = 5
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 5:
-        new_options = {**config_entry.options}
-        new_options["exclude_data"] = []
-        new_options["generate_json"] = False
-        config_entry.version = 6
-
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 6:
-        new_options = {**config_entry.options}
-        new_options["filter_description"] = []
-        new_options["extended_timetable"] = False
-        config_entry.version = 7
-
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 7:
-        new_options = {**config_entry.options}
-        new_options["calendar_description"] = "JSON"
-        config_entry.version = 8
-
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 8:
-        new_options = {**config_entry.options}
-        new_options["calendar_room"] = "Room long name"
-        config_entry.version = 9
-
-    if config_entry.version == 9:
-        new_options = {**config_entry.options}
-        new_options["calendar_show_room_change"] = False
-        config_entry.version = 10
-
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
-
-    if config_entry.version == 10:
-        new_options = {**config_entry.options}
-        new_options["notify_entity_id"] = []
-        config_entry.version = 11
-
-        hass.config_entries.async_update_entry(config_entry, options=new_options)
+    config_entry.version = CONFIG_ENTRY_VERSION
+    hass.config_entries.async_update_entry(config_entry, options=options)
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 

@@ -1,7 +1,7 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 11
+CONFIG_ENTRY_VERSION = 12
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
