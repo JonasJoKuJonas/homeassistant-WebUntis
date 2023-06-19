@@ -31,6 +31,7 @@
   "options": {
     "error": {
       "extended_timetable": "Für die Option \"Fächer Filter - Beschreibung\" und \"Calender Beschreibung\" (Lesson Info) wird \"Erweiterte Stundenplan anfordern\" benötigt",
+      "unknown_service": "Service ID nicht gefunden.",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
@@ -77,6 +78,13 @@
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
           "generate_json": "Generiert JSON in Sensor Attribute - nur aktivieren wenn es benötigt wird.",
           "extended_timetable": "Fordere erweiterte Stundenplan an. (Wird für Fächer Filter - Beschreibung benötigt)"
+        }
+      },
+      "notify": {
+        "title": "Notify Einstellungen",
+        "description": "Einstellungen zu Benachrichtungen",
+        "data": {
+          "notify_entity_id": "Notify Service ID (Bsp: notify.discord)"
         }
       }
     }

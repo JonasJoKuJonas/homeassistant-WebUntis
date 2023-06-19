@@ -127,6 +127,13 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
         hass.config_entries.async_update_entry(config_entry, options=new_options)
 
+    if config_entry.version == 10:
+        new_options = {**config_entry.options}
+        new_options["notify_entity_id"] = []
+        config_entry.version = 11
+
+        hass.config_entries.async_update_entry(config_entry, options=new_options)
+
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
     return True
@@ -190,6 +197,9 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
+        self.notify_entity_id = config.options["notify_entity_id"]
+        self.notify = bool(self.notify_entity_id)
+
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
@@ -214,6 +224,9 @@ class WebUntis:
         self.subjects = []
 
         self.today = [None, None]
+
+        self.event_list = []
+        self.event_list_old = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -258,11 +271,11 @@ class WebUntis:
                     self._loged_in = False
 
         if not self._loged_in:
-            _LOGGER.debug("logging in")
+            # _LOGGER.debug("logging in")
 
             try:
                 await self._hass.async_add_executor_job(self.session.login)
-                _LOGGER.debug("Login successful")
+                # _LOGGER.debug("Login successful")
                 self._loged_in = True
             except OSError as error:
                 # Login error, set all properties to unknown.
@@ -293,7 +306,7 @@ class WebUntis:
                 self._last_status_request_failed = True
                 return
 
-        _LOGGER.debug("updating data")
+        # _LOGGER.debug("updating data")
 
         try:
             self.school_year = await self._hass.async_add_executor_job(
@@ -401,9 +414,20 @@ class WebUntis:
                 error,
             )
 
+        if self.notify:
+            try:
+                await self.update_notify()
+            except OSError as error:
+                _LOGGER.warning(
+                    "Updating notify '%s@%s' failed - OSError: %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+
         if not self.keep_loged_in:
             await self._hass.async_add_executor_job(self.session.logout)
-            _LOGGER.debug("Logout successful")
+            # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
     def get_timetable_object(self):
@@ -547,8 +571,12 @@ class WebUntis:
         table = self.get_timetable(start=today, end=in_x_days)
 
         event_list = []
+        self.event_list = []
 
         for lesson in table:
+            if self.notify and self.check_lesson(lesson, ignor_cancelled=True):
+                self.event_list.append(self.get_lesson_for_notify(lesson))
+
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
@@ -651,13 +679,17 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson, force=False) -> str:
+    def get_lesson_json(self, lesson, force=False, output_str=True) -> str:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
         dic = {}
-        dic["start"] = str(lesson.start.astimezone())
-        dic["end"] = str(lesson.end.astimezone())
+        if output_str:
+            dic["start"] = str(lesson.start.astimezone())
+            dic["end"] = str(lesson.end.astimezone())
+        else:
+            dic["start"] = lesson.start.astimezone()
+            dic["end"] = lesson.end.astimezone()
         try:
             dic["id"] = int(lesson.id)
         except:
@@ -685,6 +717,10 @@ class WebUntis:
                 pass
             try:
                 dic["substText"] = str(lesson.substText)
+            except:
+                pass
+            try:
+                dic["lsnumber"] = str(lesson.lsnumber)
             except:
                 pass
 
@@ -734,8 +770,54 @@ class WebUntis:
                 ]
             except:
                 pass
+        if output_str:
+            return str(json.dumps(dic))
+        return dic
 
-        return str(json.dumps(dic))
+    def get_lesson_for_notify(self, lesson) -> str:
+        """returns info about for notify test"""
+        dic = {}
+
+        dic["start"] = lesson.start.astimezone()
+        dic["end"] = lesson.end.astimezone()
+
+        dic["subject_id"] = lesson.subjects[0].id
+        dic["id"] = int(lesson.id)
+        dic["lsnumber"] = int(lesson.lsnumber)
+
+        try:
+            dic["code"] = str(lesson.code)
+        except:
+            pass
+        try:
+            dic["type"] = str(lesson.type)
+        except:
+            pass
+        try:
+            dic["subjects"] = [
+                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                for subject in lesson.subjects
+            ]
+        except:
+            pass
+
+        try:
+            dic["rooms"] = [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.rooms
+            ]
+        except:
+            pass
+
+        try:
+            dic["original_rooms"] = [
+                {"name": str(room.name), "long_name": str(room.long_name)}
+                for room in lesson.original_rooms
+            ]
+        except:
+            pass
+
+        return dic
 
     def exclude_data_(self, data):
         """adds data to exclude_data list"""
@@ -745,6 +827,98 @@ class WebUntis:
 
         self._hass.config_entries.async_update_entry(self._config, options=new_options)
         self.exclude_data.append(data)
+
+    async def update_notify(self):
+        """Update data and notify"""
+
+        # _LOGGER.debug("New " + str(len(self.event_list)))
+        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
+
+        updated_items = []
+
+        """# DEBUG TEST
+        try:
+            self.event_list_old[0]["code"] = "test"
+            self.event_list_old[1]["code"] = "test"
+        except IndexError:
+            pass"""
+
+        if not self.event_list_old:
+            self.event_list_old = self.event_list
+            return
+
+        for new_item in self.event_list:
+            for old_item in self.event_list_old:
+                if (
+                    new_item["subject_id"] == old_item["subject_id"]
+                    and new_item["start"] == old_item["start"]
+                    and not (
+                        new_item["code"] == "irregular"
+                        and old_item["code"] == "cancelled"
+                    )
+                ):
+                    if new_item["code"] != old_item["code"]:
+                        _LOGGER.info("CODE HAS CHANGED")
+                        updated_items.append(["code", new_item, old_item])
+
+                    try:
+                        if new_item["rooms"] != old_item["rooms"]:
+                            updated_items.append(["rooms", new_item, old_item])
+                    except IndexError:
+                        _LOGGER.info("New " + str(self.event_list))
+                        _LOGGER.info("Old " + str(self.event_list_old))
+                    break
+
+        if updated_items:
+            _LOGGER.debug("Timetable has chaged!")
+
+            updated_items = compact_list(updated_items)
+
+            _LOGGER.debug("NEW:" + str(updated_items))
+
+            for change, lesson, lesson_old in updated_items:
+                title = "WebUntis"
+                title += (
+                    " - " + {"code": "Status changed", "rooms": "Room changed"}[change]
+                )
+
+                message = ""
+                try:
+                    message += f"Subject: {lesson['subjects'][0]['long_name']}\n"
+                except IndexError:
+                    pass
+
+                message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
+                message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
+
+                message += (
+                    f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
+                )
+
+                try:
+                    await self.async_notify(
+                        self._hass,
+                        service=self.notify_entity_id,
+                        title=title,
+                        message=message,
+                    )
+                except Exception as error:
+                    _LOGGER.warning(
+                        "Sending notification to %s failed - %s",
+                        self.notify_entity_id,
+                        error,
+                    )
+        self.event_list_old = self.event_list
+
+    async def async_notify(self, hass, service, title, message):
+        """Show a notification"""
+        domain = service.split(".")[0]
+        service = service.split(".")[1]
+        data = {"message": message, "title": title}
+        if not await hass.services.async_call(domain, service, data, blocking=True):
+            _LOGGER.error(
+                "Unable to call service %s.%s due to an error.", domain, service
+            )
 
 
 class WebUntisEntity(Entity):
