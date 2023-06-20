@@ -16,7 +16,7 @@ DEFAULT_OPTIONS = {
     "calendar_description": "JSON",
     "calendar_room": "long name",
     "calendar_show_room_change": False,
-    "notify_entity_id": [],
+    "notify_entity_id": "",
 }
 
 ICON_STATUS = "mdi:school-outline"
