@@ -782,13 +782,12 @@ class WebUntis:
         # _LOGGER.debug("Old " + str(len(self.event_list_old)))
 
         updated_items = []
-
-        """# DEBUG TEST
-        try:
-            self.event_list_old[0]["code"] = "test"
-            self.event_list_old[1]["code"] = "test"
+        # DEBUG TEST
+        """try:
+            self.event_list_old[10]["code"] = "test"
         except IndexError:
-            pass"""
+            pass
+            """
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -805,9 +804,31 @@ class WebUntis:
                     )
                 ):
                     if new_item["code"] != old_item["code"]:
-                        _LOGGER.info("CODE HAS CHANGED")
-                        updated_items.append(["code", new_item, old_item])
+                        if (
+                            old_item["code"] == "None"
+                            and new_item["code"] == "cancelled"
+                        ):
+                            if any(
+                                item["start"] == new_item["start"]
+                                and item["subject_id"] != new_item["subject_id"]
+                                and item["code"] == "None"
+                                for item in self.event_list
+                            ):
+                                new_lesson = next(
+                                    item
+                                    for item in self.event_list
+                                    if item["start"] == new_item["start"]
+                                    and item["subject_id"] != new_item["subject_id"]
+                                    and item["code"] == "None"
+                                )
+                                updated_items.append(
+                                    ["lesson change", new_lesson, old_item]
+                                )
 
+                            else:
+                                updated_items.append(["cancelled", new_item, old_item])
+                        else:
+                            updated_items.append(["code", new_item, old_item])
                     try:
                         if new_item["rooms"] != old_item["rooms"]:
                             updated_items.append(["rooms", new_item, old_item])
@@ -826,7 +847,13 @@ class WebUntis:
             for change, lesson, lesson_old in updated_items:
                 title = "WebUntis"
                 title += (
-                    " - " + {"code": "Status changed", "rooms": "Room changed"}[change]
+                    " - "
+                    + {
+                        "code": "Status changed",
+                        "rooms": "Room changed",
+                        "cancelled": "Lesson cancelled",
+                        "lesson change": "Lesson changed",
+                    }[change]
                 )
 
                 message = ""
@@ -838,9 +865,16 @@ class WebUntis:
                 message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
                 message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
 
-                message += (
-                    f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
-                )
+                if change == "cancelled":
+                    message += f"Cancelled: {lesson_old['subjects'][0]['long_name']}"
+
+                elif change == "lesson change":
+                    message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
+
+                else:
+                    message += (
+                        f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
+                    )
 
                 try:
                     await self.async_notify(
