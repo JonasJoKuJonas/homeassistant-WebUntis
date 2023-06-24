@@ -871,6 +871,9 @@ class WebUntis:
                 elif change == "lesson change":
                     message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
 
+                elif change == "rooms":
+                    message += f"Change (Room): {lesson_old['rooms']['name']} -> {lesson['rooms']['name']}"
+
                 else:
                     message += (
                         f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
