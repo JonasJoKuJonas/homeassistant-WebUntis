@@ -440,18 +440,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the notify options."""
         if user_input is not None:
-            if not is_service(self.hass, user_input["notify_entity_id"]):
-                errors = {"base": "unknown_service"}
+            if "notify_entity_id" in user_input:
+                if not is_service(self.hass, user_input["notify_entity_id"]):
+                    errors = {"base": "unknown_service"}
             else:
-                return await self.save(user_input)
+                user_input["notify_entity_id"] = ""
+            return await self.save(user_input)
         return self.async_show_form(
             step_id="notify",
             data_schema=vol.Schema(
                 {
                     vol.Optional(
                         "notify_entity_id",
-                        default=self.config_entry.options.get("notify_entity_id"),
-                    ): str
+                        description={
+                            "suggested_value": self.config_entry.options.get(
+                                "notify_entity_id"
+                            )
+                        },
+                    ): selector.TextSelector(),
                 }
             ),
             errors=errors,
