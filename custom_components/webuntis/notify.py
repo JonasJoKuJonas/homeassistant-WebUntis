@@ -1,4 +1,4 @@
-def compare_list(old_list, new_list):
+def compare_list(old_list, new_list, blacklist=[]):
     updated_items = []
 
     for new_item in new_list:
@@ -10,6 +10,14 @@ def compare_list(old_list, new_list):
                     new_item["code"] == "irregular" and old_item["code"] == "cancelled"
                 )
             ):
+                # test if lesson is on blacklist to prevent spaming notifications
+                if any(
+                    item["subject_id"] == new_item["subject_id"]
+                    and item["start"] == new_item["start"]
+                    for item in blacklist
+                ):
+                    break
+
                 if new_item["code"] != old_item["code"]:
                     if old_item["code"] == "None" and new_item["code"] == "cancelled":
                         if any(
@@ -88,5 +96,12 @@ def get_notification(updated_items):
     return notify
 
 
-def update_notify_blacklist():
-    pass
+def get_notify_blacklist(current_list):
+    blacklist = []
+
+    for item in compare_list(current_list, current_list):
+        blacklist.append(
+            {"subject_id": item[1]["subject_id"], "start": item[1]["start"]}
+        )
+
+    return blacklist

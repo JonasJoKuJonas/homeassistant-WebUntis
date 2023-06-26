@@ -29,7 +29,7 @@ from .const import (
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
 )
-from .notify import compare_list, get_notification
+from .notify import *
 from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -779,9 +779,6 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        # _LOGGER.debug("New " + str(len(self.event_list)))
-        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
-
         updated_items = []
         # DEBUG TEST
         """try:
@@ -794,7 +791,11 @@ class WebUntis:
             self.event_list_old = self.event_list
             return
 
-        updated_items = compare_list(self.event_list_old, self.event_list)
+        blacklist = get_notify_blacklist(self.event_list)
+
+        updated_items = compare_list(
+            self.event_list_old, self.event_list, blacklist=blacklist
+        )
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
@@ -820,13 +821,12 @@ class WebUntis:
 
     async def async_notify(self, hass, service, data):
         """Show a notification"""
+        _LOGGER.debug("Send notification(%s): %s", service, data)
+
         domain = service.split(".")[0]
         service = service.split(".")[1]
 
-        if not await hass.services.async_call(domain, service, data, blocking=True):
-            _LOGGER.error(
-                "Unable to call service %s.%s due to an error.", domain, service
-            )
+        await hass.services.async_call(domain, service, data, blocking=True)
 
 
 class WebUntisEntity(Entity):
