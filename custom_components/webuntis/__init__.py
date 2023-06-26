@@ -22,13 +22,14 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import (
+    CONFIG_ENTRY_VERSION,
     DAYS_TO_FUTURE,
+    DEFAULT_OPTIONS,
     DOMAIN,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
-    DEFAULT_OPTIONS,
-    CONFIG_ENTRY_VERSION,
 )
+from .notify import compare_list, get_notification
 from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -793,98 +794,21 @@ class WebUntis:
             self.event_list_old = self.event_list
             return
 
-        for new_item in self.event_list:
-            for old_item in self.event_list_old:
-                if (
-                    new_item["subject_id"] == old_item["subject_id"]
-                    and new_item["start"] == old_item["start"]
-                    and not (
-                        new_item["code"] == "irregular"
-                        and old_item["code"] == "cancelled"
-                    )
-                ):
-                    if new_item["code"] != old_item["code"]:
-                        if (
-                            old_item["code"] == "None"
-                            and new_item["code"] == "cancelled"
-                        ):
-                            if any(
-                                item["start"] == new_item["start"]
-                                and item["subject_id"] != new_item["subject_id"]
-                                and item["code"] == "None"
-                                for item in self.event_list
-                            ):
-                                new_lesson = next(
-                                    item
-                                    for item in self.event_list
-                                    if item["start"] == new_item["start"]
-                                    and item["subject_id"] != new_item["subject_id"]
-                                    and item["code"] == "None"
-                                )
-                                updated_items.append(
-                                    ["lesson change", new_lesson, old_item]
-                                )
-
-                            else:
-                                updated_items.append(["cancelled", new_item, old_item])
-                        else:
-                            updated_items.append(["code", new_item, old_item])
-                    try:
-                        if new_item["rooms"] != old_item["rooms"]:
-                            updated_items.append(["rooms", new_item, old_item])
-                    except IndexError:
-                        _LOGGER.info("New " + str(self.event_list))
-                        _LOGGER.info("Old " + str(self.event_list_old))
-                    break
+        updated_items = compare_list(self.event_list_old, self.event_list)
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
             updated_items = compact_list(updated_items, "notify")
 
-            _LOGGER.debug("NEW:" + str(updated_items))
+            _LOGGER.debug("NOTIFICATIONS:" + str(updated_items))
 
-            for change, lesson, lesson_old in updated_items:
-                title = "WebUntis"
-                title += (
-                    " - "
-                    + {
-                        "code": "Status changed",
-                        "rooms": "Room changed",
-                        "cancelled": "Lesson cancelled",
-                        "lesson change": "Lesson changed",
-                    }[change]
-                )
+            notifications = get_notification(updated_items)
 
-                message = ""
-                try:
-                    message += f"Subject: {lesson['subjects'][0]['long_name']}\n"
-                except IndexError:
-                    pass
-
-                message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
-                message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
-
-                if change == "cancelled":
-                    message += f"Cancelled: {lesson_old['subjects'][0]['long_name']}"
-
-                elif change == "lesson change":
-                    message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
-
-                elif change == "rooms":
-                    message += f"Change (Room): {lesson_old['rooms']['name']} -> {lesson['rooms']['name']}"
-
-                else:
-                    message += (
-                        f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
-                    )
-
+            for notification in notifications:
                 try:
                     await self.async_notify(
-                        self._hass,
-                        service=self.notify_entity_id,
-                        title=title,
-                        message=message,
+                        self._hass, service=self.notify_entity_id, data=notification
                     )
                 except Exception as error:
                     _LOGGER.warning(
@@ -894,11 +818,11 @@ class WebUntis:
                     )
         self.event_list_old = self.event_list
 
-    async def async_notify(self, hass, service, title, message):
+    async def async_notify(self, hass, service, data):
         """Show a notification"""
         domain = service.split(".")[0]
         service = service.split(".")[1]
-        data = {"message": message, "title": title}
+
         if not await hass.services.async_call(domain, service, data, blocking=True):
             _LOGGER.error(
                 "Unable to call service %s.%s due to an error.", domain, service
