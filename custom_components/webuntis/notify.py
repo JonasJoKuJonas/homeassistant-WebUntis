@@ -41,11 +41,14 @@ def compare_list(old_list, new_list, blacklist=[]):
                             updated_items.append(["cancelled", new_item, old_item])
                     else:
                         updated_items.append(["code", new_item, old_item])
-                try:
-                    if new_item["rooms"] != old_item["rooms"]:
-                        updated_items.append(["rooms", new_item, old_item])
-                except IndexError:
-                    pass
+
+                if (
+                    "rooms" in new_item
+                    and "rooms" in old_item
+                    and new_item["rooms"] != old_item["rooms"]
+                ):
+                    updated_items.append(["rooms", new_item, old_item])
+
                 break
 
     return updated_items
