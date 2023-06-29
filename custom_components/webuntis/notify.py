@@ -23,7 +23,7 @@ def compare_list(old_list, new_list, blacklist=[]):
                         if any(
                             item["start"] == new_item["start"]
                             and item["subject_id"] != new_item["subject_id"]
-                            and item["code"] == "None"
+                            and item["code"] == "irregular"
                             for item in new_list
                         ):
                             new_lesson = next(
