@@ -9,7 +9,6 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 import homeassistant.util.dt as dt_util
-import webuntis  # pylint: disable=import-self
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -20,6 +19,8 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
+
+import webuntis  # pylint: disable=import-self
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -146,7 +147,8 @@ class WebUntis:
         self.extended_timetable = config.options["extended_timetable"]
 
         self.notify_entity_id = config.options["notify_entity_id"]
-        self.notify = bool(self.notify_entity_id)
+        self.notify_list = config.options["notify_options"]
+        self.notify = bool(self.notify_entity_id) and bool(self.notify_list)
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -780,12 +782,11 @@ class WebUntis:
         """Update data and notify"""
 
         updated_items = []
-        # DEBUG TEST
-        """try:
+        """# DEBUG TEST
+        try:
             self.event_list_old[10]["code"] = "test"
         except IndexError:
-            pass
-            """
+            pass"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -804,7 +805,7 @@ class WebUntis:
 
             _LOGGER.debug("NOTIFICATIONS:" + str(updated_items))
 
-            notifications = get_notification(updated_items)
+            notifications = get_notification(updated_items, self.notify_list)
 
             for notification in notifications:
                 try:

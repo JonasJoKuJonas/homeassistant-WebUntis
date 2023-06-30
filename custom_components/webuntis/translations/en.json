@@ -84,7 +84,11 @@
         "title": "Notify Settings",
         "description": "Notification Settings",
         "data": {
-          "notify_entity_id": "Notify Service ID (e.g: notify.discord)"
+          "notify_entity_id": "Notify Service ID (e.g: notify.discord)",
+          "code": "Lesson status changed",
+          "rooms": "Room changed",
+          "cancelled": "Lesson is cancelled",
+          "lesson change": "Lesson was swapped"
         }
       }
     }

@@ -54,8 +54,10 @@ def compare_list(old_list, new_list, blacklist=[]):
     return updated_items
 
 
-def get_notification(updated_items):
+def get_notification(updated_items, notify_list):
     notify = []
+
+    updated_items = [item for item in updated_items if item[0] in notify_list]
 
     for change, lesson, lesson_old in updated_items:
         title = "WebUntis"
@@ -89,7 +91,6 @@ def get_notification(updated_items):
                 message += f"Change (Room): {lesson_old[0]['rooms']['name']} -> {lesson[0]['rooms']['name']}"
             except KeyError:
                 pass
-                # print(message)
 
         else:
             message += f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"

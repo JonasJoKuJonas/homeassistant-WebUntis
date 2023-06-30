@@ -1,7 +1,7 @@
 """Constants for the Web Untis integration."""
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 12
+CONFIG_ENTRY_VERSION = 13
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
@@ -17,7 +17,10 @@ DEFAULT_OPTIONS = {
     "calendar_room": "long name",
     "calendar_show_room_change": False,
     "notify_entity_id": "",
+    "notify_options": [],
 }
+
+NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson change", "code"]
 
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"
