@@ -36,9 +36,11 @@ def compare_list(old_list, new_list, blacklist=[]):
                             updated_items.append(
                                 ["lesson change", new_lesson, old_item]
                             )
+                            break
 
                         else:
                             updated_items.append(["cancelled", new_item, old_item])
+                            break
                     else:
                         updated_items.append(["code", new_item, old_item])
 
