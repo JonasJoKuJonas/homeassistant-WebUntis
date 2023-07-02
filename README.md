@@ -50,7 +50,7 @@ https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
 ### Username and Password
 Unfortunately, it is not possible to use the Untis API with an anonymous user.
 
-You can ask the school administration to give you an access, otherwise it won't work.
+You can ask the school administration to give you access, otherwise it won't work.
 
 ### Timetable Timetable source & Full name/ Class/ Subject/ Room
 With the timetable source, you can select where the data for the sensor should come from.
@@ -68,17 +68,17 @@ The final configuration field allows you to specify a name or class from which t
 ### Calendar
 |Option|Description|Default
 |:-----|:----------|-------
-|calendar_long_name|Use the long subjct name.|`True`
-|calendar_show_cancelled_lessons|Show canceled lessons.|`False`
+|calendar_long_name|Use the long subject name.|`True`
+|calendar_show_cancelled_lessons|Show cancelled lessons.|`False`
 |calendar_description|Pick what will be shown in events description.|`JSON`
 
 ### Backend
 |Option|Description|Default
 |:-----|:----------|-------
-|keep_loged_in|Keep the client loged in. (Beta)|`False`
-|generate_json|Generate JSON in sensore attributes.|`False`
-|exclude_data|Will be set automatic if user don't have rights to prevent logger from spaming errors.|`None`
-|extended_timetable|Request extendet timetable. Is needet for `filter_description` and `calendar_description(Lesson Info)`|`False`
+|keep_loged_in|Keep the client logged in. (Beta)|`False`
+|generate_json|Generate JSON in sensor attributes.|`False`
+|exclude_data|Will be set automatic if user doesn't have rights to prevent logger from spamming errors.|`None`
+|extended_timetable|Request extended timetable. Is needed for `filter_description` and `calendar_description(Lesson Info)`|`False`
 
 
 
