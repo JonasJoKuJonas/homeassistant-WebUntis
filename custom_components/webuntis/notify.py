@@ -20,27 +20,23 @@ def compare_list(old_list, new_list, blacklist=[]):
 
                 if new_item["code"] != old_item["code"]:
                     if old_item["code"] == "None" and new_item["code"] == "cancelled":
-                        if any(
-                            item["start"] == new_item["start"]
-                            and item["subject_id"] != new_item["subject_id"]
-                            and item["code"] == "irregular"
-                            for item in new_list
-                        ):
-                            new_lesson = next(
+                        matching_item = next(
+                            (
                                 item
                                 for item in new_list
                                 if item["start"] == new_item["start"]
                                 and item["subject_id"] != new_item["subject_id"]
-                                and item["code"] == "None"
-                            )
-                            updated_items.append(
-                                ["lesson change", new_lesson, old_item]
-                            )
-                            break
+                                and item["code"] == "irregular"
+                            ),
+                            None,
+                        )
 
+                        if matching_item is not None:
+                            updated_items.append(
+                                ["lesson change", matching_item, old_item]
+                            )
                         else:
                             updated_items.append(["cancelled", new_item, old_item])
-                            break
                     else:
                         updated_items.append(["code", new_item, old_item])
 
