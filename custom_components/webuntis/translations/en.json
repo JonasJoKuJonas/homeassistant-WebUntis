@@ -85,10 +85,14 @@
         "description": "Notification Settings",
         "data": {
           "notify_entity_id": "Notify Service ID (e.g: notify.discord)",
+          "notify_data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
           "rooms": "Room changed",
           "cancelled": "Lesson is cancelled",
           "lesson change": "Lesson was swapped"
+        },
+        "data_description": {
+          "notify_data": "e.g.:\nnotification_icon: mdi:school-outline"
         }
       }
     }

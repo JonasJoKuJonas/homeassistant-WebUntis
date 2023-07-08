@@ -85,10 +85,14 @@
         "description": "Einstellungen zu Benachrichtungen",
         "data": {
           "notify_entity_id": "Notify Service ID (Bsp: notify.discord)",
+          "notify_data": "Plattformspezifische Benachrichtigung daten",
           "code": "Stunden status ändert sich",
           "rooms": "Raum ändert sich",
           "cancelled": "Stunde fällt aus",
           "lesson change": "Eine Stunde wurde ausgetausch"
+        },
+        "data_description": {
+          "notify_data": "z.b.:\nnotification_icon: mdi:school-outline"
         }
       }
     }

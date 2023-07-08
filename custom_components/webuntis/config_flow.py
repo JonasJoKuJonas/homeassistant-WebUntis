@@ -457,6 +457,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     errors = {"base": "unknown_service"}
             else:
                 user_input["notify_entity_id"] = ""
+            if "notify_data" not in user_input:
+                user_input["notify_data"] = {}
             return await self.save(user_input)
 
         schema_options = {
@@ -466,6 +468,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "suggested_value": self.config_entry.options.get("notify_entity_id")
                 },
             ): selector.TextSelector(),
+            vol.Optional(
+                "notify_data",
+                description={
+                    "suggested_value": self.config_entry.options.get("notify_data")
+                },
+            ): selector.ObjectSelector(),
         }
 
         for option in NOTIFY_OPTIONS:

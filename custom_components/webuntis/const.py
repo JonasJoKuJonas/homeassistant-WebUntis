@@ -18,6 +18,7 @@ DEFAULT_OPTIONS = {
     "calendar_show_room_change": False,
     "notify_entity_id": "",
     "notify_options": [],
+    "notify_data": {},
 }
 
 NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson change", "code"]
