@@ -78,15 +78,12 @@ def get_notification(updated_items, notify_list):
         message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
         message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
 
-        if change == "cancelled":
-            message += f"Cancelled: {lesson_old['subjects'][0]['long_name']}"
-
-        elif change == "lesson change":
+        if change == "lesson change":
             message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
 
         elif change == "rooms":
             try:
-                message += f"Change (Room): {lesson_old[0]['rooms']['name']} -> {lesson[0]['rooms']['name']}"
+                message += f"Change (Room): {lesson_old['rooms']['name']} -> {lesson['rooms']['name']}"
             except KeyError:
                 pass
 
