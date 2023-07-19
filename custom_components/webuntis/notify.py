@@ -78,7 +78,9 @@ def get_notification(updated_items, notify_list):
         message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
         message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
 
-        if change == "lesson change":
+        if change == "cancelled":
+            pass
+        elif change == "lesson change":
             message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
 
         elif change == "rooms":
