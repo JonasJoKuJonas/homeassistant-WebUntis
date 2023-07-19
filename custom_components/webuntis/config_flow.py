@@ -16,7 +16,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
 
-from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN
+from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN, NOTIFY_OPTIONS
 from .utils import is_service
 
 _LOGGER = logging.getLogger(__name__)
@@ -231,7 +231,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 OPTIONS_MENU = {
     "filter": "Filter",
     "calendar": "Calendar",
-    # "notify": "Notify",
+    "notify": "Notify",
     "backend": "Backend",
 }
 
@@ -440,20 +440,53 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the notify options."""
         if user_input is not None:
-            if not is_service(self.hass, user_input["notify_entity_id"]):
-                errors = {"base": "unknown_service"}
+            notify_options = [
+                key
+                for key, value in user_input.items()
+                if value and key in NOTIFY_OPTIONS
+            ]
+            user_input = {
+                key: value
+                for key, value in user_input.items()
+                if key not in NOTIFY_OPTIONS
+            }
+            user_input["notify_options"] = notify_options
+
+            if "notify_entity_id" in user_input:
+                if not is_service(self.hass, user_input["notify_entity_id"]):
+                    errors = {"base": "unknown_service"}
             else:
-                return await self.save(user_input)
+                user_input["notify_entity_id"] = ""
+            if "notify_data" not in user_input:
+                user_input["notify_data"] = {}
+            return await self.save(user_input)
+
+        schema_options = {
+            vol.Optional(
+                "notify_entity_id",
+                description={
+                    "suggested_value": self.config_entry.options.get("notify_entity_id")
+                },
+            ): selector.TextSelector(),
+            vol.Optional(
+                "notify_data",
+                description={
+                    "suggested_value": self.config_entry.options.get("notify_data")
+                },
+            ): selector.ObjectSelector(),
+        }
+
+        for option in NOTIFY_OPTIONS:
+            schema_options[
+                vol.Optional(
+                    option,
+                    default=option in self.config_entry.options["notify_options"],
+                )
+            ] = bool
+
         return self.async_show_form(
             step_id="notify",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        "notify_entity_id",
-                        default=self.config_entry.options.get("notify_entity_id"),
-                    ): str
-                }
-            ),
+            data_schema=vol.Schema(schema_options),
             errors=errors,
         )
 

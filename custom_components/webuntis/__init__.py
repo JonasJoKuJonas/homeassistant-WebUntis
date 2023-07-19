@@ -9,7 +9,6 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 import homeassistant.util.dt as dt_util
-import webuntis  # pylint: disable=import-self
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -21,14 +20,17 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
+import webuntis  # pylint: disable=import-self
+
 from .const import (
+    CONFIG_ENTRY_VERSION,
     DAYS_TO_FUTURE,
+    DEFAULT_OPTIONS,
     DOMAIN,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
-    DEFAULT_OPTIONS,
-    CONFIG_ENTRY_VERSION,
 )
+from .notify import *
 from .utils import compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -145,7 +147,9 @@ class WebUntis:
         self.extended_timetable = config.options["extended_timetable"]
 
         self.notify_entity_id = config.options["notify_entity_id"]
-        self.notify = bool(self.notify_entity_id)
+        self.notify_list = config.options["notify_options"]
+        self.notify = bool(self.notify_entity_id) and bool(self.notify_list)
+        self.notify_data = config.options["notify_data"]
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -778,15 +782,10 @@ class WebUntis:
     async def update_notify(self):
         """Update data and notify"""
 
-        # _LOGGER.debug("New " + str(len(self.event_list)))
-        # _LOGGER.debug("Old " + str(len(self.event_list_old)))
-
         updated_items = []
-
         """# DEBUG TEST
         try:
-            self.event_list_old[0]["code"] = "test"
-            self.event_list_old[1]["code"] = "test"
+            self.event_list_old[10]["code"] = "test"
         except IndexError:
             pass"""
 
@@ -794,60 +793,27 @@ class WebUntis:
             self.event_list_old = self.event_list
             return
 
-        for new_item in self.event_list:
-            for old_item in self.event_list_old:
-                if (
-                    new_item["subject_id"] == old_item["subject_id"]
-                    and new_item["start"] == old_item["start"]
-                    and not (
-                        new_item["code"] == "irregular"
-                        and old_item["code"] == "cancelled"
-                    )
-                ):
-                    if new_item["code"] != old_item["code"]:
-                        _LOGGER.info("CODE HAS CHANGED")
-                        updated_items.append(["code", new_item, old_item])
+        blacklist = get_notify_blacklist(self.event_list)
 
-                    try:
-                        if new_item["rooms"] != old_item["rooms"]:
-                            updated_items.append(["rooms", new_item, old_item])
-                    except IndexError:
-                        _LOGGER.info("New " + str(self.event_list))
-                        _LOGGER.info("Old " + str(self.event_list_old))
-                    break
+        updated_items = compare_list(
+            self.event_list_old, self.event_list, blacklist=blacklist
+        )
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
 
             updated_items = compact_list(updated_items, "notify")
 
-            _LOGGER.debug("NEW:" + str(updated_items))
+            _LOGGER.debug("NOTIFICATIONS:" + str(updated_items))
 
-            for change, lesson, lesson_old in updated_items:
-                title = "WebUntis"
-                title += (
-                    " - " + {"code": "Status changed", "rooms": "Room changed"}[change]
-                )
+            notifications = get_notification(updated_items, self.notify_list)
 
-                message = ""
-                try:
-                    message += f"Subject: {lesson['subjects'][0]['long_name']}\n"
-                except IndexError:
-                    pass
-
-                message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
-                message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
-
-                message += (
-                    f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
-                )
-
+            for notification in notifications:
+                if self.notify_data:
+                    notification["data"] = self.notify_data
                 try:
                     await self.async_notify(
-                        self._hass,
-                        service=self.notify_entity_id,
-                        title=title,
-                        message=message,
+                        self._hass, service=self.notify_entity_id, data=notification
                     )
                 except Exception as error:
                     _LOGGER.warning(
@@ -857,15 +823,14 @@ class WebUntis:
                     )
         self.event_list_old = self.event_list
 
-    async def async_notify(self, hass, service, title, message):
+    async def async_notify(self, hass, service, data):
         """Show a notification"""
+        _LOGGER.debug("Send notification(%s): %s", service, data)
+
         domain = service.split(".")[0]
         service = service.split(".")[1]
-        data = {"message": message, "title": title}
-        if not await hass.services.async_call(domain, service, data, blocking=True):
-            _LOGGER.error(
-                "Unable to call service %s.%s due to an error.", domain, service
-            )
+
+        await hass.services.async_call(domain, service, data, blocking=True)
 
 
 class WebUntisEntity(Entity):
