@@ -264,6 +264,30 @@ class WebUntis:
                 self.session.schoolyears
             )
 
+            valid_schoolyear =  await self._hass.async_add_executor_job(
+                self.check_schoolyear
+            )
+
+            if not valid_schoolyear:
+                # Login error, set all properties to unknown.
+                self.is_class = None
+                self.next_class = None
+                self.next_class_json = None
+                self.next_lesson_to_wake_up = None
+                self.calendar_events = []
+                self.next_day_json = None
+
+
+                # Inform user once about failed update if necessary.
+                if not self._last_status_request_failed:
+                    _LOGGER.warning(
+                        "No active schoolyear '%s@%s'",
+                        self.school,
+                        self.username,
+                    )
+                self._last_status_request_failed = True
+                return
+
         except OSError as error:
             _LOGGER.warning(
                 "Request for schoolyears of '%s@%s' failed - OSError: %s",
@@ -380,6 +404,17 @@ class WebUntis:
             await self._hass.async_add_executor_job(self.session.logout)
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
+
+    def check_schoolyear(self):
+        current_date = datetime.now().date()
+
+        for time_range in self.school_year:
+
+            if time_range.start.date() <= current_date <= time_range.end.date():
+                return True
+
+        return False
+
 
     def get_timetable_object(self):
         """return the object to request the timetable"""
