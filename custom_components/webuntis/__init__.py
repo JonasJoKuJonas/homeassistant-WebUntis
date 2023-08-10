@@ -280,7 +280,7 @@ class WebUntis:
 
                 # Inform user once about failed update if necessary.
                 if not self._last_status_request_failed:
-                    _LOGGER.warning(
+                    _LOGGER.info(
                         "No active schoolyear '%s@%s'",
                         self.school,
                         self.username,
