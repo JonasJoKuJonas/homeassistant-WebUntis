@@ -7,6 +7,8 @@ import socket
 from typing import Any
 from urllib.parse import urlparse
 
+from .utils import check_schoolyear
+
 import requests
 import voluptuous as vol
 import webuntis
@@ -15,6 +17,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
+
 
 from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN, NOTIFY_OPTIONS
 from .utils import is_service
@@ -30,7 +33,8 @@ async def validate_input(
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
-    if user_input["timetable_source"] in ["student", "teacher"]:
+
+    if user_input["timetable_source"] in ["student", "teacher"] and isinstance(user_input["timetable_source_id"], str):
         for char in [",", " "]:
             split = user_input["timetable_source_id"].split(char)
             if len(split) == 2:
@@ -106,8 +110,11 @@ async def validate_input(
 
 def test_timetable(session, timetable_source, source):
     """test if timetable is allowed to be fetched"""
-    today = datetime.date.today()
-    session.timetable(start=today, end=today, **{timetable_source: source})
+    day = datetime.date.today()
+    school_years = session.schoolyears()
+    if not check_schoolyear(school_year=school_years):
+        day = school_years[-1].start.date()
+    session.timetable(start=day, end=day, **{timetable_source: source})
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):

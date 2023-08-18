@@ -96,5 +96,28 @@
         }
       }
     }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server Domain.",
+          "invalid_auth": "Ungültige Authentifizierung",
+          "bad_credentials": "Ungültigs Passwort",
+
+          "unknown": "Unerwarteter Fehler"
+        },
+        "step": {
+          "confirm": {
+            "description": "Bitte gebe das neue Passwort ein!",
+            "title": "Das Passwort wurde geändert",
+            "data": {
+              "password": "Passwort"
+            }
+          }
+        }
+      },
+      "title": "Das Passwort wurde geändert"
+    }
   }
 }

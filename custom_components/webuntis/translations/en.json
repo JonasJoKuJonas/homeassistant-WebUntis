@@ -96,5 +96,28 @@
         }
       }
     }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "cannot_connect": "Failed to connect. Please check the host.",
+          "invalid_auth": "Invalid authentication",
+          "bad_credentials": "Invalid password",
+
+          "unknown": "Unexpected error"
+        },
+        "step": {
+          "confirm": {
+            "description": "Please enter the new password!",
+            "title": "Password has been changed",
+            "data": {
+              "password": "Password"
+            }
+          }
+        }
+      },
+      "title": "Password has been changed"
+    }
   }
 }

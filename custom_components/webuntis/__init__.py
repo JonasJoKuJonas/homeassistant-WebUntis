@@ -13,6 +13,7 @@ from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
@@ -31,7 +32,7 @@ from .const import (
     SIGNAL_NAME_PREFIX,
 )
 from .notify import *
-from .utils import compact_list
+from .utils import check_schoolyear, compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -246,6 +247,22 @@ class WebUntis:
                         error,
                     )
                 self._last_status_request_failed = True
+
+                if str(error) == "bad credentials":
+                    ir.async_create_issue(
+                        self._hass,
+                        DOMAIN,
+                        "bad_credentials",
+                        is_fixable=True,
+                        severity=ir.IssueSeverity.ERROR,
+                        translation_key="bad_credentials",
+                        data={
+                            "unique_id": self.unique_id,
+                            "config_data": dict(self._config.data),
+                            "entry_id": self._config.entry_id,
+                        },
+                    )
+
                 return
             except error as error:
                 _LOGGER.error(
@@ -264,8 +281,8 @@ class WebUntis:
                 self.session.schoolyears
             )
 
-            valid_schoolyear =  await self._hass.async_add_executor_job(
-                self.check_schoolyear
+            valid_schoolyear = await self._hass.async_add_executor_job(
+                check_schoolyear, self.school_year
             )
 
             if not valid_schoolyear:
@@ -276,7 +293,6 @@ class WebUntis:
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
                 self.next_day_json = None
-
 
                 # Inform user once about failed update if necessary.
                 if not self._last_status_request_failed:
@@ -404,17 +420,6 @@ class WebUntis:
             await self._hass.async_add_executor_job(self.session.logout)
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
-
-    def check_schoolyear(self):
-        current_date = datetime.now().date()
-
-        for time_range in self.school_year:
-
-            if time_range.start.date() <= current_date <= time_range.end.date():
-                return True
-
-        return False
-
 
     def get_timetable_object(self):
         """return the object to request the timetable"""

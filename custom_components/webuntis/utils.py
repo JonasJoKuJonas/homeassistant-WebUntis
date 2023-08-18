@@ -1,6 +1,9 @@
 """Miscellaneous support functions for webuntis"""
 
 
+from datetime import datetime
+
+
 def is_service(hass, entry):
     """check whether config entry is a service"""
     domain, service = entry.split(".")[0], ".".join(entry.split(".")[1:])
@@ -66,3 +69,14 @@ def compact_list(lst, type=None):
             i += 1
 
     return compacted_list
+
+
+def check_schoolyear(school_year):
+    current_date = datetime.now().date()
+
+    for time_range in school_year:
+
+        if time_range.start.date() <= current_date <= time_range.end.date():
+            return True
+
+    return False
