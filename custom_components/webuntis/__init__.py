@@ -9,10 +9,12 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 import homeassistant.util.dt as dt_util
+from homeassistant.components import persistent_notification
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -62,6 +64,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
+
+    await add_services(hass)
 
     return True
 
@@ -922,3 +926,44 @@ class WebUntisEntity(Entity):
     def _update_callback(self) -> None:
         """Triggers update of properties after receiving signal from server."""
         self.async_schedule_update_ha_state(force_refresh=True)
+
+
+async def add_services(hass: HomeAssistant):
+    """adds report service"""
+
+    async def async_handle_get_timetable(call):
+        """Handle the service call"""
+
+        device = call.data.get("device")
+        import homeassistant.loader as loader
+
+        device_registry = hass.data
+        print(device_registry)
+
+        print(hass.data[DOMAIN])
+
+        start = call.data.get("start")
+        end = call.data.get("end")
+
+        print(device, start, end)
+
+        if False:
+            message = (
+                "Either `send_nofification` or `create_file` should be set to `true` "
+                "in service parameters."
+            )
+            await async_notification(hass, "Watchman error", message, error=True)
+
+    hass.services.async_register(DOMAIN, "get_timetable", async_handle_get_timetable)
+
+
+async def async_notification(hass, title, message, error=False, n_id="watchman"):
+    """Show a persistent notification"""
+    persistent_notification.async_create(
+        hass,
+        message,
+        title=title,
+        notification_id=n_id,
+    )
+    if error:
+        raise HomeAssistantError(message.replace("`", ""))
