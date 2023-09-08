@@ -119,5 +119,25 @@
       },
       "title": "Das Passwort wurde geändert"
     }
+  },
+  "services": {
+    "get_timetable": {
+      "description": "Stundenplan in einem bestimmten Zeitraum abrufen.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Eine Instanz auswählen"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start des Zeitraums"
+        },
+        "end": {
+          "name": "Ende",
+          "description": "Ende des Zeitraums"
+        }
+      },
+      "name": "Stundenplan abrufen"
+    }
   }
 }
