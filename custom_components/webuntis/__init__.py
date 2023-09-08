@@ -31,7 +31,7 @@ from .const import (
 )
 from .notify import *
 from .services import async_setup_services
-from .utils import check_schoolyear, compact_list
+from .utils import compact_list, get_schoolyear
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -283,7 +283,7 @@ class WebUntis:
             )
 
             valid_schoolyear = await self._hass.async_add_executor_job(
-                check_schoolyear, self.school_year
+                get_schoolyear, self.school_year
             )
 
             if not valid_schoolyear:
@@ -447,10 +447,11 @@ class WebUntis:
         """Get the timetable for the given time period"""
         timetable_object = self.get_timetable_object()
 
-        school_year_end = self.school_year.current.end.date()
+        start_schoolyear = get_schoolyear(self.school_year, start.date())
 
-        # set end to school year end if out of school year
-        end = min(end, school_year_end)
+        if start_schoolyear:
+            if start_schoolyear.end.date() < end.date():
+                end = start_schoolyear.end.date()
 
         if self.extended_timetable:
             return self.session.timetable_extended(
