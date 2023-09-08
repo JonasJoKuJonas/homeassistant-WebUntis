@@ -3,18 +3,14 @@ from __future__ import annotations
 
 import json
 import logging
-from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
 
-import homeassistant.util.dt as dt_util
-from homeassistant.components import persistent_notification
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -34,6 +30,7 @@ from .const import (
     SIGNAL_NAME_PREFIX,
 )
 from .notify import *
+from .services import async_setup_services
 from .utils import check_schoolyear, compact_list
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
@@ -65,7 +62,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
 
-    await add_services(hass)
+    await async_setup_services(hass)
 
     return True
 
@@ -625,6 +622,16 @@ class WebUntis:
 
         return event_list
 
+    def _get_events_in_timerange(self, start, end):
+        table = self.get_timetable(start=start, end=end)
+
+        events = []
+
+        for lesson in table:
+            events.append(self.get_lesson_json(lesson, force=True, output_str=False))
+
+        return events
+
     def _today(self):
         today = date.today()
 
@@ -829,11 +836,6 @@ class WebUntis:
         """Update data and notify"""
 
         updated_items = []
-        """# DEBUG TEST
-        try:
-            self.event_list_old[10]["code"] = "test"
-        except IndexError:
-            pass"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -850,7 +852,7 @@ class WebUntis:
 
             updated_items = compact_list(updated_items, "notify")
 
-            _LOGGER.debug("NOTIFICATIONS:" + str(updated_items))
+            _LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
 
             notifications = get_notification(updated_items, self.notify_list)
 
@@ -926,44 +928,3 @@ class WebUntisEntity(Entity):
     def _update_callback(self) -> None:
         """Triggers update of properties after receiving signal from server."""
         self.async_schedule_update_ha_state(force_refresh=True)
-
-
-async def add_services(hass: HomeAssistant):
-    """adds report service"""
-
-    async def async_handle_get_timetable(call):
-        """Handle the service call"""
-
-        device = call.data.get("device")
-        import homeassistant.loader as loader
-
-        device_registry = hass.data
-        print(device_registry)
-
-        print(hass.data[DOMAIN])
-
-        start = call.data.get("start")
-        end = call.data.get("end")
-
-        print(device, start, end)
-
-        if False:
-            message = (
-                "Either `send_nofification` or `create_file` should be set to `true` "
-                "in service parameters."
-            )
-            await async_notification(hass, "Watchman error", message, error=True)
-
-    hass.services.async_register(DOMAIN, "get_timetable", async_handle_get_timetable)
-
-
-async def async_notification(hass, title, message, error=False, n_id="watchman"):
-    """Show a persistent notification"""
-    persistent_notification.async_create(
-        hass,
-        message,
-        title=title,
-        notification_id=n_id,
-    )
-    if error:
-        raise HomeAssistantError(message.replace("`", ""))

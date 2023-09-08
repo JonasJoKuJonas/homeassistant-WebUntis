@@ -4,7 +4,7 @@
 get_timetable:
   description: Get WebUntis timetable
   fields:
-    device:
+    device_id:
       required: true
       selector:
         device:
