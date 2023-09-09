@@ -71,12 +71,9 @@ def compact_list(lst, type=None):
     return compacted_list
 
 
-def check_schoolyear(school_year):
-    current_date = datetime.now().date()
-
+def get_schoolyear(school_year, date=datetime.now().date()):
     for time_range in school_year:
+        if time_range.start.date() <= date <= time_range.end.date():
+            return time_range
 
-        if time_range.start.date() <= current_date <= time_range.end.date():
-            return True
-
-    return False
+    return None

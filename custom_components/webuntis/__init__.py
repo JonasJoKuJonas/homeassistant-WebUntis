@@ -3,12 +3,10 @@ from __future__ import annotations
 
 import json
 import logging
-from asyncio.log import logger
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
 
-import homeassistant.util.dt as dt_util
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -32,7 +30,8 @@ from .const import (
     SIGNAL_NAME_PREFIX,
 )
 from .notify import *
-from .utils import check_schoolyear, compact_list
+from .services import async_setup_services
+from .utils import compact_list, get_schoolyear
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -62,6 +61,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
+
+    await async_setup_services(hass)
 
     return True
 
@@ -282,7 +283,7 @@ class WebUntis:
             )
 
             valid_schoolyear = await self._hass.async_add_executor_job(
-                check_schoolyear, self.school_year
+                get_schoolyear, self.school_year
             )
 
             if not valid_schoolyear:
@@ -446,10 +447,11 @@ class WebUntis:
         """Get the timetable for the given time period"""
         timetable_object = self.get_timetable_object()
 
-        school_year_end = self.school_year.current.end.date()
+        start_schoolyear = get_schoolyear(self.school_year, start.date())
 
-        # set end to school year end if out of school year
-        end = min(end, school_year_end)
+        if start_schoolyear:
+            if start_schoolyear.end.date() < end.date():
+                end = start_schoolyear.end.date()
 
         if self.extended_timetable:
             return self.session.timetable_extended(
@@ -620,6 +622,16 @@ class WebUntis:
                     )
 
         return event_list
+
+    def _get_events_in_timerange(self, start, end):
+        table = self.get_timetable(start=start, end=end)
+
+        events = []
+
+        for lesson in table:
+            events.append(self.get_lesson_json(lesson, force=True, output_str=False))
+
+        return events
 
     def _today(self):
         today = date.today()
@@ -825,11 +837,6 @@ class WebUntis:
         """Update data and notify"""
 
         updated_items = []
-        """# DEBUG TEST
-        try:
-            self.event_list_old[10]["code"] = "test"
-        except IndexError:
-            pass"""
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
@@ -846,7 +853,7 @@ class WebUntis:
 
             updated_items = compact_list(updated_items, "notify")
 
-            _LOGGER.debug("NOTIFICATIONS:" + str(updated_items))
+            _LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
 
             notifications = get_notification(updated_items, self.notify_list)
 

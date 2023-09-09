@@ -1,0 +1,20 @@
+# Example services.yaml entry
+
+# Service ID
+get_timetable:
+  description: Get WebUntis timetable
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          filter:
+            - integration: webuntis
+    start:
+      required: true
+      selector:
+        date:
+    end:
+      required: true
+      selector:
+        date:

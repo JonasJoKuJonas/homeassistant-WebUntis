@@ -7,7 +7,7 @@ import socket
 from typing import Any
 from urllib.parse import urlparse
 
-from .utils import check_schoolyear
+from .utils import get_schoolyear
 
 import requests
 import voluptuous as vol
@@ -33,8 +33,9 @@ async def validate_input(
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
-
-    if user_input["timetable_source"] in ["student", "teacher"] and isinstance(user_input["timetable_source_id"], str):
+    if user_input["timetable_source"] in ["student", "teacher"] and isinstance(
+        user_input["timetable_source_id"], str
+    ):
         for char in [",", " "]:
             split = user_input["timetable_source_id"].split(char)
             if len(split) == 2:
@@ -112,7 +113,7 @@ def test_timetable(session, timetable_source, source):
     """test if timetable is allowed to be fetched"""
     day = datetime.date.today()
     school_years = session.schoolyears()
-    if not check_schoolyear(school_year=school_years):
+    if not get_schoolyear(school_year=school_years):
         day = school_years[-1].start.date()
     session.timetable(start=day, end=day, **{timetable_source: source})
 

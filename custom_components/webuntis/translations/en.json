@@ -119,5 +119,25 @@
       },
       "title": "Password has been changed"
     }
+  },
+  "services": {
+    "get_timetable": {
+      "description": "Get the timetable in a given timerange.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select a instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start of timerange"
+        },
+        "end": {
+          "name": "End",
+          "description": "End of timerange"
+        }
+      },
+      "name": "Get Timetable"
+    }
   }
 }
