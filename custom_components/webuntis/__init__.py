@@ -210,70 +210,10 @@ class WebUntis:
     async def _async_status_request(self) -> None:
         """Request status and update properties."""
 
-        if self._loged_in:
-            # Check if there is a session id.
-            if "jsessionid" not in self.session.config:
-                _LOGGER.debug("No session id found")
-                self._loged_in = False
-            else:
-                # Check if session id is still valid.
-                try:
-                    await self._hass.async_add_executor_job(self.session.schoolyears)
-                except webuntis.errors.NotLoggedInError:
-                    _LOGGER.debug("Session invalid")
-                    self._loged_in = False
+        suggess = await self._hass.async_add_executor_job(self.webuntis_login)
 
-        if not self._loged_in:
-            # _LOGGER.debug("logging in")
-
-            try:
-                await self._hass.async_add_executor_job(self.session.login)
-                # _LOGGER.debug("Login successful")
-                self._loged_in = True
-            except OSError as error:
-                # Login error, set all properties to unknown.
-                self.is_class = None
-                self.next_class = None
-                self.next_class_json = None
-                self.next_lesson_to_wake_up = None
-                self.calendar_events = []
-                self.next_day_json = None
-
-                # Inform user once about failed update if necessary.
-                if not self._last_status_request_failed:
-                    _LOGGER.warning(
-                        "Login to WebUntis '%s@%s' failed - OSError: %s",
-                        self.school,
-                        self.username,
-                        error,
-                    )
-                self._last_status_request_failed = True
-
-                if str(error) == "bad credentials":
-                    ir.async_create_issue(
-                        self._hass,
-                        DOMAIN,
-                        "bad_credentials",
-                        is_fixable=True,
-                        severity=ir.IssueSeverity.ERROR,
-                        translation_key="bad_credentials",
-                        data={
-                            "unique_id": self.unique_id,
-                            "config_data": dict(self._config.data),
-                            "entry_id": self._config.entry_id,
-                        },
-                    )
-
-                return
-            except error as error:
-                _LOGGER.error(
-                    "Login to WebUntis '%s@%s' failed - ERROR: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
-                self._last_status_request_failed = True
-                return
+        if not suggess:
+            return
 
         # _LOGGER.debug("updating data")
 
@@ -422,6 +362,74 @@ class WebUntis:
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
+    def webuntis_login(self):
+        if self._loged_in:
+            # Check if there is a session id.
+            if "jsessionid" not in self.session.config:
+                _LOGGER.debug("No session id found")
+                self._loged_in = False
+            else:
+                # Check if session id is still valid.
+                try:
+                    self.session.schoolyears()
+                    return True
+                except webuntis.errors.NotLoggedInError:
+                    _LOGGER.debug("Session invalid")
+                    self._loged_in = False
+
+        if not self._loged_in:
+            # _LOGGER.debug("logging in")
+
+            try:
+                self.session.login()
+                # _LOGGER.debug("Login successful")
+                self._loged_in = True
+                return True
+            except OSError as error:
+                # Login error, set all properties to unknown.
+                self.is_class = None
+                self.next_class = None
+                self.next_class_json = None
+                self.next_lesson_to_wake_up = None
+                self.calendar_events = []
+                self.next_day_json = None
+
+                # Inform user once about failed update if necessary.
+                if not self._last_status_request_failed:
+                    _LOGGER.warning(
+                        "Login to WebUntis '%s@%s' failed - OSError: %s",
+                        self.school,
+                        self.username,
+                        error,
+                    )
+                self._last_status_request_failed = True
+
+                if str(error) == "bad credentials":
+                    ir.async_create_issue(
+                        self._hass,
+                        DOMAIN,
+                        "bad_credentials",
+                        is_fixable=True,
+                        severity=ir.IssueSeverity.ERROR,
+                        translation_key="bad_credentials",
+                        data={
+                            "unique_id": self.unique_id,
+                            "config_data": dict(self._config.data),
+                            "entry_id": self._config.entry_id,
+                        },
+                    )
+
+                return
+            except Exception as error:
+                _LOGGER.error(
+                    "Login to WebUntis '%s@%s' failed - ERROR: %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+                self._last_status_request_failed = True
+                return
+
     def get_timetable_object(self):
         """return the object to request the timetable"""
         if self.timetable_source == "student":
@@ -447,7 +455,7 @@ class WebUntis:
         """Get the timetable for the given time period"""
         timetable_object = self.get_timetable_object()
 
-        start_schoolyear = get_schoolyear(self.school_year, start.date())
+        start_schoolyear = get_schoolyear(self.school_year, start)
 
         if start_schoolyear:
             if start_schoolyear.end.date() < end.date():
@@ -624,7 +632,12 @@ class WebUntis:
         return event_list
 
     def _get_events_in_timerange(self, start, end):
-        table = self.get_timetable(start=start, end=end)
+        suggess = self.webuntis_login
+
+        if not suggess:
+            return {"error": True}
+
+        table = self.get_timetable(start=start.date(), end=end)
 
         events = []
 
