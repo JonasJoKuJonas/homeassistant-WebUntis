@@ -639,20 +639,44 @@ class WebUntis:
 
         return event_list
 
-    def _get_events_in_timerange(self, start, end):
-        suggess = self.webuntis_login
-
-        if not suggess:
-            return {"error": True}
-
+    def _get_events_in_timerange(self, start, end, filter_on, show_cancelled=True):
         table = self.get_timetable(start=start.date(), end=end)
 
         events = []
 
         for lesson in table:
-            events.append(self.get_lesson_json(lesson, force=True, output_str=False))
+            if (not filter_on or self.check_lesson(lesson, show_cancelled)) and (
+                show_cancelled or lesson.code != "cancelled"
+            ):
+                events.append(
+                    self.get_lesson_json(lesson, force=True, output_str=False)
+                )
 
         return events
+
+    def _count_lessons(self, start, end, filter_on, count_cancelled=False):
+        table = self.get_timetable(start=start.date(), end=end)
+
+        result = {}
+
+        for lesson in table:
+            if (
+                lesson.subjects
+                and (not filter_on or self.check_lesson(lesson, count_cancelled))
+                and (count_cancelled or lesson.code != "cancelled")
+            ):
+                name = lesson.subjects[0].long_name
+
+                if name in result:
+                    result[name] += 1
+                else:
+                    result[name] = 1
+
+        sorted_result = dict(
+            sorted(result.items(), key=lambda item: item[1], reverse=True)
+        )
+
+        return sorted_result
 
     def _today(self):
         today = date.today()
