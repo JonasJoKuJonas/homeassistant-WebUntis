@@ -137,7 +137,7 @@ class WebUntis:
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
 
-        self.keep_loged_in = config.options["keep_loged_in"]
+        self.keep_logged_in = config.options["keep_loged_in"]
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
@@ -433,7 +433,7 @@ class WebUntis:
 
     def webuntis_logout(self):
         self.updating -= 1
-        if not self.keep_loged_in and self.updating == 0:
+        if not self.keep_logged_in and self.updating == 0:
             self.session.logout()
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
