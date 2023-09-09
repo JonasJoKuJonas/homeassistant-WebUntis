@@ -4,15 +4,15 @@
       "already_configured": "Der Sensor ist bereits konfiguriert."
     },
     "error": {
-      "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server Domain.",
+      "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
       "invalid_auth": "Ungültige Authentifizierung",
-      "bad_credentials": "Ungültiger Benutzername und / oder Passwort",
-      "school_not_found": "Ungültiger Schulname/-id",
-      "name_split_error": "Ungültiger Name. Versuche \"vor_name, nach_name\".",
+      "bad_credentials": "Ungültiger Benutzername und/oder Passwort",
+      "school_not_found": "Ungültiger Schulname/-ID",
+      "name_split_error": "Ungültiger Name. Versuche \"Vorname, Nachname\".",
       "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
-      "class_not_found": "Klasse nicht gefunden. Überprüfen Sie den Klasse oder wählen Sie eine andere Quelle.",
-      "no_rights_for_timetable": "Keine rechte für Stundenplan.",
+      "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
+      "no_rights_for_timetable": "Keine Rechte für den Stundenplan.",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
@@ -22,37 +22,37 @@
           "school": "Schule",
           "username": "Benutzername",
           "password": "Passwort",
-          "timetable_source": "Stundenplan Quelle",
-          "timetable_source_id": "Ganzer Name/ Klasse/ Fach/ Raum"
+          "timetable_source": "Stundenplan-Quelle",
+          "timetable_source_id": "Voller Name/Klasse/Fach/Raum"
         }
       }
     }
   },
   "options": {
     "error": {
-      "extended_timetable": "Für die Option \"Fächer Filter - Beschreibung\" und \"Calender Beschreibung\" (Lesson Info) wird \"Erweiterte Stundenplan anfordern\" benötigt",
-      "unknown_service": "Service ID nicht gefunden.",
+      "extended_timetable": "Für die Optionen \"Fächer Filter - Beschreibung\" und \"Kalender-Beschreibung\" (Lesson Info) wird \"Erweiterten Stundenplan anfordern\" benötigt",
+      "unknown_service": "Service-ID nicht gefunden.",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
       "filter": {
-        "title": "Filter Einstellungen",
-        "description": "Einstellungen zur herausfiltern von unerwünschten Fächern.",
+        "title": "Filter-Einstellungen",
+        "description": "Einstellungen zum Herausfiltern unerwünschter Fächer.",
         "data": {
           "filter_mode": "Fächer Filter",
           "filter_subjects": "Fächer Filter - Fächer",
-          "filter_description": "Fächer Filtern - Beschreibung"
+          "filter_description": "Fächer Filter- Beschreibung"
         },
         "data_description": {
-          "filter_description": "Verstecke Stunden die folgende Ausdrücke  in der Beschreibung beinhalten. (Kommagetrennte Liste)"
+          "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste)"
         }
       },
       "calendar": {
-        "title": "Kalender Einstellungen",
+        "title": "Kalender-Einstellungen",
         "description": "Einstellungen zur Kalender Darstellung.",
         "data": {
-          "calendar_long_name": "Kalender - langer Name",
-          "calendar_show_cancelled_lessons": "Kalender - ausfallende Stunden",
+          "calendar_long_name": "Kalender - Langer Name",
+          "calendar_show_cancelled_lessons": "Kalender - Ausfallende Stunden",
           "calendar_description": "Kalender - Beschreibung",
           "calendar_room": "Kalender - Ort",
           "calendar_show_room_change": "Kalender - Zimmerwechsel"
@@ -61,38 +61,38 @@
           "calendar_long_name": "Verwende den langen Namen der Stunden im Kalender.",
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
           "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
-          "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wirt.",
+          "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
           "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an."
         }
       },
       "backend": {
-        "title": "Server Einstellungen",
-        "description": "Einstellungen zur Verbindung und der Datenverarbeitung.",
+        "title": "Server-Einstellungen",
+        "description": "Einstellungen zur Verbindung und Datenverarbeitung.",
         "data": {
           "keep_loged_in": "Eingeloggt bleiben",
           "generate_json": "JSON generieren",
           "exclude_data": "Daten von request ausschließen",
-          "extended_timetable": "Erweiterte Stundenplan anfordern"
+          "extended_timetable": "Erweiterten Stundenplan anfordern"
         },
         "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
-          "generate_json": "Generiert JSON in Sensor Attribute - nur aktivieren wenn es benötigt wird.",
-          "extended_timetable": "Fordere erweiterte Stundenplan an. (Wird für Fächer Filter - Beschreibung benötigt)"
+          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
+          "extended_timetable": "Fordere erweiterten Stundenplan an. (Wird für Fächer Filter - Beschreibung benötigt)"
         }
       },
       "notify": {
         "title": "Notify Einstellungen",
-        "description": "Einstellungen zu Benachrichtungen",
+        "description": "Einstellungen für Benachrichtigungen",
         "data": {
-          "notify_entity_id": "Notify Service ID (Bsp: notify.discord)",
-          "notify_data": "Plattformspezifische Benachrichtigung daten",
-          "code": "Stunden status ändert sich",
+          "notify_entity_id": "Notify-Service-ID (Bsp: notify.discord)",
+          "notify_data": "Plattformspezifische Benachrichtigungsdaten",
+          "code": "Stunden-Status ändert sich",
           "rooms": "Raum ändert sich",
           "cancelled": "Stunde fällt aus",
-          "lesson change": "Eine Stunde wurde ausgetausch"
+          "lesson change": "Eine Stunde wurde ausgetauscht"
         },
         "data_description": {
-          "notify_data": "z.b.:\nnotification_icon: mdi:school-outline"
+          "notify_data": "z. B.:\n Benachrichtigungssymbol: mdi:school-outline"
         }
       }
     }
@@ -101,15 +101,15 @@
     "bad_credentials": {
       "fix_flow": {
         "error": {
-          "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server Domain.",
+          "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
           "invalid_auth": "Ungültige Authentifizierung",
-          "bad_credentials": "Ungültigs Passwort",
+          "bad_credentials": "Ungültiges Passwort",
 
           "unknown": "Unerwarteter Fehler"
         },
         "step": {
           "confirm": {
-            "description": "Bitte gebe das neue Passwort ein!",
+            "description": "Bitte gib das neue Passwort ein!",
             "title": "Das Passwort wurde geändert",
             "data": {
               "password": "Passwort"

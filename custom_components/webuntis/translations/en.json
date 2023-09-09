@@ -6,12 +6,12 @@
     "error": {
       "cannot_connect": "Failed to connect. Please check the host.",
       "invalid_auth": "Invalid authentication",
-      "bad_credentials": "Invalid user name and/or password",
+      "bad_credentials": "Invalid username and/or password",
       "school_not_found": "Invalid school name/id",
       "name_split_error": "Invalid name. Try \"first_name, last_name\".",
-      "student_not_found": "Student not found. Check the name or pick other source.",
-      "teacher_not_found": "Teacher not found. Check the name or pick other source.",
-      "class_not_found": "Class not found. Check the class or pick other source.",
+      "student_not_found": "Student not found. Check the name or choose another source.",
+      "teacher_not_found": "Teacher not found. Check the name or choose another source.",
+      "class_not_found": "Class not found. Check the class or choose another source.",
       "no_rights_for_timetable": "No rights for timetable.",
 
       "unknown": "Unexpected error"
@@ -24,7 +24,7 @@
           "username": "Username",
           "password": "Password",
           "timetable_source": "Timetable source",
-          "timetable_source_id": "Full name/ Class/ Subject/ Room"
+          "timetable_source_id": "Full name/Class/Subject/Room"
         }
       }
     }
@@ -42,7 +42,7 @@
         "data": {
           "filter_mode": "Filter mode",
           "filter_subjects": "Filter mode - subjects",
-          "filter_description": "Filter Mode - Description"
+          "filter_description": "Filter mode - Description"
         },
         "data_description": {
           "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list)"
@@ -56,13 +56,13 @@
           "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
           "calendar_description": "Calendar - description",
           "calendar_room": "Calendar - Location",
-          "calendar_show_room_change": "Calender - Room change"
+          "calendar_show_room_change": "Calendar - Room change"
         },
         "data_description": {
           "calendar_long_name": "Use the long name of the hours in the calendar.",
           "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
           "calendar_description": "Determine what should be in the description of a calendar event.",
-          "calendar_room": "Specify what to display location.",
+          "calendar_room": "Specify what to display for location.",
           "calendar_show_room_change": "Show room changes in the calendar."
         }
       },
@@ -84,7 +84,7 @@
         "title": "Notify Settings",
         "description": "Notification Settings",
         "data": {
-          "notify_entity_id": "Notify Service ID (e.g: notify.discord)",
+          "notify_entity_id": "Notify Service ID (e.g., notify.discord)",
           "notify_data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
           "rooms": "Room changed",
@@ -92,7 +92,7 @@
           "lesson change": "Lesson was swapped"
         },
         "data_description": {
-          "notify_data": "e.g.:\nnotification_icon: mdi:school-outline"
+          "notify_data": "e.g.,\nnotification_icon: mdi:school-outline"
         }
       }
     }
@@ -122,53 +122,53 @@
   },
   "services": {
     "get_timetable": {
-      "description": "Get the timetable in a given timerange.",
+      "description": "Get the timetable in a given time range.",
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "Select a instance"
+          "description": "Select an instance"
         },
         "start": {
           "name": "Start",
-          "description": "Start of timerange"
+          "description": "Start of time range"
         },
         "end": {
           "name": "End",
-          "description": "End of timerange"
+          "description": "End of time range"
         },
         "apply_filter": {
           "name": "Activate Filter",
           "description": "Applies the filter from the settings to the results"
         },
         "show_cancelled": {
-          "name": "Show Canceled lessons",
-          "description": "Display canceled lessons in the result"
+          "name": "Show Cancelled lessons",
+          "description": "Display cancelled lessons in the result"
         }
       },
       "name": "Get Timetable"
     },
     "count_lessons": {
-      "description": "Count lessons within timerange.",
+      "description": "Count lessons within a time range.",
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "Select a instance"
+          "description": "Select an instance"
         },
         "start": {
           "name": "Start",
-          "description": "Start of timerange"
+          "description": "Start of time range"
         },
         "end": {
           "name": "End",
-          "description": "End of timerange"
+          "description": "End of time range"
         },
         "apply_filter": {
           "name": "Activate Filter",
           "description": "Apply the filter from the settings to the results"
         },
         "count_cancelled": {
-          "name": "Count Canceled lessons",
-          "description": "Count canceled lessons"
+          "name": "Count Cancelled lessons",
+          "description": "Count cancelled lessons"
         }
       },
       "name": "Count Hours"
