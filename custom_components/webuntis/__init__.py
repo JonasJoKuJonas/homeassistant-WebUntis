@@ -382,7 +382,7 @@ class WebUntis:
 
             try:
                 self.session.login()
-                _LOGGER.debug("Login successful")
+                # _LOGGER.debug("Login successful")
                 self._loged_in = True
                 self.updating += 1
                 return True
@@ -435,7 +435,7 @@ class WebUntis:
         self.updating -= 1
         if not self.keep_loged_in and self.updating == 0:
             self.session.logout()
-            _LOGGER.debug("Logout successful")
+            # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
     def get_timetable_object(self):
