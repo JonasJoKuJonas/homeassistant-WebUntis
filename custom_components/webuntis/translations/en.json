@@ -135,9 +135,43 @@
         "end": {
           "name": "End",
           "description": "End of timerange"
+        },
+        "apply_filter": {
+          "name": "Activate Filter",
+          "description": "Applies the filter from the settings to the results"
+        },
+        "show_cancelled": {
+          "name": "Show Canceled lessons",
+          "description": "Display canceled lessons in the result"
         }
       },
       "name": "Get Timetable"
+    },
+    "count_lessons": {
+      "description": "Count lessons within timerange.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select a instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start of timerange"
+        },
+        "end": {
+          "name": "End",
+          "description": "End of timerange"
+        },
+        "apply_filter": {
+          "name": "Activate Filter",
+          "description": "Apply the filter from the settings to the results"
+        },
+        "count_cancelled": {
+          "name": "Count Canceled lessons",
+          "description": "Count canceled lessons"
+        }
+      },
+      "name": "Count Hours"
     }
   }
 }

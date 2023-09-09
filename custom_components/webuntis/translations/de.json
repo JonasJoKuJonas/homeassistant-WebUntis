@@ -135,9 +135,43 @@
         "end": {
           "name": "Ende",
           "description": "Ende des Zeitraums"
+        },
+        "apply_filter": {
+          "name": "Filter aktivieren",
+          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an"
+        },
+        "show_cancelled": {
+          "name": "Zeige ausgefallene Stunden",
+          "description": "Zeige ausgefallene Stunden im Ergebnis"
         }
       },
       "name": "Stundenplan abrufen"
+    },
+    "count_lessons": {
+      "description": "Stunden in einem Zeitraum zählen.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Eine Instanz auswählen"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start des Zeitraums"
+        },
+        "end": {
+          "name": "Ende",
+          "description": "Ende des Zeitraums"
+        },
+        "apply_filter": {
+          "name": "Filter aktivieren",
+          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an"
+        },
+        "count_cancelled": {
+          "name": "Zähle ausgefallene Stunden",
+          "description": "Zähle ausgefallene Stunden"
+        }
+      },
+      "name": "Stunden zählen"
     }
   }
 }
