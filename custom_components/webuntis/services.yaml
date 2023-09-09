@@ -1,6 +1,3 @@
-# Example services.yaml entry
-
-# Service ID
 get_timetable:
   description: Get WebUntis timetable
   fields:
@@ -18,3 +15,41 @@ get_timetable:
       required: true
       selector:
         date:
+    apply_filter:
+      required: true
+      default: true
+      selector:
+        boolean:
+    show_cancelled:
+      required: true
+      default: true
+      selector:
+        boolean:
+
+count_lessons:
+  description: Get WebUntis timetable
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          filter:
+            - integration: webuntis
+    start:
+      required: true
+      selector:
+        date:
+    end:
+      required: true
+      selector:
+        date:
+    apply_filter:
+      required: true
+      default: true
+      selector:
+        boolean:
+    count_cancelled:
+      required: true
+      default: false
+      selector:
+        boolean:

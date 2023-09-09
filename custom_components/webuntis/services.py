@@ -41,19 +41,38 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
         await hass.async_add_executor_job(webuntis_object.webuntis_login)
 
-        timetable = await hass.async_add_executor_job(
-            webuntis_object._get_events_in_timerange, start_date, end_date
-        )
+        if service_call.service == "get_timetable":
+            result = await hass.async_add_executor_job(
+                webuntis_object._get_events_in_timerange,
+                start_date,
+                end_date,
+                data["apply_filter"],
+                data["show_cancelled"],
+            )
+            result = {index: value for index, value in enumerate(result)}
+
+        elif service_call.service == "count_lessons":
+            result = await hass.async_add_executor_job(
+                webuntis_object._count_lessons,
+                start_date,
+                end_date,
+                data["apply_filter"],
+                data["count_cancelled"],
+            )
 
         await hass.async_add_executor_job(webuntis_object.webuntis_logout)
 
-        timetable_dict = {index: value for index, value in enumerate(timetable)}
-
-        return timetable_dict
+        return result
 
     hass.services.async_register(
         DOMAIN,
         "get_timetable",
+        async_call_webuntis_service,
+        supports_response=SupportsResponse.ONLY,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        "count_lessons",
         async_call_webuntis_service,
         supports_response=SupportsResponse.ONLY,
     )
