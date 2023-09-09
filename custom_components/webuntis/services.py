@@ -39,9 +39,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         if not get_schoolyear(webuntis_object.school_year, date=start_date.date()):
             raise HomeAssistantError(f"Start date is not in any schoolyear")
 
+        await hass.async_add_executor_job(webuntis_object.webuntis_login)
+
         timetable = await hass.async_add_executor_job(
             webuntis_object._get_events_in_timerange, start_date, end_date
         )
+
+        await hass.async_add_executor_job(webuntis_object.webuntis_logout)
 
         timetable_dict = {index: value for index, value in enumerate(timetable)}
 

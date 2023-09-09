@@ -163,6 +163,7 @@ class WebUntis:
         )
         self._loged_in = False
         self._last_status_request_failed = False
+        self.updating = 0
 
         # Data provided by 3rd party library
         self.school_year = None
@@ -243,6 +244,7 @@ class WebUntis:
                         self.username,
                     )
                 self._last_status_request_failed = True
+                await self._hass.async_add_executor_job(self.webuntis_logout)
                 return
 
         except OSError as error:
@@ -357,10 +359,7 @@ class WebUntis:
                     error,
                 )
 
-        if not self.keep_loged_in:
-            await self._hass.async_add_executor_job(self.session.logout)
-            # _LOGGER.debug("Logout successful")
-            self._loged_in = False
+        await self._hass.async_add_executor_job(self.webuntis_logout)
 
     def webuntis_login(self):
         if self._loged_in:
@@ -372,6 +371,7 @@ class WebUntis:
                 # Check if session id is still valid.
                 try:
                     self.session.schoolyears()
+                    self.updating += 1
                     return True
                 except webuntis.errors.NotLoggedInError:
                     _LOGGER.debug("Session invalid")
@@ -382,8 +382,9 @@ class WebUntis:
 
             try:
                 self.session.login()
-                # _LOGGER.debug("Login successful")
+                _LOGGER.debug("Login successful")
                 self._loged_in = True
+                self.updating += 1
                 return True
             except OSError as error:
                 # Login error, set all properties to unknown.
@@ -429,6 +430,13 @@ class WebUntis:
                 )
                 self._last_status_request_failed = True
                 return
+
+    def webuntis_logout(self):
+        self.updating -= 1
+        if not self.keep_loged_in and self.updating == 0:
+            self.session.logout()
+            _LOGGER.debug("Logout successful")
+            self._loged_in = False
 
     def get_timetable_object(self):
         """return the object to request the timetable"""
