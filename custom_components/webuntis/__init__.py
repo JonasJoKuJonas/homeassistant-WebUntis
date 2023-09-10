@@ -639,7 +639,9 @@ class WebUntis:
 
         return event_list
 
-    def _get_events_in_timerange(self, start, end, filter_on, show_cancelled=True):
+    def _get_events_in_timerange(
+        self, start, end, filter_on, show_cancelled=True, compact_result=True
+    ):
         table = self.get_timetable(start=start.date(), end=end)
 
         events = []
@@ -651,6 +653,11 @@ class WebUntis:
                 events.append(
                     self.get_lesson_json(lesson, force=True, output_str=False)
                 )
+
+        events = sorted(events, key=lambda x: x["start"])
+
+        if compact_result:
+            events = compact_list(events, type="dict")
 
         return events
 

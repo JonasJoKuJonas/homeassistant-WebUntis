@@ -143,6 +143,10 @@
         "show_cancelled": {
           "name": "Show Cancelled lessons",
           "description": "Display cancelled lessons in the result"
+        },
+        "compact_result": {
+          "name": "Simplify Results",
+          "description": "Combine double lessons in the result"
         }
       },
       "name": "Get Timetable"

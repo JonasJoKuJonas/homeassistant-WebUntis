@@ -143,6 +143,10 @@
         "show_cancelled": {
           "name": "Zeige ausgefallene Stunden",
           "description": "Zeige ausgefallene Stunden im Ergebnis"
+        },
+        "compact_result": {
+          "name": "Vereinfachte Ergebnisse",
+          "description": "Fasse doppel Stunden im Ergebnis zusammen"
         }
       },
       "name": "Stundenplan abrufen"

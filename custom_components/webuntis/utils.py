@@ -34,12 +34,12 @@ def is_different(arr1, arr2):
     return False
 
 
-def compact_list(lst, type=None):
+def compact_list(list, type=None):
     if type == "notify":
         compacted_list = []
         i = 0
-        while i < len(lst):
-            item = lst[i]
+        while i < len(list):
+            item = list[i]
             if compacted_list:
                 last_item = compacted_list[-1]
                 if (
@@ -53,11 +53,30 @@ def compact_list(lst, type=None):
             compacted_list.append(item)
             i += 1
 
-    else:
+    elif type == "dict":
         compacted_list = []
         i = 0
-        while i < len(lst):
-            item = lst[i]
+        while i < len(list):
+            item = list[i]
+            if compacted_list:
+                last_item = compacted_list[-1]
+                if (
+                    last_item["end"] == item["start"]
+                    and last_item["lsnumber"] == item["lsnumber"]
+                    and last_item["code"] == item["code"]
+                ):
+                    last_item["end"] = item["end"]
+
+                    i += 1
+                    continue
+            compacted_list.append(item)
+            i += 1
+
+    else:  # calendar
+        compacted_list = []
+        i = 0
+        while i < len(list):
+            item = list[i]
             if compacted_list:
                 last_item = compacted_list[-1]
                 if last_item.end == item.start and last_item.summary == item.summary:

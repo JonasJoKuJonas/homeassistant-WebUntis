@@ -25,6 +25,11 @@ get_timetable:
       default: true
       selector:
         boolean:
+    compact_result:
+      required: true
+      default: true
+      selector:
+        boolean:
 
 count_lessons:
   description: Get WebUntis timetable
