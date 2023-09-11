@@ -459,14 +459,14 @@ class WebUntis:
 
         return {self.timetable_source: source}
 
-    def get_timetable(self, start, end):
+    def get_timetable(self, start, end: datetime):
         """Get the timetable for the given time period"""
         timetable_object = self.get_timetable_object()
 
         start_schoolyear = get_schoolyear(self.school_year, start)
 
         if start_schoolyear:
-            if start_schoolyear.end.date() < end.date():
+            if start_schoolyear.end.date() < end:
                 end = start_schoolyear.end.date()
 
         if self.extended_timetable:
@@ -642,7 +642,7 @@ class WebUntis:
     def _get_events_in_timerange(
         self, start, end, filter_on, show_cancelled=True, compact_result=True
     ):
-        table = self.get_timetable(start=start.date(), end=end)
+        table = self.get_timetable(start=start.date(), end=end.date())
 
         events = []
 
