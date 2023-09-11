@@ -662,7 +662,7 @@ class WebUntis:
         return events
 
     def _count_lessons(self, start, end, filter_on, count_cancelled=False):
-        table = self.get_timetable(start=start.date(), end=end)
+        table = self.get_timetable(start=start.date(), end=end.date())
 
         result = {}
 
