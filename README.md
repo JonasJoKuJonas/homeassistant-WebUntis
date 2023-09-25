@@ -55,6 +55,7 @@ You can ask the school administration to give you access, otherwise it won't wor
 ### Timetable Timetable source & Full name/ Class/ Subject/ Room
 With the timetable source, you can select where the data for the sensor should come from.
 The final configuration field allows you to specify a name or class from which the data is pulled.
+The Format for the student's full name must be in the form <"first name"> <"middle name">, <"last name">.
 
 ## Optional Configurations
 
