@@ -85,7 +85,7 @@ def get_notification(updated_items, notify_list):
 
         elif change == "rooms":
             try:
-                message += f"Change (Room): {lesson_old['rooms']['name']} -> {lesson['rooms']['name']}"
+                message += f"Change (Room): {lesson_old['rooms'][0]['name']} -> {lesson['rooms'][0]['name']}"
             except KeyError:
                 pass
 
