@@ -263,7 +263,7 @@ class WebUntis:
             self.subjects = []
 
             _LOGGER.warning(
-                "Updating the propertie subjects of '%s@%s' failed - OSError: %s",
+                "Updating the property subjects of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -275,7 +275,7 @@ class WebUntis:
             self.is_class = None
 
             _LOGGER.warning(
-                "Updating the propertie is_class of '%s@%s' failed - OSError: %s",
+                "Updating the property is_class of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -287,7 +287,7 @@ class WebUntis:
             self.next_class = None
 
             _LOGGER.warning(
-                "Updating the propertie next_class of '%s@%s' failed - OSError: %s",
+                "Updating the property next_class of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -301,7 +301,7 @@ class WebUntis:
             self.next_lesson_to_wake_up = None
 
             _LOGGER.warning(
-                "Updating the propertie next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
+                "Updating the property next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -315,7 +315,7 @@ class WebUntis:
             self.next_day_json = None
 
             _LOGGER.warning(
-                "Updating the propertie next_day_json of '%s@%s' failed - OSError: %s",
+                "Updating the property next_day_json of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -330,7 +330,7 @@ class WebUntis:
             self.calendar_events = []
 
             _LOGGER.warning(
-                "Updating the propertie calendar_events of '%s@%s' failed - OSError: %s",
+                "Updating the property calendar_events of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -342,7 +342,7 @@ class WebUntis:
             self.today = [None, None]
 
             _LOGGER.warning(
-                "Updating the propertie today-sensor of '%s@%s' failed - OSError: %s",
+                "Updating the property today-sensor of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -510,7 +510,7 @@ class WebUntis:
             lesson = lesson_list[0]
         except IndexError:
             _LOGGER.warning(
-                "Updating the propertie _next_class of '%s@%s' failed - No lesson in the next %s days",
+                "Updating the property _next_class of '%s@%s' failed - No lesson in the next %s days",
                 self.school,
                 self.username,
                 DAYS_TO_FUTURE,
@@ -550,7 +550,7 @@ class WebUntis:
             return sorted(time_list_new)[0].astimezone()
         except IndexError:
             _LOGGER.warning(
-                "Updating the propertie _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
+                "Updating the property _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
                 self.school,
                 self.username,
                 DAYS_TO_FUTURE,
