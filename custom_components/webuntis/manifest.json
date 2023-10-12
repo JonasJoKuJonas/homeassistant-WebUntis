@@ -9,6 +9,6 @@
   "issue_tracker": "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/issues",
   "loggers": ["webuntis"],
   "quality_scale": "silver",
-  "requirements": ["webuntis==0.1.21"],
+  "requirements": ["webuntis==0.1.22"],
   "version": "v0.0.0"
 }
