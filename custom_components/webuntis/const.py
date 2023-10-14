@@ -14,7 +14,7 @@ DEFAULT_OPTIONS = {
     "filter_description": [],
     "extended_timetable": False,
     "calendar_description": "JSON",
-    "calendar_room": "long name",
+    "calendar_room": "Room long name",
     "calendar_show_room_change": False,
     "notify_entity_id": "",
     "notify_options": [],
