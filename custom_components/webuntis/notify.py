@@ -43,6 +43,8 @@ def compare_list(old_list, new_list, blacklist=[]):
                 if (
                     "rooms" in new_item
                     and "rooms" in old_item
+                    and new_item["rooms"]
+                    and old_item["rooms"]
                     and new_item["rooms"] != old_item["rooms"]
                 ):
                     updated_items.append(["rooms", new_item, old_item])
