@@ -256,7 +256,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
-        return self.async_show_menu(step_id="user", menu_options=OPTIONS_MENU)
+        return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
 
     async def save(self, user_input):
         """Save the options"""
