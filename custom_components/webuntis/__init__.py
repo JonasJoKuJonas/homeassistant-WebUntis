@@ -714,8 +714,12 @@ class WebUntis:
         if lesson.code == "cancelled" and not ignor_cancelled:
             return False
 
-        if not lesson.subjects:
+        try:
+            if not lesson.subjects:
+                return False
+        except IndexError:
             return False
+
 
         for filter_description in self.filter_description:
             if (
