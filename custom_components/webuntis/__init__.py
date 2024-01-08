@@ -79,7 +79,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
     options = {**config_entry.options}
 
     for option, default in DEFAULT_OPTIONS.items():
-        if not option in options:
+        if option not in options:
             options[option] = default
 
     config_entry.version = CONFIG_ENTRY_VERSION
@@ -164,6 +164,7 @@ class WebUntis:
         self._loged_in = False
         self._last_status_request_failed = False
         self.updating = 0
+        self.issue = False
 
         # Data provided by 3rd party library
         self.school_year = None
@@ -385,6 +386,12 @@ class WebUntis:
                 # _LOGGER.debug("Login successful")
                 self._loged_in = True
                 self.updating += 1
+
+                if self.issue:
+                    _LOGGER.info("delete issue bad_credentials")
+                    ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
+                    self.issue = False
+
                 return True
             except OSError as error:
                 # Login error, set all properties to unknown.
@@ -406,6 +413,7 @@ class WebUntis:
                 self._last_status_request_failed = True
 
                 if str(error) == "bad credentials":
+                    self.issue = True
                     ir.async_create_issue(
                         self._hass,
                         DOMAIN,
@@ -719,7 +727,6 @@ class WebUntis:
                 return False
         except IndexError:
             return False
-
 
         for filter_description in self.filter_description:
             if (
