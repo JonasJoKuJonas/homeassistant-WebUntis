@@ -151,7 +151,8 @@ class WebUntis:
         self.notify_entity_id = config.options["notify_entity_id"]
         self.notify_list = config.options["notify_options"]
         self.notify = bool(self.notify_entity_id) and bool(self.notify_list)
-        self.notify_data = config.options["notify_data"]
+        self.notify_target = config.options.get("notify_target")
+        self.notify_data = config.options.get("notify_data")
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -922,6 +923,7 @@ class WebUntis:
 
             for notification in notifications:
                 if self.notify_data:
+                    notification["target"] = self.notify_target
                     notification["data"] = self.notify_data
                 try:
                     await self.async_notify(

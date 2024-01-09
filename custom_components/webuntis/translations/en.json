@@ -85,6 +85,7 @@
         "description": "Notification Settings",
         "data": {
           "notify_entity_id": "Notify Service ID (e.g., notify.discord)",
+          "notify_target": "Platform-Specific Target Data",
           "notify_data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
           "rooms": "Room changed",

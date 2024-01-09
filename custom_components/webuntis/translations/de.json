@@ -85,6 +85,7 @@
         "description": "Einstellungen für Benachrichtigungen",
         "data": {
           "notify_entity_id": "Notify-Service-ID (Bsp: notify.discord)",
+          "notify_target": "Plattformspezifische Targetdaten",
           "notify_data": "Plattformspezifische Benachrichtigungsdaten",
           "code": "Stunden-Status ändert sich",
           "rooms": "Raum ändert sich",
