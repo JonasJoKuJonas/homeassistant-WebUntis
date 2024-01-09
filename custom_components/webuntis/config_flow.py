@@ -50,6 +50,7 @@ async def validate_input(
     try:
         socket.gethostbyname(user_input["server"])
     except Exception as exc:
+        _LOGGER.error(f"Cannot resolve hostname: {exc}")
         raise CannotConnect from exc
 
     try:
@@ -65,6 +66,7 @@ async def validate_input(
     except webuntis.errors.BadCredentialsError as ext:
         raise BadCredentials from ext
     except requests.exceptions.ConnectionError as exc:
+        _LOGGER.error(f"webuntis.Session connection error: {exc}")
         raise CannotConnect from exc
     except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
         raise SchoolNotFound from exc
