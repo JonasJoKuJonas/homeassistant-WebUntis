@@ -95,6 +95,12 @@
         "data_description": {
           "notify_data": "e.g.,\nnotification_icon: mdi:school-outline"
         }
+      },
+      "test": {
+        "title": "Test Menu",
+        "data": {
+          "tests": "Option for testing"
+        }
       }
     }
   },

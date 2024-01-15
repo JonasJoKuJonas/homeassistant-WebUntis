@@ -2,6 +2,9 @@
 
 
 from datetime import datetime
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def is_service(hass, entry):
@@ -96,3 +99,17 @@ def get_schoolyear(school_year, date=datetime.now().date()):
             return time_range
 
     return None
+
+
+async def async_notify(hass, service, data):
+    """Show a notification"""
+
+    if "target" in data and not data["target"]:
+        del data["target"]
+
+    _LOGGER.debug("Send notification(%s): %s", service, data)
+
+    domain = service.split(".")[0]
+    service = service.split(".")[1]
+
+    await hass.services.async_call(domain, service, data, blocking=True)

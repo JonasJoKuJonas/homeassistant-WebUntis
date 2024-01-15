@@ -20,7 +20,7 @@ from homeassistant.helpers import selector
 
 
 from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN, NOTIFY_OPTIONS
-from .utils import is_service
+from .utils import is_service, async_notify
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -238,27 +238,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
-OPTIONS_MENU = {
-    "filter": "Filter",
-    "calendar": "Calendar",
-    "notify": "Notify",
-    "backend": "Backend",
-}
-
-
 class OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle the option flow for WebUntis."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry
+        self.OPTIONS_MENU = {
+            "filter": "Filter",
+            "calendar": "Calendar",
+            "notify": "Notify",
+            "backend": "Backend",
+            "test": "Test",
+        }
 
     async def async_step_init(
         self,
         user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
-        return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
+        return self.async_show_menu(step_id="init", menu_options=self.OPTIONS_MENU)
 
     async def save(self, user_input):
         """Save the options"""
@@ -507,6 +506,45 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(schema_options),
             errors=errors,
         )
+
+    async def async_step_test(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the test options."""
+        if user_input is None:
+            return self.async_show_form(
+                step_id="test",
+                data_schema=vol.Schema(
+                    {
+                        vol.Optional(
+                            "tests", default="notify"
+                        ): selector.SelectSelector(
+                            selector.SelectSelectorConfig(options=["notify"])
+                        ),
+                    }
+                ),
+                errors=errors,
+            )
+        else:
+            if user_input["tests"] == "notify":
+                options = dict(self.config_entry.options)
+                notification = {
+                    "title": "WebUntis - Test message",
+                    "message": "Subject: Demo\nDate: {}\nTime: {}".format(
+                        *(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S").split())
+                    ),
+                }
+                notification["target"] = options.get("notify_target")
+                notification["data"] = options["notify_data"]
+                notify_entity_id = options.get("notify_entity_id")
+
+                await async_notify(
+                    self.hass, service=notify_entity_id, data=notification
+                )
+                pass
+            return await self.save({})
 
 
 def _create_subject_list(server):

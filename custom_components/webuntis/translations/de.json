@@ -95,6 +95,12 @@
         "data_description": {
           "notify_data": "z. B.:\n Benachrichtigungssymbol: mdi:school-outline"
         }
+      },
+      "test": {
+        "title": "Test Menü",
+        "data": {
+          "tests": "Option zum testen"
+        }
       }
     }
   },

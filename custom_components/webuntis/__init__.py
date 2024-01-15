@@ -31,7 +31,7 @@ from .const import (
 )
 from .notify import *
 from .services import async_setup_services
-from .utils import compact_list, get_schoolyear
+from .utils import compact_list, get_schoolyear, async_notify
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -926,7 +926,7 @@ class WebUntis:
                     notification["target"] = self.notify_target
                     notification["data"] = self.notify_data
                 try:
-                    await self.async_notify(
+                    await async_notify(
                         self._hass, service=self.notify_entity_id, data=notification
                     )
                 except Exception as error:
@@ -937,14 +937,6 @@ class WebUntis:
                     )
         self.event_list_old = self.event_list
 
-    async def async_notify(self, hass, service, data):
-        """Show a notification"""
-        _LOGGER.debug("Send notification(%s): %s", service, data)
-
-        domain = service.split(".")[0]
-        service = service.split(".")[1]
-
-        await hass.services.async_call(domain, service, data, blocking=True)
 
 
 class WebUntisEntity(Entity):
