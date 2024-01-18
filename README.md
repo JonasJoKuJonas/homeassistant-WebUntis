@@ -73,6 +73,14 @@ The Format for the student's full name must be in the form <"first name"> <"midd
 |calendar_show_cancelled_lessons|Show cancelled lessons.|`False`
 |calendar_description|Pick what will be shown in events description.|`JSON`
 
+### Notify
+|Option|Description|Default
+|:-----|:----------|-------
+|notify_entity_id|Home assistant notification service to send lesson changes via, e.g. notify.telegram.|`None`
+|notify_target|An object with additional notification service targets|`None`
+|notify_data|An object with additional notification service data|`None`
+|notify_options|Option that will trigger a notification|`None`
+
 ### Backend
 |Option|Description|Default
 |:-----|:----------|-------
@@ -81,6 +89,8 @@ The Format for the student's full name must be in the form <"first name"> <"midd
 |exclude_data|Will be set automatic if user doesn't have rights to prevent logger from spamming errors.|`None`
 |extended_timetable|Request extended timetable. Is needed for `filter_description` and `calendar_description(Lesson Info)`|`False`
 
+### Test
+Test the notification Configuration
 
 
 ## Entities
