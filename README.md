@@ -108,6 +108,43 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 Before you can use templates you need to enable the option generate JSON in the options flow. (Backend - generate JSON)
 
 Now you can copy this examples and don't forget to change the sensor names. (Replace NAME with your name)
+### WebUntis Alarm Clock Automation
+Create a yaml configuration:
+```
+webuntis_wake_up_time:
+        friendly_name: "WebUntis Weck Zeit"
+        value_template: >
+            {% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
+            {% if datetime not in ["unknown", "unavailable", None] %}
+              {% set datetime = datetime | as_datetime | as_local %}
+              {% set time = datetime.hour|string + ":" + datetime.minute|string %}
+              
+              
+              
+              {% if time == "7:45" %}
+                {% set weak_up_time = "6:25" %}
+              {% elif time == "8:30" %}
+                {% set weak_up_time = "7:10" %}
+              {% elif time == "9:45" %}
+                {% set weak_up_time = "8:45" %}
+              {% endif %}
+              
+              {{ datetime.replace(hour=weak_up_time.split(":")[0]|int, minute=weak_up_time.split(":")[1]|int) }}
+            {% else %}
+              {{ None }}
+            {% endif %}
+```
+This will creat a Sensor that represents the wake up time 
+
+Now you can use following trigger in you automation:
+```
+platform: template
+value_template: >-
+  {{ 0 < as_timestamp(now()) -
+     as_timestamp(states("sensor.webuntis_wake_up_time")|
+     as_datetime | as_local) < 60 }}
+```
+The automation will be triggered according to the time you defined in the sensor template
 ### List lessons from next day
 ```
 {% set json = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
