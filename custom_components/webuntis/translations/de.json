@@ -93,7 +93,8 @@
           "lesson change": "Eine Stunde wurde ausgetauscht"
         },
         "data_description": {
-          "notify_data": "z. B.:\n Benachrichtigungssymbol: mdi:school-outline"
+          "notify_data": "z. B.:\n Benachrichtigungssymbol: mdi:school-outline",
+          "notify_target": "Testen die Benachrichtigungen im Testmenü"
         }
       },
       "test": {
