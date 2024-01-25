@@ -170,16 +170,16 @@ class WebUntis:
         # Data provided by 3rd party library
         self.school_year = None
 
+        # sensor data
         self.is_class = None
         self.next_class = None
         self.next_class_json = None
         self.next_lesson_to_wake_up = None
         self.calendar_events = []
         self.next_day_json = None
+        self.today = [None, None]
 
         self.subjects = []
-
-        self.today = [None, None]
 
         self.event_list = []
         self.event_list_old = []
@@ -237,6 +237,7 @@ class WebUntis:
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
                 self.next_day_json = None
+                self.today = [None, None]
 
                 # Inform user once about failed update if necessary.
                 if not self._last_status_request_failed:
@@ -936,7 +937,6 @@ class WebUntis:
                         error,
                     )
         self.event_list_old = self.event_list
-
 
 
 class WebUntisEntity(Entity):
