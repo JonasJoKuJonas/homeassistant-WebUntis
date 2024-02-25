@@ -107,32 +107,32 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 ## Template
 Before you can use templates you need to enable the option generate JSON in the options flow. (Backend - generate JSON)
 
-Now you can copy this examples and don't forget to change the sensor names. (Replace NAME with your name)
+Now you can copy this examples and don't forget to change the sensor names and start times. (Replace NAME with your name, and time without starting 0)
 ### WebUntis Alarm Clock Automation
-Create a yaml configuration:
+Create a template -> sensor configuration in your configuration.yml:
 ```
-webuntis_wake_up_time:
-        friendly_name: "WebUntis Weck Zeit"
-        value_template: >
-            {% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
-            {% if datetime not in ["unknown", "unavailable", None] %}
-              {% set datetime = datetime | as_datetime | as_local %}
-              {% set time = datetime.hour|string + ":" + datetime.minute|string %}
-              
-              
-              
-              {% if time == "7:45" %}
-                {% set weak_up_time = "6:25" %}
-              {% elif time == "8:30" %}
-                {% set weak_up_time = "7:10" %}
-              {% elif time == "9:45" %}
-                {% set weak_up_time = "8:45" %}
-              {% endif %}
-              
-              {{ datetime.replace(hour=weak_up_time.split(":")[0]|int, minute=weak_up_time.split(":")[1]|int) }}
+- template:
+  - sensor:
+    - name: Webunits Weck Zeit
+        unique_id: "webuntis_wake_up_time"
+        icon: mdi:alarm
+        device_class: timestamp
+        state: >
+          {% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
+          {% if datetime not in ["unknown", "unavailable", None] %}
+            {% set datetime = datetime | as_datetime | as_local %}
+            {% set time = datetime.hour|string + ":" + datetime.minute|string %}
+            {% if time == "8:0" %}
+              {% set wake_up_time = "6:25" %}
+            {% elif time == "9:14" %}
+              {% set wake_up_time = "7:30" %}
+            {% elif time == "10:45" %}
+              {% set wake_up_time = "8:45" %}
+            {% endif %}
+              {{ datetime.replace(hour=wake_up_time.split(":")[0]|int, minute=wake_up_time.split(":")[1]|int) }}
             {% else %}
               {{ None }}
-            {% endif %}
+            {% endif %} 
 ```
 This will creat a Sensor that represents the wake up time 
 
@@ -163,3 +163,4 @@ The automation will be triggered according to the time you defined in the sensor
 {%- endfor %}
 {{ lessonList.lesson | unique | join(', ') }}
 ```
+for more examples feel free to check in #code-sharing on [Discord](https://discord.com/channels/1090218586565509170/1208159703520120902)
