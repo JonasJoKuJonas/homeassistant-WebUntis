@@ -107,7 +107,7 @@ The integration creates multiple entities in the format `sensor.NAME_entity`.
 ## Template
 Before you can use templates you need to enable the option generate JSON in the options flow. (Backend - generate JSON)
 
-Now you can copy this examples and don't forget to change the sensor names and start times. (Replace NAME with your name, and time without starting 0)
+Now you can copy this examples and don't forget to change the sensor names and start times. (Replace NAME with your name, and time without leading zero)
 ### WebUntis Alarm Clock Automation
 Create a template -> sensor configuration in your configuration.yaml:
 ```
