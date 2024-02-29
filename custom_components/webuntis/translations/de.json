@@ -32,6 +32,7 @@
     "error": {
       "extended_timetable": "Für die Optionen \"Fächer Filter - Beschreibung\" und \"Kalender-Beschreibung\" (Lesson Info) wird \"Erweiterten Stundenplan anfordern\" benötigt",
       "unknown_service": "Service-ID nicht gefunden.",
+      "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
@@ -112,7 +113,6 @@
           "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
           "invalid_auth": "Ungültige Authentifizierung",
           "bad_credentials": "Ungültiges Passwort",
-
           "unknown": "Unerwarteter Fehler"
         },
         "step": {

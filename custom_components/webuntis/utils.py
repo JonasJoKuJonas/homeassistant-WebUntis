@@ -1,6 +1,5 @@
 """Miscellaneous support functions for webuntis"""
 
-
 from datetime import datetime
 import logging
 
@@ -112,4 +111,14 @@ async def async_notify(hass, service, data):
     domain = service.split(".")[0]
     service = service.split(".")[1]
 
-    await hass.services.async_call(domain, service, data, blocking=True)
+    try:
+        await hass.services.async_call(domain, service, data, blocking=True)
+    except Exception as error:
+        _LOGGER.warning(
+            "Sending notification to %s failed - %s",
+            service,
+            error,
+        )
+        return False
+
+    return True

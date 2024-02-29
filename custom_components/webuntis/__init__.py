@@ -1,4 +1,5 @@
 """The Web Untis integration."""
+
 from __future__ import annotations
 
 import json
@@ -631,9 +632,9 @@ class WebUntis:
                             elif self.calendar_room == "Room short name":
                                 event["location"] = lesson.rooms[0].name
                             elif self.calendar_room == "Room short-long name":
-                                event[
-                                    "location"
-                                ] = f"{lesson.rooms[0].name} - {lesson.rooms[0].long_name}"
+                                event["location"] = (
+                                    f"{lesson.rooms[0].name} - {lesson.rooms[0].long_name}"
+                                )
                     except IndexError:
                         # server does not return rooms
                         pass
@@ -926,16 +927,11 @@ class WebUntis:
                 if self.notify_data:
                     notification["target"] = self.notify_target
                     notification["data"] = self.notify_data
-                try:
-                    await async_notify(
-                        self._hass, service=self.notify_entity_id, data=notification
-                    )
-                except Exception as error:
-                    _LOGGER.warning(
-                        "Sending notification to %s failed - %s",
-                        self.notify_entity_id,
-                        error,
-                    )
+
+                await async_notify(
+                    self._hass, service=self.notify_entity_id, data=notification
+                )
+
         self.event_list_old = self.event_list
 
 

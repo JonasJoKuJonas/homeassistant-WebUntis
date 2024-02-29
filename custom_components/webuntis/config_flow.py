@@ -1,4 +1,5 @@
 """Config flow for webuntisnew integration."""
+
 from __future__ import annotations
 
 import datetime
@@ -158,23 +159,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             info = await validate_input(self.hass, user_input)
         except CannotConnect:
-            errors["base"] = "cannot_connect"
+            errors["server"] = "cannot_connect"
         except InvalidAuth:
-            errors["base"] = "invalid_auth"
+            errors["name"] = "invalid_auth"
         except BadCredentials:
-            errors["base"] = "bad_credentials"
+            errors["password"] = "bad_credentials"
         except SchoolNotFound:
-            errors["base"] = "school_not_found"
+            errors["school"] = "school_not_found"
         except NameSplitError:
-            errors["base"] = "name_split_error"
+            errors["timetable_source_id"] = "name_split_error"
         except StudentNotFound:
-            errors["base"] = "student_not_found"
+            errors["timetable_source_id"] = "student_not_found"
         except TeacherNotFound:
-            errors["base"] = "teacher_not_found"
+            errors["timetable_source_id"] = "teacher_not_found"
         except ClassNotFound:
-            errors["base"] = "class_not_found"
+            errors["timetable_source_id"] = "class_not_found"
         except NoRightsForTimetable:
-            errors["base"] = "no_rights_for_timetable"
+            errors["timetable_source_id"] = "no_rights_for_timetable"
 
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected exception")
@@ -540,10 +541,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 notification["data"] = options["notify_data"]
                 notify_entity_id = options.get("notify_entity_id")
 
-                await async_notify(
+                success = await async_notify(
                     self.hass, service=notify_entity_id, data=notification
                 )
-                pass
+                if not success:
+                    return await self.async_step_test(
+                        None, {"base": "notification_invalid"}
+                    )
             return await self.save({})
 
 

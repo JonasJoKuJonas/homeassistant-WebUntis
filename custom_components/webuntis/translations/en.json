@@ -13,7 +13,6 @@
       "teacher_not_found": "Teacher not found. Check the name or choose another source.",
       "class_not_found": "Class not found. Check the class or choose another source.",
       "no_rights_for_timetable": "No rights for timetable.",
-
       "unknown": "Unexpected error"
     },
     "step": {
@@ -33,6 +32,7 @@
     "error": {
       "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" and \"Calendar Description\" (Lesson Info) option",
       "unknown_service": "Service ID not found.",
+      "notification_invalid": "Notification could not be sent. See logs for more information.",
       "unknown": "Unexpected error"
     },
     "step": {
@@ -112,7 +112,6 @@
           "cannot_connect": "Failed to connect. Please check the host.",
           "invalid_auth": "Invalid authentication",
           "bad_credentials": "Invalid password",
-
           "unknown": "Unexpected error"
         },
         "step": {
