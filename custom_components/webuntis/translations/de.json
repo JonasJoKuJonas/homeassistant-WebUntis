@@ -32,6 +32,7 @@
     "error": {
       "extended_timetable": "Für die Optionen \"Fächer Filter - Beschreibung\" und \"Kalender-Beschreibung\" (Lesson Info) wird \"Erweiterten Stundenplan anfordern\" benötigt",
       "unknown_service": "Service-ID nicht gefunden.",
+      "not_a_dict": "Muss ein Dictionary sein",
       "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
       "unknown": "Unerwarteter Fehler"
     },

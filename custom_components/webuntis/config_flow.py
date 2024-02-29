@@ -163,7 +163,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except InvalidAuth:
             errors["name"] = "invalid_auth"
         except BadCredentials:
-            errors["password"] = "bad_credentials"
+            errors["name"] = "bad_credentials"
         except SchoolNotFound:
             errors["school"] = "school_not_found"
         except NameSplitError:
@@ -404,12 +404,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 not user_input["extended_timetable"]
                 and self.config_entry.options["filter_description"]
             ):
-                errors = {"base": "extended_timetable"}
+                errors = {"extended_timetable": "extended_timetable"}
             elif (
                 user_input["extended_timetable"] is False
                 and self.config_entry.options["calendar_description"] == "Lesson Info"
             ):
-                errors = {"base": "extended_timetable"}
+                errors = {"extended_timetable": "extended_timetable"}
             else:
                 return await self.save(user_input)
         return self.async_show_form(
@@ -462,16 +462,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }
             user_input["notify_options"] = notify_options
 
+            errors = {}
+
             if "notify_entity_id" in user_input:
                 if not is_service(self.hass, user_input["notify_entity_id"]):
-                    errors = {"base": "unknown_service"}
+                    errors["base"] = "unknown_service"
             else:
                 user_input["notify_entity_id"] = ""
-            if "notify_target" not in user_input:
+
+            if "notify_target" in user_input:
+                if not isinstance(user_input["notify_target"], dict):
+                    errors["notify_target"] = "not_a_dict"
+            else:
                 user_input["notify_target"] = {}
-            if "notify_data" not in user_input:
+            if "notify_data" in user_input:
+                if not isinstance(user_input["notify_data"], dict):
+                    errors["notify_data"] = "not_a_dict"
+            else:
                 user_input["notify_data"] = {}
-            return await self.save(user_input)
+
+            if not errors:
+                return await self.save(user_input)
 
         schema_options = {
             vol.Optional(
@@ -485,7 +496,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 description={
                     "suggested_value": self.config_entry.options.get("notify_target")
                 },
-            ): selector.ObjectSelector(),
+            ): selector.ObjectSelector(selector.ObjectSelectorConfig()),
             vol.Optional(
                 "notify_data",
                 description={
