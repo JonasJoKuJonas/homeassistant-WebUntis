@@ -164,3 +164,6 @@ The automation will be triggered according to the time you defined in the sensor
 {{ lessonList.lesson | unique | join(', ') }}
 ```
 for more examples feel free to check in #code-sharing on [Discord](https://discord.com/channels/1090218586565509170/1208159703520120902)
+
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/Jonas_JoKu)
