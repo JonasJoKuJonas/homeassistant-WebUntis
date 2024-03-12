@@ -48,6 +48,15 @@ def compare_list(old_list, new_list, blacklist=[]):
                     and new_item["rooms"] != old_item["rooms"]
                 ):
                     updated_items.append(["rooms", new_item, old_item])
+                    
+                if (
+                    "teachers" in new_item
+                    and "teachers" in old_item
+                    and new_item["teachers"]
+                    and old_item["teachers"]
+                    and new_item["teachers"] != old_item["teachers"]
+                ):
+                    updated_items.append(["teachers", new_item, old_item])
 
                 break
 
@@ -68,6 +77,7 @@ def get_notification(updated_items, notify_list):
                 "rooms": "Room changed",
                 "cancelled": "Lesson cancelled",
                 "lesson change": "Lesson changed",
+                "teachers": "Teacher changed",
             }[change]
         )
 
@@ -88,6 +98,11 @@ def get_notification(updated_items, notify_list):
         elif change == "rooms":
             try:
                 message += f"Change (Room): {lesson_old['rooms'][0]['name']} -> {lesson['rooms'][0]['name']}"
+            except KeyError:
+                pass
+        elif change == "teachers":
+            try:
+                message += f"Change (teachers): {lesson_old['teachers'][0]['name']} -> {lesson['teachers'][0]['name']}"
             except KeyError:
                 pass
 

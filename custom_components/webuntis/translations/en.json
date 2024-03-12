@@ -90,6 +90,7 @@
           "notify_data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
           "rooms": "Room changed",
+          "teachers": "Teacher changed",
           "cancelled": "Lesson is cancelled",
           "lesson change": "Lesson was swapped"
         },
