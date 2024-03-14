@@ -1,0 +1,3 @@
+files:
+  - source: /custom_components/webuntis/translations/en.json
+    translation: /custom_components/webuntis/translations/%locale%.json
