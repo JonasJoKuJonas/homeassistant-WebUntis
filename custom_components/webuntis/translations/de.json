@@ -78,8 +78,7 @@
         },
         "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
-          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
-          "extended_timetable": "Fordere erweiterten Stundenplan an. (Wird für Fächer Filter - Beschreibung benötigt)"
+          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird."
         }
       },
       "notify": {
