@@ -1,5 +1,5 @@
 files:
   - source: /custom_components/webuntis/translations/en.json
     translation: /custom_components/webuntis/translations/%two_letters_code%.json
-    project_id_env: CROWDIN_PROJECT_ID
-    api_token_env: CROWDIN_PERSONAL_TOKEN
+    api_token: CROWDIN_PROJECT_ID
+    project_id: CROWDIN_PERSONAL_TOKEN
