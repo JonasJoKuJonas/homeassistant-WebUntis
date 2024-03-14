@@ -37,6 +37,16 @@
       "unknown": "Unexpected error"
     },
     "step": {
+      "init": {
+        "menu_options": {
+          "filter": "Filter",
+          "calendar": "Calendar",
+          "notify": "Notify",
+          "backend": "Backend",
+          "test": "Test",
+          "notify_menu": "Notify Menu"
+        }
+      },
       "filter": {
         "title": "Filter Settings",
         "description": "Settings to filter out unwanted subjects.",
@@ -81,13 +91,14 @@
           "generate_json": "Generate JSON in Sensor Attributes - enable only if needed."
         }
       },
-      "notify": {
+      "edit_notify_service": {
         "title": "Notify Settings",
         "description": "Notification Settings",
         "data": {
-          "notify_entity_id": "Notify Service ID (e.g., notify.discord)",
-          "notify_target": "Platform-Specific Target Data",
-          "notify_data": "Platform-Specific Notification Data",
+          "name": "Name",
+          "entity_id": "Notify Service ID (e.g., notify.discord)",
+          "target": "Platform-Specific Target Data",
+          "data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
           "rooms": "Room changed",
           "teachers": "Teacher changed",
@@ -95,14 +106,17 @@
           "lesson change": "Lesson was swapped"
         },
         "data_description": {
-          "notify_data": "e.g.,\nnotification_icon: mdi:school-outline",
+          "notify_data": "e.g.,\n notification_icon: mdi:school-outline",
           "notify_target": "Test the notifications in the Test menu"
         }
       },
-      "test": {
-        "title": "Test Menu",
-        "data": {
-          "tests": "Option for testing"
+      "notify_menu": {
+        "title": "Notify Settings",
+        "menu_options": {
+          "edit_notify_service": "add notify service",
+          "edit_notify_service_select": "edit notify service",
+          "remove_notify_service": "remove notify service",
+          "test_notify_service": "test notify service"
         }
       }
     }

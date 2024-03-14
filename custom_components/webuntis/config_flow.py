@@ -8,8 +8,6 @@ import socket
 from typing import Any
 from urllib.parse import urlparse
 
-from .utils import get_schoolyear
-
 import requests
 import voluptuous as vol
 import webuntis
@@ -17,11 +15,11 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 
-
 from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN, NOTIFY_OPTIONS
-from .utils import is_service, async_notify
+from .utils import async_notify, get_schoolyear, is_service
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -245,13 +243,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry
-        self.OPTIONS_MENU = {
-            "filter": "Filter",
-            "calendar": "Calendar",
-            "notify": "Notify",
-            "backend": "Backend",
-            "test": "Test",
-        }
+        self.OPTIONS_MENU = [
+            "filter",
+            "calendar",
+            "notify",
+            "backend",
+            "notify_menu",
+        ]
 
     async def async_step_init(
         self,
@@ -509,7 +507,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             schema_options[
                 vol.Optional(
                     option,
-                    default=option in self.config_entry.options["notify_options"],
+                    default=option
+                    in self.config_entry.options.get("notify_options", {}),
                 )
             ] = bool
 
@@ -519,47 +518,186 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             errors=errors,
         )
 
-    async def async_step_test(
+    async def list_notify_services(
+        self, step_id, multible=False, required=True, errors={}
+    ):
+        services = {
+            id: service["name"]
+            for id, service in self.config_entry.options["notify_config"].items()
+        }
+
+        select = cv.multi_select if multible else vol.In
+        required = vol.Required if required else vol.Optional
+
+        return self.async_show_form(
+            step_id=step_id,
+            errors=errors,
+            data_schema=vol.Schema(
+                {
+                    required("services"): select(services),
+                }
+            ),
+        )
+
+    async def async_step_notify_menu(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the notify_menu options."""
+
+        if not self.config_entry.options["notify_config"]:
+            options = [
+                "edit_notify_service",
+            ]
+        else:
+            options = [
+                "edit_notify_service",
+                "edit_notify_service_select",
+                "remove_notify_service",
+                "test_notify_service",
+            ]
+        return self.async_show_menu(step_id="notify_menu", menu_options=options)
+
+    async def async_step_edit_notify_service_select(
         self,
         user_input: dict[str, str] = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the test options."""
         if user_input is None:
-            return self.async_show_form(
-                step_id="test",
-                data_schema=vol.Schema(
-                    {
-                        vol.Optional(
-                            "tests", default="notify"
-                        ): selector.SelectSelector(
-                            selector.SelectSelectorConfig(options=["notify"])
-                        ),
-                    }
-                ),
-                errors=errors,
+            return await self.list_notify_services("edit_notify_service_select")
+        else:
+            return await self.async_step_edit_notify_service(
+                edit=user_input["services"]
+            )
+
+    async def async_step_remove_notify_service(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the test options."""
+        if user_input is None:
+            return await self.list_notify_services(
+                "remove_notify_service", multible=True
             )
         else:
-            if user_input["tests"] == "notify":
-                options = dict(self.config_entry.options)
+            notify_config = self.config_entry.options["notify_config"]
+            for key in user_input["services"]:
+                notify_config.pop(key, None)
+            return await self.save(
+                {
+                    "notify_config": notify_config,
+                    "toggle": not self.config_entry.options.get("toggle"),
+                }
+            )
+
+    async def async_step_test_notify_service(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Manage the test options."""
+        if user_input is None:
+            return await self.list_notify_services(
+                "test_notify_service", multible=True, required=False, errors=errors
+            )
+        else:
+            for service in user_input.get("services", {}):
+                options = dict(self.config_entry.options["notify_config"][service])
                 notification = {
                     "title": "WebUntis - Test message",
                     "message": "Subject: Demo\nDate: {}\nTime: {}".format(
                         *(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S").split())
                     ),
                 }
-                notification["target"] = options.get("notify_target")
-                notification["data"] = options["notify_data"]
-                notify_entity_id = options.get("notify_entity_id")
+                notification["target"] = options.get("target")
+                notification["data"] = options.get("data")
+                notify_entity_id = options.get("entity_id")
 
                 success = await async_notify(
-                    self.hass, service=notify_entity_id, data=notification
+                    self.hass, service_id=notify_entity_id, data=notification
                 )
                 if not success:
-                    return await self.async_step_test(
-                        None, {"base": "notification_invalid"}
+                    return await self.async_step_test_notify_service(
+                        None, errors={"base": "notification_invalid"}
                     )
+
             return await self.save({})
+
+    async def async_step_edit_notify_service(
+        self,
+        user_input: dict[str, str] = None,
+        errors: dict[str, Any] | None = None,
+        edit=None,
+    ) -> FlowResult:
+
+        options = {}
+        if edit:
+            options = self.config_entry.options["notify_config"].get(edit)
+
+        if user_input is not None:
+            errors = {}
+
+            if "entity_id" in user_input and not is_service(
+                self.hass, user_input["entity_id"]
+            ):
+                errors["entity_id"] = "unknown_service"
+
+            if "notify_target" in user_input and not isinstance(
+                user_input["target"], dict
+            ):
+                errors["notify_target"] = "not_a_dict"
+
+            if "notify_data" in user_input and not isinstance(user_input["data"], dict):
+                errors["notify_data"] = "not_a_dict"
+
+            if "name" not in user_input:
+                user_input["name"] = user_input["entity_id"]
+
+            if not errors:
+                notify_config = self.config_entry.options["notify_config"]
+                notify_config[user_input["entity_id"]] = user_input
+
+                return await self.save(
+                    {
+                        "notify_config": notify_config,
+                        "toggle": not self.config_entry.options.get("toggle"),
+                    }
+                )
+
+            options = self.config_entry.options["notify_config"].get(
+                user_input["entity_id"], {}
+            )
+
+        schema_options = {
+            vol.Optional(
+                "name",
+                description={"suggested_value": options.get("name")},
+            ): selector.TextSelector(),
+            vol.Required(
+                "entity_id",
+                description={"suggested_value": options.get("entity_id")},
+            ): selector.TextSelector(),
+            vol.Optional(
+                "target",
+                description={"suggested_value": options.get("target")},
+            ): selector.ObjectSelector(selector.ObjectSelectorConfig()),
+            vol.Optional(
+                "data",
+                description={"suggested_value": options.get("data")},
+            ): selector.ObjectSelector(),
+            vol.Optional(
+                "options", description={"suggested_value": options.get("options")}
+            ): cv.multi_select(NOTIFY_OPTIONS),
+        }
+
+        return self.async_show_form(
+            step_id="edit_notify_service",
+            data_schema=vol.Schema(schema_options),
+            errors=errors,
+        )
 
 
 def _create_subject_list(server):
