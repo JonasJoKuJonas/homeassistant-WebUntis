@@ -1,7 +1,3 @@
 files:
   - source: /custom_components/webuntis/translations/en.json
-    translation: /custom_components/webuntis/translations/%locale%.json
-    languages_mapping:
-      locale:
-        de: de    
-        nl: nl
+    translation: /custom_components/webuntis/translations/%two_letters_code%.json
