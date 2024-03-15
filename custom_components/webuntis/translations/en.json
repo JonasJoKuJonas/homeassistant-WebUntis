@@ -41,9 +41,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Calendar",
-          "notify": "Notify",
           "backend": "Backend",
-          "test": "Test",
           "notify_menu": "Notify Menu"
         }
       },
@@ -92,11 +90,11 @@
         }
       },
       "edit_notify_service": {
-        "title": "Notify Settings",
-        "description": "Notification Settings",
+        "title": "Notify Menu",
+        "description": "add or edit a notify service",
         "data": {
           "name": "Name",
-          "entity_id": "Notify Service ID (e.g., notify.discord)",
+          "entity_id": "Notify Service ID",
           "target": "Platform-Specific Target Data",
           "data": "Platform-Specific Notification Data",
           "code": "Lesson status changed",
@@ -106,12 +104,12 @@
           "lesson change": "Lesson was swapped"
         },
         "data_description": {
-          "notify_data": "e.g.,\n notification_icon: mdi:school-outline",
-          "notify_target": "Test the notifications in the Test menu"
+          "data": "e.g.,\nnotification_icon: mdi:school-outline",
+          "entity_id": "e.g., notify.discord"
         }
       },
       "notify_menu": {
-        "title": "Notify Settings",
+        "title": "Notify Service",
         "menu_options": {
           "edit_notify_service": "add notify service",
           "edit_notify_service_select": "edit notify service",
