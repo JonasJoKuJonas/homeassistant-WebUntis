@@ -31,9 +31,20 @@
   "options": {
     "error": {
       "extended_timetable": "\"Uitgebreid rooster aanvragen\" is vereist voor de optie \"Onderwerpfilter - Beschrijving\"",
+      "unknown_service": "Service ID not found.",
+      "not_a_dict": "Has to be a dictionary",
+      "notification_invalid": "Notification could not be sent. See logs for more information.",
       "unknown": "Onverwachte fout"
     },
     "step": {
+      "init": {
+        "menu_options": {
+          "filter": "Filter",
+          "calendar": "Calendar",
+          "backend": "Backend",
+          "notify_menu": "Notify Menu"
+        }
+      },
       "filter": {
         "title": "Filterinstellingen",
         "description": "Instellingen om ongewenste onderwerpen uit te filteren.",
@@ -51,11 +62,17 @@
         "description": "Instellingen om de kalender aan te passen.",
         "data": {
           "calendar_long_name": "Kalender - lange naam",
-          "calendar_show_cancelled_lessons": "Kalender - geannuleerde lessen"
+          "calendar_show_cancelled_lessons": "Kalender - geannuleerde lessen",
+          "calendar_description": "Calendar - description",
+          "calendar_room": "Calendar - Location",
+          "calendar_show_room_change": "Calendar - Room change"
         },
         "data_description": {
           "calendar_long_name": "Gebruik de lange naam van de uren in de kalender.",
-          "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender."
+          "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender.",
+          "calendar_description": "Determine what should be in the description of a calendar event.",
+          "calendar_room": "Specify what to display for location.",
+          "calendar_show_room_change": "Show room changes in the calendar."
         }
       },
       "backend": {
@@ -71,7 +88,115 @@
           "keep_loged_in": "Probeer de sessiegegevens op te slaan. (BETA)",
           "generate_json": "Genereer JSON in Sensorattributen - alleen inschakelen indien nodig."
         }
+      },
+      "edit_notify_service": {
+        "title": "Notify Menu",
+        "description": "add or edit a notify service",
+        "data": {
+          "name": "Name",
+          "entity_id": "Notify Service ID",
+          "target": "Platform-Specific Target Data",
+          "data": "Platform-Specific Notification Data",
+          "code": "Lesson status changed",
+          "rooms": "Room changed",
+          "teachers": "Teacher changed",
+          "cancelled": "Lesson is cancelled",
+          "lesson change": "Lesson was swapped"
+        },
+        "data_description": {
+          "data": "e.g.,\nnotification_icon: mdi:school-outline",
+          "entity_id": "e.g., notify.discord"
+        }
+      },
+      "notify_menu": {
+        "title": "Notify Service",
+        "menu_options": {
+          "edit_notify_service": "add notify service",
+          "edit_notify_service_select": "edit notify service",
+          "remove_notify_service": "remove notify service",
+          "test_notify_service": "test notify service"
+        }
       }
+    }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "cannot_connect": "Failed to connect. Please check the host.",
+          "invalid_auth": "Invalid authentication",
+          "bad_credentials": "Invalid password",
+          "unknown": "Unexpected error"
+        },
+        "step": {
+          "confirm": {
+            "description": "Please enter the new password!",
+            "title": "Password has been changed",
+            "data": {
+              "password": "Password"
+            }
+          }
+        }
+      },
+      "title": "Password has been changed"
+    }
+  },
+  "services": {
+    "get_timetable": {
+      "description": "Get the timetable in a given time range.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start of time range"
+        },
+        "end": {
+          "name": "End",
+          "description": "End of time range"
+        },
+        "apply_filter": {
+          "name": "Activate Filter",
+          "description": "Applies the filter from the settings to the results"
+        },
+        "show_cancelled": {
+          "name": "Show Cancelled lessons",
+          "description": "Display cancelled lessons in the result"
+        },
+        "compact_result": {
+          "name": "Simplify Results",
+          "description": "Combine double lessons in the result"
+        }
+      },
+      "name": "Get Timetable"
+    },
+    "count_lessons": {
+      "description": "Count lessons within a time range.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start of time range"
+        },
+        "end": {
+          "name": "End",
+          "description": "End of time range"
+        },
+        "apply_filter": {
+          "name": "Activate Filter",
+          "description": "Apply the filter from the settings to the results"
+        },
+        "count_cancelled": {
+          "name": "Count Cancelled lessons",
+          "description": "Count cancelled lessons"
+        }
+      },
+      "name": "Count Hours"
     }
   }
 }
