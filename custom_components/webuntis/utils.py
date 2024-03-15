@@ -100,23 +100,23 @@ def get_schoolyear(school_year, date=datetime.now().date()):
     return None
 
 
-async def async_notify(hass, service, data):
+async def async_notify(hass, service_id, data):
     """Show a notification"""
 
     if "target" in data and not data["target"]:
         del data["target"]
 
-    _LOGGER.debug("Send notification(%s): %s", service, data)
+    _LOGGER.debug("Send notification(%s): %s", service_id, data)
 
-    domain = service.split(".")[0]
-    service = service.split(".")[1]
+    domain = service_id.split(".")[0]
+    service = service_id.split(".")[1]
 
     try:
         await hass.services.async_call(domain, service, data, blocking=True)
     except Exception as error:
         _LOGGER.warning(
             "Sending notification to %s failed - %s",
-            service,
+            service_id,
             error,
         )
         return False

@@ -91,6 +91,7 @@
           "notify_data": "Plattformspezifische Benachrichtigungsdaten",
           "code": "Stunden-Status ändert sich",
           "rooms": "Raum ändert sich",
+          "teachers": "Lehrer ändert sich",
           "cancelled": "Stunde fällt aus",
           "lesson change": "Eine Stunde wurde ausgetauscht"
         },

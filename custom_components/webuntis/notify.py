@@ -10,7 +10,18 @@ def compare_list(old_list, new_list, blacklist=[]):
                     new_item["code"] == "irregular" and old_item["code"] == "cancelled"
                 )
             ):
-                # test if lesson is on blacklist to prevent spaming notifications
+                #
+                #
+                #
+                #
+                #
+                #
+                #
+                #
+                #
+                #
+                #
+                # if lesson is on blacklist to prevent spaming notifications
                 if any(
                     item["subject_id"] == new_item["subject_id"]
                     and item["start"] == new_item["start"]
@@ -49,15 +60,22 @@ def compare_list(old_list, new_list, blacklist=[]):
                 ):
                     updated_items.append(["rooms", new_item, old_item])
 
+                if (
+                    "teachers" in new_item
+                    and "teachers" in old_item
+                    and new_item["teachers"]
+                    and old_item["teachers"]
+                    and new_item["teachers"] != old_item["teachers"]
+                ):
+                    updated_items.append(["teachers", new_item, old_item])
+
                 break
 
     return updated_items
 
 
-def get_notification(updated_items, notify_list):
+def get_notification(updated_items):
     notify = []
-
-    updated_items = [item for item in updated_items if item[0] in notify_list]
 
     for change, lesson, lesson_old in updated_items:
         title = "WebUntis"
@@ -68,6 +86,7 @@ def get_notification(updated_items, notify_list):
                 "rooms": "Room changed",
                 "cancelled": "Lesson cancelled",
                 "lesson change": "Lesson changed",
+                "teachers": "Teacher changed",
             }[change]
         )
 
@@ -90,11 +109,16 @@ def get_notification(updated_items, notify_list):
                 message += f"Change (Room): {lesson_old['rooms'][0]['name']} -> {lesson['rooms'][0]['name']}"
             except KeyError:
                 pass
+        elif change == "teachers":
+            try:
+                message += f"Change (teachers): {lesson_old['teachers'][0]['name']} -> {lesson['teachers'][0]['name']}"
+            except KeyError:
+                pass
 
         else:
             message += f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
 
-        notify.append({"title": title, "message": message})
+        notify.append({"change": change, "title": title, "message": message})
 
     return notify
 

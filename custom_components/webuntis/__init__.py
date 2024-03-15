@@ -83,6 +83,24 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         if option not in options:
             options[option] = default
 
+    if config_entry.version == 14:
+        if "notify_entity_id" in options:
+            options["notify_config"][options["notify_entity_id"]] = {
+                "name": options["notify_entity_id"],
+                "entity_id": options["notify_entity_id"],
+                "target": options.get("notify_target", {}),
+                "data": options.get("notify_data", {}),
+                "options": options.get("notify_options", {}),
+            }
+
+    for key in [
+        "notify_entity_id",
+        "notify_target",
+        "notify_data",
+        "notify_options",
+    ]:
+        options.pop(key, None)
+
     config_entry.version = CONFIG_ENTRY_VERSION
     hass.config_entries.async_update_entry(config_entry, options=options)
 
@@ -149,11 +167,12 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.notify_entity_id = config.options["notify_entity_id"]
-        self.notify_list = config.options["notify_options"]
-        self.notify = bool(self.notify_entity_id) and bool(self.notify_list)
-        self.notify_target = config.options.get("notify_target")
-        self.notify_data = config.options.get("notify_data")
+        self.notify_config = {}
+
+        self.notify_config = config.options.get("notify_config")
+        self.notify = any(
+            config.get("options") for config in self.notify_config.values()
+        )
 
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
@@ -921,16 +940,19 @@ class WebUntis:
 
             _LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
 
-            notifications = get_notification(updated_items, self.notify_list)
+            notifications = get_notification(updated_items)
 
-            for notification in notifications:
-                if self.notify_data:
-                    notification["target"] = self.notify_target
-                    notification["data"] = self.notify_data
+            for service in self.notify_config.values():
+                notification["data"] = service.get("data", {})
+                notification["target"] = service.get("target", {})
 
-                await async_notify(
-                    self._hass, service=self.notify_entity_id, data=notification
-                )
+                for notification in notifications:
+                    if notification["change"] in service["options"]:
+                        await async_notify(
+                            self._hass,
+                            service_id=service["entity_id"],
+                            data=notification,
+                        )
 
         self.event_list_old = self.event_list
 
