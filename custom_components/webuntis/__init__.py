@@ -943,10 +943,8 @@ class WebUntis:
             notifications = get_notification(updated_items)
 
             for service in self.notify_config.values():
-                if service["target"]:
-                    notification["target"] = service["target"]
-                if service["data"]:
-                    notification["data"] = service["data"]
+                notification["data"] = service.get("data", {})
+                notification["target"] = service.get("target", {})
 
                 for notification in notifications:
                     if notification["change"] in service["options"]:

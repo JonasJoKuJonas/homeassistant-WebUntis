@@ -246,9 +246,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self.OPTIONS_MENU = [
             "filter",
             "calendar",
-            "notify",
-            "backend",
             "notify_menu",
+            "backend",
         ]
 
     async def async_step_init(
@@ -441,83 +440,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             errors=errors,
         )
 
-    async def async_step_notify(
-        self,
-        user_input: dict[str, str] = None,
-        errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
-        """Manage the notify options."""
-        if user_input is not None:
-            notify_options = [
-                key
-                for key, value in user_input.items()
-                if value and key in NOTIFY_OPTIONS
-            ]
-            user_input = {
-                key: value
-                for key, value in user_input.items()
-                if key not in NOTIFY_OPTIONS
-            }
-            user_input["notify_options"] = notify_options
-
-            errors = {}
-
-            if "notify_entity_id" in user_input:
-                if not is_service(self.hass, user_input["notify_entity_id"]):
-                    errors["base"] = "unknown_service"
-            else:
-                user_input["notify_entity_id"] = ""
-
-            if "notify_target" in user_input:
-                if not isinstance(user_input["notify_target"], dict):
-                    errors["notify_target"] = "not_a_dict"
-            else:
-                user_input["notify_target"] = {}
-            if "notify_data" in user_input:
-                if not isinstance(user_input["notify_data"], dict):
-                    errors["notify_data"] = "not_a_dict"
-            else:
-                user_input["notify_data"] = {}
-
-            if not errors:
-                return await self.save(user_input)
-
-        schema_options = {
-            vol.Optional(
-                "notify_entity_id",
-                description={
-                    "suggested_value": self.config_entry.options.get("notify_entity_id")
-                },
-            ): selector.TextSelector(),
-            vol.Optional(
-                "notify_target",
-                description={
-                    "suggested_value": self.config_entry.options.get("notify_target")
-                },
-            ): selector.ObjectSelector(selector.ObjectSelectorConfig()),
-            vol.Optional(
-                "notify_data",
-                description={
-                    "suggested_value": self.config_entry.options.get("notify_data")
-                },
-            ): selector.ObjectSelector(),
-        }
-
-        for option in NOTIFY_OPTIONS:
-            schema_options[
-                vol.Optional(
-                    option,
-                    default=option
-                    in self.config_entry.options.get("notify_options", {}),
-                )
-            ] = bool
-
-        return self.async_show_form(
-            step_id="notify",
-            data_schema=vol.Schema(schema_options),
-            errors=errors,
-        )
-
     async def list_notify_services(
         self, step_id, multible=False, required=True, errors={}
     ):
@@ -612,8 +534,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         *(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S").split())
                     ),
                 }
-                notification["target"] = options.get("target")
-                notification["data"] = options.get("data")
+                notification["target"] = options.get("target", {})
+                notification["data"] = options.get("data", {})
                 notify_entity_id = options.get("entity_id")
 
                 success = await async_notify(
