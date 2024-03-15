@@ -43,7 +43,6 @@
           "calendar": "Calendar",
           "notify_menu": "Notify Menu",
           "backend": "Backend",
-          "test": "Test",
         }
       },
       "filter": {
