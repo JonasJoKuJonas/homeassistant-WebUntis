@@ -37,6 +37,14 @@
       "unknown": "Unerwarteter Fehler"
     },
     "step": {
+      "init": {
+        "menu_options": {
+          "filter": "Filter",
+          "calendar": "Kalender",
+          "backend": "Backend",
+          "notify_menu": "Notify Menü"
+        }
+      },
       "filter": {
         "title": "Filter-Einstellungen",
         "description": "Einstellungen zum Herausfiltern unerwünschter Fächer.",
@@ -81,27 +89,32 @@
           "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird."
         }
       },
-      "notify": {
-        "title": "Notify Einstellungen",
-        "description": "Einstellungen für Benachrichtigungen",
+      "edit_notify_service": {
+        "title": "Notify Menü",
+        "description": "füge oder bearbeite einen Benachrichtigungs-Dienst",
         "data": {
-          "notify_entity_id": "Notify-Service-ID (Bsp: notify.discord)",
-          "notify_target": "Plattformspezifische Targetdaten",
-          "notify_data": "Plattformspezifische Benachrichtigungsdaten",
+          "name": "Name",
+          "entity_id": "Notify Service ID",
+          "target": "Plattformspezifische Targetdaten",
+          "data": "Plattformspezifische Benachrichtigungs-Daten",
           "code": "Stunden-Status ändert sich",
           "rooms": "Raum ändert sich",
+          "teachers": "Lehrer ändert sich",
           "cancelled": "Stunde fällt aus",
           "lesson change": "Eine Stunde wurde ausgetauscht"
         },
         "data_description": {
-          "notify_data": "z. B.:\n notification_icon: mdi:school-outline",
-          "notify_target": "Testen die Benachrichtigungen im Testmenü"
+          "data": "z. B.:\nnotification_icon: mdi:school-outline",
+          "entity_id": "Bsp: notify.discord"
         }
       },
-      "test": {
-        "title": "Test Menü",
-        "data": {
-          "tests": "Option zum testen"
+      "notify_menu": {
+        "title": "Notify Dienst",
+        "menu_options": {
+          "edit_notify_service": "Notify Dienst hinzufügen",
+          "edit_notify_service_select": "Notify Dienst bearbeiten",
+          "remove_notify_service": "Notify Dienst löschen",
+          "test_notify_service": "Notify Dienst testen"
         }
       }
     }
