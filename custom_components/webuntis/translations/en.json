@@ -41,10 +41,9 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Calendar",
-          "notify": "Notify",
+          "notify_menu": "Notify Menu",
           "backend": "Backend",
           "test": "Test",
-          "notify_menu": "Notify Menu"
         }
       },
       "filter": {
