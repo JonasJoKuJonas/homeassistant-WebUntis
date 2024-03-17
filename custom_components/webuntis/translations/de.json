@@ -104,7 +104,7 @@
           "lesson change": "Eine Stunde wurde ausgetauscht"
         },
         "data_description": {
-          "data": "z. B.:\nnotification_icon: mdi:school-outline",
+          "data": "Bsp:\nnotification_icon: mdi:school-outline",
           "entity_id": "Bsp: notify.discord"
         }
       },
