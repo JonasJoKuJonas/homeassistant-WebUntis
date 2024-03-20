@@ -15,25 +15,33 @@
 [![Discord Banner 4](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner4)](https://discord.gg/34EHnHQaPm)
 
 
+### Help Translate with Crowdin
 
+We're using Crowdin to make translating our project easier for everyone. If you're fluent in another language and want to help, you can get started on Crowdin right away. Your contributions are welcome in any language! If you need help or want to add a new language, please let us know through a pull request or on Discord. 
+
+Help us:
+
+<a href="https://crowdin.com/project/homeassistant-webuntis" rel="nofollow"><img style="width:140;height:40px" src="https://badges.crowdin.net/badge/light/crowdin-on-dark.png" srcset="https://badges.crowdin.net/badge/light/crowdin-on-dark.png 1x,https://badges.crowdin.net/badge/light/crowdin-on-dark@2x.png 2x" alt="Crowdin | Agile localization for tech companies" /></a>
 
 ## Installation
 
 ### HACS
 
 1. Install [HACS](https://github.com/custom-components/hacs).
-2. Install Integration.
-3. Restart Home Assistant
-4. Add Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis)
+2. Go to HACS and install the WebUntis Integration.
+3. Restart Home Assistant.
+4. Add the Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis).
 
-### Manual installation 
+### Manual Installation 
 
-1. Copy all files from custom_components/webuntis/ to custom_components/webuntis/ inside your config Home Assistant directory.
-2. Restart Home Assistant
-4. Add Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis)
+1. Copy all files from `custom_components/webuntis/` to `custom_components/webuntis/` inside your Home Assistant config directory.
+2. Restart Home Assistant.
+3. Add the Integration via [UI](https://my.home-assistant.io/redirect/integrations/) or click [HERE](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis).
 
+   
 ### Docker
-If your home assistant is running on a docker, you may need to set your local timezone in the docker configuration!
+If your Home Assistant is running in Docker, you may need to set your local timezone in the Docker configuration!
+
 
 ## Configuration via UI
 
@@ -52,60 +60,57 @@ Unfortunately, it is not possible to use the Untis API with an anonymous user.
 
 You can ask the school administration to give you access, otherwise it won't work.
 
-### Timetable Timetable source & Full name/ Class/ Subject/ Room
-With the timetable source, you can select where the data for the sensor should come from.
-The final configuration field allows you to specify a name or class from which the data is pulled.
-The Format for the student's full name must be in the form <"first name"> <"middle name">, <"last name">. (This could variate from school to school)
+### Timetable Source & Full Name/ Class/ Subject/ Room
+With the timetable source, you can select the data source for the sensor.
+The final configuration field allows you to specify a name or class for data collection.
+The format for the student's full name must be <"first name"> <"middle name">, <"last name">. (This could vary from school to school)
 
 ## Optional Configurations
 
 ### Filter
-|Option|Description
-|:-----|:----------
-|filter_mode|The mode of the filter. e.g. `Blacklist`
-|filter_subjects|Subjects that will be excludet from any data.
-|filter_description|Exclude all lessons with specific text in the lesson info
+| Option | Description |
+|:------|:------------|
+| filter_mode | The mode of the filter, e.g., `Blacklist`. |
+| filter_subjects | Subjects excluded from any data. |
+| filter_description | Exclude all lessons with specific text in the lesson info. |
 
 ### Calendar
-|Option|Description|Default
-|:-----|:----------|-------
-|calendar_long_name|Use the long subject name.|`True`
-|calendar_show_cancelled_lessons|Show cancelled lessons.|`False`
-|calendar_description|Pick what will be shown in events description.|`JSON`
+| Option | Description | Default |
+|:------|:------------|-------|
+| calendar_long_name | Use the long subject name. | `True` |
+| calendar_show_cancelled_lessons | Show cancelled lessons. | `False` |
+| calendar_description | Pick what to show in event descriptions. | `JSON` |
 
-### Notify
-|Option|Description|Default
-|:-----|:----------|-------
-|notify_entity_id|Home assistant notification service to send lesson changes via, e.g. notify.telegram.|`None`
-|notify_target|An object with additional notification service targets|`None`
-|notify_data|An object with additional notification service data|`None`
-|notify_options|Option that will trigger a notification|`None`
+### Notification Configuration
+| Option | Description | Default |
+|:------|:------------|-------|
+| notify_entity_id | Home Assistant notification service to send lesson changes via, e.g., notify.telegram. | `None` |
+| notify_target | Object with additional notification service targets. | `None` |
+| notify_data | Object with additional notification service data. | `None` |
+| notify_options | Options that will trigger a notification. | `None` |
 
 ### Backend
 |Option|Description|Default
-|:-----|:----------|-------
-|keep_loged_in|Keep the client logged in. (Beta)|`False`
-|generate_json|Generate JSON in sensor attributes.|`False`
-|exclude_data|Will be set automatic if user doesn't have rights to prevent logger from spamming errors.|`None`
-|extended_timetable|Request extended timetable. Is needed for `filter_description` and `calendar_description(Lesson Info)`|`False`
-
-### Test
-Test the notification Configuration
-
+|:-----|:----------|-------|
+| keep_logged_in | Keep the client logged in. (Beta) | `False` |
+| generate_json | Generate JSON in sensor attributes. | `False` |
+| exclude_data | Set automatically if the user doesn't have rights, to prevent error spamming. | `None` |
+| extended_timetable | Request extended timetable, needed for `filter_description` and `calendar_description (Lesson Info)`. | `False` |
 
 ## Entities
 
-The integration creates multiple entities in the format `sensor.NAME_entity`.
+The integration creates several entities in the format `sensor.NAME_entity`.
 
-|Sensor  |Type|Description
-|:-----------|:---|:------------
-|`binary_sensor.NAME_class`| bool | indicates if a lesson is currently taking place.
-|`sensor.NAME_next_class`| datetime | the start time of the next lesson.
-|`sensor.NAME_next_lesson_to_wake_up`| datetime | the start of the next first lesson of the day.
-|`calendar.NAME_webuntis_calender`| calendar | Calendar entry
+| Sensor | Type | Description |
+|:-------|:-----|:------------|
+| `binary_sensor.NAME_class` | bool | Indicates if a lesson is currently taking place. |
+| `sensor.NAME_next_class` | datetime | The start time of the next lesson. |
+| `sensor.NAME_next_lesson_to_wake_up` | datetime | The start of the next first lesson of the day. |
+| `calendar.NAME_webuntis_calendar` | calendar | Calendar entry |
 
-## Template
-Before you can use templates you need to enable the option generate JSON in the options flow. (Backend - generate JSON)
+## Templates
+Before you can use templates, you need to enable the option to generate JSON in the options flow (Backend - generate JSON).
+
 
 Now you can copy this examples and don't forget to change the sensor names and start times. (Replace NAME with your name, and time without leading zero)
 ### WebUntis Alarm Clock Automation
@@ -134,18 +139,15 @@ Create a template -> sensor configuration in your configuration.yaml:
               {{ None }}
             {% endif %} 
 ```
-This will creat a Sensor that represents the wake up time 
+This creates a sensor that represents the wake-up time.
 
-Now you can use following trigger in you automation:
+Now, you can use the following trigger in your automation:
 ```
-platform: template
-value_template: >-
-  {{ 0 < as_timestamp(now()) -
-     as_timestamp(states("sensor.webuntis_wake_up_time")|
-     as_datetime | as_local) < 60 }}
+platform: time
+at: sensor.webuntis_weck_zeit
 ```
 The automation will be triggered according to the time you defined in the sensor template
-### List lessons from next day
+### List Lessons from the Next Day
 ```
 {% set json = state_attr("sensor.NAME_next_lesson_to_wake_up", "day") | from_json %}
 
