@@ -20,7 +20,7 @@ DEFAULT_OPTIONS = {
     "notify_config": {},
 }
 
-NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson change", "teachers", "code"]
+NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson_change", "teachers", "code"]
 
 TEMPLATE_OPTIONS = ["message_title", "message", "discord"]
 

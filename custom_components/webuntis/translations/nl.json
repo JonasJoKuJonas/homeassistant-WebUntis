@@ -101,7 +101,7 @@
           "rooms": "Room changed",
           "teachers": "Teacher changed",
           "cancelled": "Lesson is cancelled",
-          "lesson change": "Lesson was swapped"
+          "lesson_change": "Lesson was swapped"
         },
         "data_description": {
           "data": "e.g.,\nnotification_icon: mdi:school-outline",

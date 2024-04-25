@@ -121,10 +121,10 @@
     "notify_options": {
       "options": {
         "code": "Lesson status changed",
-        "rooms": "Room changed",
-        "teachers": "Teacher changed",
+        "room": "Room changed",
+        "teacher": "Teacher changed",
         "cancelled": "Lesson is cancelled",
-        "lesson change": "Lesson was swapped"
+        "lesson_change": "Lesson was swapped"
       }
     },
     "notify_template": {

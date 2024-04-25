@@ -101,7 +101,7 @@
           "rooms": "Raum ändert sich",
           "teachers": "Lehrer ändert sich",
           "cancelled": "Stunde fällt aus",
-          "lesson change": "Eine Stunde wurde ausgetauscht"
+          "lesson_change": "Eine Stunde wurde ausgetauscht"
         },
         "data_description": {
           "data": "Bsp:\nnotification_icon: mdi:school-outline",

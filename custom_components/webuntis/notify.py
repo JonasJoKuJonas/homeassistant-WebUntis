@@ -47,7 +47,7 @@ def compare_list(old_list, new_list, blacklist=[]):
 
                         if matching_item is not None:
                             updated_items.append(
-                                ["lesson change", matching_item, old_item]
+                                ["lesson_change", matching_item, old_item]
                             )
                         else:
                             updated_items.append(["cancelled", new_item, old_item])
@@ -162,7 +162,7 @@ def get_changes(change, lesson, lesson_old):
         "code": "Status changed",
         "rooms": "Room changed",
         "cancelled": "Lesson cancelled",
-        "lesson change": "Lesson changed",
+        "lesson_change": "Lesson changed",
         "teachers": "Teacher changed",
     }[change]
 
@@ -182,7 +182,7 @@ def get_changes(change, lesson, lesson_old):
 
     if change == "cancelled":
         pass
-    elif change == "lesson change":
+    elif change == "lesson_change":
         changes["old"] = lesson_old["subjects"][0]["long_name"]
         changes["new"] = lesson["subjects"][0]["long_name"]
 
