@@ -22,6 +22,8 @@ DEFAULT_OPTIONS = {
 
 NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson change", "teachers", "code"]
 
+TEMPLATE_OPTIONS = ["message_title", "message", "discord"]
+
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"
 ICON_NEXT_LESSON_TO_WAKE_UP = "mdi:clock-start"
@@ -36,7 +38,7 @@ NAME_CALENDER = "WebUntis Calender"
 NAME_TODAY_START = "Today school start"
 NAME_TODAY_END = "Today school end"
 
-SCAN_INTERVAL = 60 * 5  # 5min
+SCAN_INTERVAL = 5 * 60  # 5min
 
 SIGNAL_NAME_PREFIX = f"signal_{DOMAIN}"
 

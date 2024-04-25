@@ -1,3 +1,6 @@
+from .const import TEMPLATE_OPTIONS
+
+
 def compare_list(old_list, new_list, blacklist=[]):
     updated_items = []
 
@@ -74,55 +77,6 @@ def compare_list(old_list, new_list, blacklist=[]):
     return updated_items
 
 
-def get_notification(updated_items):
-    notify = []
-
-    for change, lesson, lesson_old in updated_items:
-        title = "WebUntis"
-        title += (
-            " - "
-            + {
-                "code": "Status changed",
-                "rooms": "Room changed",
-                "cancelled": "Lesson cancelled",
-                "lesson change": "Lesson changed",
-                "teachers": "Teacher changed",
-            }[change]
-        )
-
-        message = ""
-        try:
-            message += f"Subject: {lesson['subjects'][0]['long_name']}\n"
-        except IndexError:
-            pass
-
-        message += f"Date: {lesson['start'].strftime('%d.%m.%Y')}\n"
-        message += f"Time: {lesson['start'].strftime('%H:%M')} - {lesson['end'].strftime('%H:%M')}\n"
-
-        if change == "cancelled":
-            pass
-        elif change == "lesson change":
-            message += f"Change (Lesson): {lesson_old['subjects'][0]['long_name']} -> {lesson['subjects'][0]['long_name']}"
-
-        elif change == "rooms":
-            try:
-                message += f"Change (Room): {lesson_old['rooms'][0]['name']} -> {lesson['rooms'][0]['name']}"
-            except KeyError:
-                pass
-        elif change == "teachers":
-            try:
-                message += f"Change (teachers): {lesson_old['teachers'][0]['name']} -> {lesson['teachers'][0]['name']}"
-            except KeyError:
-                pass
-
-        else:
-            message += f"Change ({change}): {lesson_old[change]} -> {lesson[change]}"
-
-        notify.append({"change": change, "title": title, "message": message})
-
-    return notify
-
-
 def get_notify_blacklist(current_list):
     blacklist = []
 
@@ -132,3 +86,121 @@ def get_notify_blacklist(current_list):
         )
 
     return blacklist
+
+
+def get_notification_data(changes, service):
+
+    message = ""
+    title = ""
+    data = {}
+
+    template = service.get("template", TEMPLATE_OPTIONS[0])
+
+    if template == "message_title":
+        title = f"WebUntis - {changes['title']}"
+        message = f"""
+        Subject: {changes["subject"]}
+        Date: {changes["date"]}
+        Time: {changes["time_start"]} - {changes["time_end"]}
+        """
+
+        if changes["change"] not in ["cancelled", "test"]:
+            message += f"""
+            {changes["change"]}
+            Old: {changes["old"]}
+            New: {changes["new"]}
+            """
+
+    elif template == "message":
+        message = f"{title}\n{message}"
+
+    elif template == "discord":
+        data = {
+            "embed": {
+                "title": changes["title"],
+                "color": 16750848,
+                "author": {
+                    "name": "WebUntis",
+                    "url": "https://www.home-assistant.io",
+                    "icon_url": "https://brands.home-assistant.io/webuntis/icon.png",
+                },
+                "fields": [
+                    {"name": "Subject", "value": changes["subject"], "inline": False},
+                    {"name": "Date", "value": changes["date"], "inline": False},
+                    {"name": "Time", "value": "", "inline": False},
+                    {"name": "Start", "value": changes["time_start"]},
+                    {"name": "End", "value": changes["time_end"]},
+                ],
+            }
+        }
+
+        if changes["change"] not in ["cancelled", "test"]:
+            data["embed"]["fields"].extend(
+                [
+                    {
+                        "name": changes["title"].replace(" changed", ""),
+                        "value": "",
+                        "inline": False,
+                    },
+                    {"name": "Old", "value": changes["old"]},
+                    {"name": "New", "value": changes["new"]},
+                ]
+            )
+
+    return {
+        "message": message,
+        "title": title,
+        "data": data,
+    }
+
+
+def get_changes(change, lesson, lesson_old):
+
+    changes = {"change": change}
+
+    changes["title"] = {
+        "code": "Status changed",
+        "rooms": "Room changed",
+        "cancelled": "Lesson cancelled",
+        "lesson change": "Lesson changed",
+        "teachers": "Teacher changed",
+    }[change]
+
+    changes["subject"] = ""
+
+    try:
+        changes["subject"] = lesson["subjects"][0].get("long_name", None)
+    except IndexError:
+        pass
+
+    changes["date"] = lesson["start"].strftime("%d.%m.%Y")
+    changes["time_start"] = lesson["start"].strftime("%H:%M")
+    changes["time_end"] = lesson["end"].strftime("%H:%M")
+
+    changes["old"] = None
+    changes["new"] = None
+
+    if change == "cancelled":
+        pass
+    elif change == "lesson change":
+        changes["old"] = lesson_old["subjects"][0]["long_name"]
+        changes["new"] = lesson["subjects"][0]["long_name"]
+
+    elif change == "rooms":
+        try:
+            changes["old"] = lesson_old["rooms"][0]["name"]
+            changes["new"] = lesson["rooms"][0]["name"]
+        except KeyError:
+            pass
+    elif change == "teachers":
+        try:
+            changes["old"] = lesson_old["teachers"][0]["name"]
+            changes["new"] = lesson["teachers"][0]["name"]
+        except KeyError:
+            pass
+
+        else:
+            changes["old"] = lesson_old[change]
+            changes["new"] = lesson[change]
+
+    return changes

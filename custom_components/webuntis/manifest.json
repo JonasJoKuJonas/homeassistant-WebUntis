@@ -1,14 +1,20 @@
 {
   "domain": "webuntis",
   "name": "Web Untis",
-  "codeowners": ["@JonasJoKuJonas"],
+  "codeowners": [
+    "@JonasJoKuJonas"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/",
   "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/issues",
-  "loggers": ["webuntis"],
+  "loggers": [
+    "webuntis"
+  ],
   "quality_scale": "silver",
-  "requirements": ["webuntis==0.1.22"],
+  "requirements": [
+    "webuntis==0.1.22"
+  ],
   "version": "v0.0.0"
 }

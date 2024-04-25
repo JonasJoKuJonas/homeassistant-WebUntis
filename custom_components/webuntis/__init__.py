@@ -927,6 +927,7 @@ class WebUntis:
             self.event_list_old = self.event_list
             return
 
+
         blacklist = get_notify_blacklist(self.event_list)
 
         updated_items = compare_list(
@@ -938,7 +939,29 @@ class WebUntis:
 
             updated_items = compact_list(updated_items, "notify")
 
-            _LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
+            for service in self.notify_config.values():
+
+                for change, lesson, lesson_old in updated_items:
+                    if change in service.get("options", []):
+
+                        data = {
+                            "data": service.get("data", {}),
+                            "target": service.get("target", {}),
+                        }
+
+                        changes = get_changes(change, lesson, lesson_old)
+
+                        data.update(get_notification_data(changes, service))
+
+                        await async_notify(
+                            self._hass,
+                            service_id=service["entity_id"],
+                            data=data,
+                        )
+
+                        _LOGGER.info(updated_items)
+
+            """_LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
 
             notifications = get_notification(updated_items)
 
@@ -962,7 +985,7 @@ class WebUntis:
                             self._hass,
                             service_id=service["entity_id"],
                             data=data,
-                        )
+                        )"""
 
         self.event_list_old = self.event_list
 

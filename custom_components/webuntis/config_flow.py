@@ -18,7 +18,15 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 
-from .const import CONFIG_ENTRY_VERSION, DEFAULT_OPTIONS, DOMAIN, NOTIFY_OPTIONS
+from .notify import get_changes, get_notification_data
+
+from .const import (
+    CONFIG_ENTRY_VERSION,
+    DEFAULT_OPTIONS,
+    DOMAIN,
+    NOTIFY_OPTIONS,
+    TEMPLATE_OPTIONS,
+)
 from .utils import async_notify, get_schoolyear, is_service
 
 _LOGGER = logging.getLogger(__name__)
@@ -262,6 +270,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _LOGGER.debug("Saving options: %s", user_input)
         options = dict(self.config_entry.options)  # old options
         options.update(user_input)  # update old options with new options
+        _LOGGER.debug("New options: %s", options)
         return self.async_create_entry(title="", data=options)
 
     async def async_step_filter(self, user_input: dict[str, str] = None) -> FlowResult:
@@ -527,19 +536,29 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
         else:
             for service in user_input.get("services", {}):
-                options = dict(self.config_entry.options["notify_config"][service])
-                notification = {
-                    "title": "WebUntis - Test message",
-                    "message": "Subject: Demo\nDate: {}\nTime: {}".format(
-                        *(datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S").split())
-                    ),
+
+                config = self.config_entry.options["notify_config"][service]
+
+                data = {
+                    "data": config.get("data", {}),
+                    "target": config.get("target", {}),
                 }
-                notification["target"] = options.get("target", {})
-                notification["data"] = options.get("data", {})
-                notify_entity_id = options.get("entity_id")
+
+                changes = {
+                    "change": "test",
+                    "title": "Test Notification",
+                    "subject": "Math",
+                    "date": datetime.datetime.now().strftime("%d.%m.%Y"),
+                    "time_start": datetime.datetime.now().strftime("%H:%M:%S"),
+                    "time_end": datetime.datetime.now().strftime("%H:%M:%S"),
+                }
+
+                data.update(get_notification_data(changes, config))
 
                 success = await async_notify(
-                    self.hass, service_id=notify_entity_id, data=notification
+                    self.hass,
+                    service_id=config["entity_id"],
+                    data=data,
                 )
                 if not success:
                     return await self.async_step_test_notify_service(
@@ -611,8 +630,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 description={"suggested_value": options.get("data")},
             ): selector.ObjectSelector(),
             vol.Optional(
-                "options", description={"suggested_value": options.get("options")}
-            ): cv.multi_select(NOTIFY_OPTIONS),
+                "template",
+                description={
+                    "suggested_value": options.get("template", TEMPLATE_OPTIONS[0])
+                },
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=TEMPLATE_OPTIONS,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    translation_key="notify_template",
+                )
+            ),
+            vol.Optional(
+                "options",
+                description={"suggested_value": options.get("options")},
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=NOTIFY_OPTIONS,
+                    multiple=True,
+                    translation_key="notify_options",
+                )
+            ),
         }
 
         return self.async_show_form(
