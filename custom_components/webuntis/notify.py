@@ -13,17 +13,6 @@ def compare_list(old_list, new_list, blacklist=[]):
                     new_item["code"] == "irregular" and old_item["code"] == "cancelled"
                 )
             ):
-                #
-                #
-                #
-                #
-                #
-                #
-                #
-                #
-                #
-                #
-                #
                 # if lesson is on blacklist to prevent spaming notifications
                 if any(
                     item["subject_id"] == new_item["subject_id"]
@@ -60,6 +49,7 @@ def compare_list(old_list, new_list, blacklist=[]):
                     and new_item["rooms"]
                     and old_item["rooms"]
                     and new_item["rooms"] != old_item["rooms"]
+                    and new_item["code"] != "cancelled"
                 ):
                     updated_items.append(["rooms", new_item, old_item])
 
@@ -69,6 +59,7 @@ def compare_list(old_list, new_list, blacklist=[]):
                     and new_item["teachers"]
                     and old_item["teachers"]
                     and new_item["teachers"] != old_item["teachers"]
+                    and new_item["code"] != "cancelled"
                 ):
                     updated_items.append(["teachers", new_item, old_item])
 
