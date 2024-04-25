@@ -93,6 +93,11 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
                 "options": options.get("notify_options", {}),
             }
 
+    for notify_key, notify_value in options["notify_config"].items():
+        options["notify_config"][notify_key]["options"][
+            options["notify_config"][notify_key]["options"].index("lesson change")
+        ] = "lesson_change"
+
     for key in [
         "notify_entity_id",
         "notify_target",
@@ -926,7 +931,6 @@ class WebUntis:
         if not self.event_list_old:
             self.event_list_old = self.event_list
             return
-
 
         blacklist = get_notify_blacklist(self.event_list)
 

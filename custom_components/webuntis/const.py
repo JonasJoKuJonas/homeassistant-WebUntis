@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 15
+CONFIG_ENTRY_VERSION = 16
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
