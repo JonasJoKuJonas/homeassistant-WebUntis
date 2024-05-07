@@ -89,18 +89,14 @@ def get_notification_data(changes, service):
 
     if template == "message_title":
         title = f"WebUntis - {changes['title']}"
-        message = f"""
-        Subject: {changes["subject"]}
-        Date: {changes["date"]}
-        Time: {changes["time_start"]} - {changes["time_end"]}
-        """
+        message = f"""Subject: {changes["subject"]}
+Date: {changes["date"]}
+Time: {changes["time_start"]} - {changes["time_end"]}"""
 
         if changes["change"] not in ["cancelled", "test"]:
-            message += f"""
-            {changes["change"]}
-            Old: {changes["old"]}
-            New: {changes["new"]}
-            """
+            message += f"""{changes["change"]}
+Old: {changes["old"]}
+New: {changes["new"]}"""
 
     elif template == "message":
         message = f"{title}\n{message}"
