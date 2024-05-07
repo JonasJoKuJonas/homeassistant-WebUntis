@@ -97,15 +97,13 @@
           "entity_id": "Notify Service ID",
           "target": "Plattformspezifische Targetdaten",
           "data": "Plattformspezifische Benachrichtigungs-Daten",
-          "code": "Stunden-Status ändert sich",
-          "rooms": "Raum ändert sich",
-          "teachers": "Lehrer ändert sich",
-          "cancelled": "Stunde fällt aus",
-          "lesson_change": "Eine Stunde wurde ausgetauscht"
+          "template": "Benachrichtigungs-Template",
+          "options": "Benachrichtigen, wenn"
         },
         "data_description": {
           "data": "Bsp:\nnotification_icon: mdi:school-outline",
-          "entity_id": "Bsp: notify.discord"
+          "entity_id": "Bsp: notify.discord",
+          "template": "Kann Benachrichtigungs-Daten überschreiben"
         }
       },
       "notify_menu": {
@@ -116,6 +114,24 @@
           "remove_notify_service": "Notify Dienst löschen",
           "test_notify_service": "Notify Dienst testen"
         }
+      }
+    }
+  },
+  "selector": {
+    "notify_options": {
+      "options": {
+        "code": "Stunden-Status ändert sich",
+        "rooms": "Raum Änderung",
+        "teachers": "Lehrer Änderung",
+        "cancelled": "Stunde ausfällt",
+        "lesson_change": "Stunde ausgetauscht"
+      }
+    },
+    "notify_template": {
+      "options": {
+        "message_title": "Nachricht & Titel",
+        "message": "Nachricht",
+        "discord": "Discord"
       }
     }
   },
