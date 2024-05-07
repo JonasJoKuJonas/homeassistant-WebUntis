@@ -97,8 +97,8 @@
           "entity_id": "Notify Service ID",
           "target": "Platform-Specific Target Data",
           "data": "Platform-Specific Notification Data",
-          "notify_options": "Notify on",
-          "template": "Notify Template"
+          "template": "Notify Template",
+          "options": "Notify on"
         },
         "data_description": {
           "data": "e.g.,\nnotification_icon: mdi:school-outline",

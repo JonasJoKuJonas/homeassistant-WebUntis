@@ -97,15 +97,13 @@
           "entity_id": "Notify Service ID",
           "target": "Platform-Specific Target Data",
           "data": "Platform-Specific Notification Data",
-          "code": "Lesson status changed",
-          "rooms": "Room changed",
-          "teachers": "Teacher changed",
-          "cancelled": "Lesson is cancelled",
-          "lesson_change": "Lesson was swapped"
+          "template": "Notify Template",
+          "options": "Notify on"
         },
         "data_description": {
           "data": "e.g.,\nnotification_icon: mdi:school-outline",
-          "entity_id": "e.g., notify.discord"
+          "entity_id": "e.g., notify.discord",
+          "template": "may overwrite data keys"
         }
       },
       "notify_menu": {
@@ -116,6 +114,24 @@
           "remove_notify_service": "remove notify service",
           "test_notify_service": "test notify service"
         }
+      }
+    }
+  },
+  "selector": {
+    "notify_options": {
+      "options": {
+        "code": "Lesson status changed",
+        "rooms": "Room changed",
+        "teachers": "Teacher changed",
+        "cancelled": "Lesson is cancelled",
+        "lesson_change": "Lesson was swapped"
+      }
+    },
+    "notify_template": {
+      "options": {
+        "message_title": "Message & Title",
+        "message": "Message",
+        "discord": "Discord"
       }
     }
   },
