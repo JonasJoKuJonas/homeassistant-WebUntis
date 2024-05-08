@@ -23,11 +23,7 @@
           "username": "Username",
           "password": "Password",
           "timetable_source": "Timetable source",
-          "timetable_source_id": "Full name/Class"
-        },
-        "data_description": {
-          "timetable_source": "Select the source of the timetable",
-          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+          "timetable_source_id": "Full name/Class/Subject/Room"
         }
       }
     }
@@ -129,15 +125,6 @@
         "teachers": "Teacher changed",
         "cancelled": "Lesson is cancelled",
         "lesson_change": "Lesson was swapped"
-      }
-    },
-    "timetable_source": {
-      "options": {
-        "student": "Student",
-        "klasse": "Klasse",
-        "teacher": "Teacher",
-        "subject": "Subject",
-        "room": "Raum"
       }
     },
     "notify_template": {
