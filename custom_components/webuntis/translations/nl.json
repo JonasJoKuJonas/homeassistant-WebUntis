@@ -23,7 +23,10 @@
           "username": "Gebruikersnaam",
           "password": "Wachtwoord",
           "timetable_source": "Tijdschema bron",
-          "timetable_source_id": "Volledige naam/ Klas/ Onderwerp/ Kamer"
+          "timetable_source_id": "Full name/Class"
+        },
+        "data_description": {
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
         }
       }
     }
@@ -125,6 +128,15 @@
         "teachers": "Teacher changed",
         "cancelled": "Lesson is cancelled",
         "lesson_change": "Lesson was swapped"
+      }
+    },
+    "timetable_source": {
+      "options": {
+        "student": "Student",
+        "klasse": "Class",
+        "teacher": "Teacher",
+        "subject": "Subject",
+        "room": "Raum"
       }
     },
     "notify_template": {
