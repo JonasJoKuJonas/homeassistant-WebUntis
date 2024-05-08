@@ -23,11 +23,10 @@
           "username": "Benutzername",
           "password": "Passwort",
           "timetable_source": "Stundenplan-Quelle",
-          "timetable_source_id": "Full name/Class"
+          "timetable_source_id": "Voller Name/Klasse"
         },
         "data_description": {
-          "timetable_source": "Select the source of the timetable",
-          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
         }
       }
     }
@@ -133,10 +132,10 @@
     },
     "timetable_source": {
       "options": {
-        "student": "Student",
+        "student": "Schüler",
         "klasse": "Klasse",
-        "teacher": "Teacher",
-        "subject": "Subject",
+        "teacher": "Lehrer",
+        "subject": "Fach",
         "room": "Raum"
       }
     },
