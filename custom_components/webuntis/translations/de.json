@@ -23,7 +23,11 @@
           "username": "Benutzername",
           "password": "Passwort",
           "timetable_source": "Stundenplan-Quelle",
-          "timetable_source_id": "Voller Name/Klasse/Fach/Raum"
+          "timetable_source_id": "Full name/Class"
+        },
+        "data_description": {
+          "timetable_source": "Select the source of the timetable",
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
         }
       }
     }
@@ -125,6 +129,15 @@
         "teachers": "Lehrer Änderung",
         "cancelled": "Stunde ausfällt",
         "lesson_change": "Stunde ausgetauscht"
+      }
+    },
+    "timetable_source": {
+      "options": {
+        "student": "Student",
+        "klasse": "Klasse",
+        "teacher": "Teacher",
+        "subject": "Subject",
+        "room": "Raum"
       }
     },
     "notify_template": {
