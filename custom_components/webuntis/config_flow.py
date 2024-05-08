@@ -232,6 +232,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                                 "klasse",
                                 "teacher",
                             ],  # "subject", "room"
+                            translation_key="timetable_source",
                             mode="dropdown",
                         )
                     ),
