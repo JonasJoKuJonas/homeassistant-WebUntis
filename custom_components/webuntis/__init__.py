@@ -94,9 +94,10 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             }
 
     for notify_key, notify_value in options["notify_config"].items():
-        options["notify_config"][notify_key]["options"][
-            options["notify_config"][notify_key]["options"].index("lesson change")
-        ] = "lesson_change"
+        if "lesson change" in options["notify_config"][notify_key]["options"]:
+            options["notify_config"][notify_key]["options"][
+                options["notify_config"][notify_key]["options"].index("lesson change")
+            ] = "lesson_change"
 
     for key in [
         "notify_entity_id",
