@@ -153,6 +153,7 @@ class WebUntis:
         self.password = config.data["password"]
         self.timetable_source = config.data["timetable_source"]
         self.timetable_source_id = config.data["timetable_source_id"]
+        self.title = config.title
 
         self.calendar_long_name = config.options["calendar_long_name"]
         self.calendar_show_cancelled_lessons = config.options[
@@ -956,7 +957,7 @@ class WebUntis:
 
                         changes = get_changes(change, lesson, lesson_old)
 
-                        data.update(get_notification_data(changes, service))
+                        data.update(get_notification_data(changes, service, self.title))
 
                         await async_notify(
                             self._hass,

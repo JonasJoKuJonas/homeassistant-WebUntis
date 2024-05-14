@@ -79,7 +79,7 @@ def get_notify_blacklist(current_list):
     return blacklist
 
 
-def get_notification_data(changes, service):
+def get_notification_data(changes, service, entry_title):
 
     message = ""
     title = ""
@@ -88,7 +88,7 @@ def get_notification_data(changes, service):
     template = service.get("template", TEMPLATE_OPTIONS[0])
 
     if template == "message_title":
-        title = f"WebUntis - {changes['title']}"
+        title = f"WebUntis ({entry_title}) - {changes['title']}"
         message = f"""Subject: {changes["subject"]}
 Date: {changes["date"]}
 Time: {changes["time_start"]} - {changes["time_end"]}"""
@@ -105,6 +105,7 @@ New: {changes["new"]}"""
         data = {
             "embed": {
                 "title": changes["title"],
+                "description": entry_title,
                 "color": 16750848,
                 "author": {
                     "name": "WebUntis",

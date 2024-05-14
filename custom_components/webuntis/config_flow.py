@@ -554,7 +554,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "time_end": datetime.datetime.now().strftime("%H:%M:%S"),
                 }
 
-                data.update(get_notification_data(changes, config))
+                data.update(
+                    get_notification_data(changes, config, self.config_entry.title)
+                )
 
                 success = await async_notify(
                     self.hass,
