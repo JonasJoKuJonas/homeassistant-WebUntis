@@ -18,8 +18,6 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 
-from .notify import get_changes, get_notification_data
-
 from .const import (
     CONFIG_ENTRY_VERSION,
     DEFAULT_OPTIONS,
@@ -27,6 +25,7 @@ from .const import (
     NOTIFY_OPTIONS,
     TEMPLATE_OPTIONS,
 )
+from .notify import get_notification_data
 from .utils import async_notify, get_schoolyear, is_service
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,7 +56,7 @@ async def validate_input(
     try:
         socket.gethostbyname(user_input["server"])
     except Exception as exc:
-        _LOGGER.error(f"Cannot resolve hostname: {exc}")
+        _LOGGER.error("Cannot resolve hostname: %s", exc)
         raise CannotConnect from exc
 
     try:
@@ -73,7 +72,7 @@ async def validate_input(
     except webuntis.errors.BadCredentialsError as ext:
         raise BadCredentials from ext
     except requests.exceptions.ConnectionError as exc:
-        _LOGGER.error(f"webuntis.Session connection error: {exc}")
+        _LOGGER.error("webuntis.Session connection error: %s", exc)
         raise CannotConnect from exc
     except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
         raise SchoolNotFound from exc
@@ -246,25 +245,27 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
+OPTIONS_MENU = [
+    "filter",
+    "calendar",
+    "notify_menu",
+    "backend",
+]
+
+
 class OptionsFlowHandler(config_entries.OptionsFlow):
     """Handle the option flow for WebUntis."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry
-        self.OPTIONS_MENU = [
-            "filter",
-            "calendar",
-            "notify_menu",
-            "backend",
-        ]
 
     async def async_step_init(
         self,
         user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
-        return self.async_show_menu(step_id="init", menu_options=self.OPTIONS_MENU)
+        return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
 
     async def save(self, user_input):
         """Save the options"""
