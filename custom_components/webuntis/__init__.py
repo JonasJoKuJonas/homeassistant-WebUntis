@@ -967,32 +967,6 @@ class WebUntis:
 
                         _LOGGER.info(updated_items)
 
-            """_LOGGER.debug("NOTIFICATIONS: %s", str(updated_items))
-
-            notifications = get_notification(updated_items)
-
-            for service in self.notify_config.values():
-                notification = {}
-
-                data = service.get("data", {})
-                target = service.get("target", {})
-
-                for notification in notifications:
-                    _LOGGER.warning(notification)
-                    if notification["change"] in service["options"]:
-                        data = {
-                            "message": notification["message"],
-                            "title": notification["title"],
-                            "data": data,
-                            "target": target,
-                        }
-
-                        await async_notify(
-                            self._hass,
-                            service_id=service["entity_id"],
-                            data=data,
-                        )"""
-
         self.event_list_old = self.event_list
 
 
