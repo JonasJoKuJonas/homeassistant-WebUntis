@@ -168,4 +168,6 @@ The automation will be triggered according to the time you defined in the sensor
 for more examples feel free to check in #code-sharing on [Discord](https://discord.com/channels/1090218586565509170/1208159703520120902)
 
 
+# Support ♥️
+<a href="https://paypal.me/JonasJoKu"><img src="https://raw.githubusercontent.com/andreostrovsky/donate-with-paypal/925c5a9e397363c6f7a477973fdeed485df5fdd9/blue.svg" height="40"></a>  
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/Jonas_JoKu)
