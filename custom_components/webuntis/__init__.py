@@ -191,6 +191,7 @@ class WebUntis:
         )
         self._loged_in = False
         self._last_status_request_failed = False
+        self._no_lessons = False
         self.updating = 0
         self.issue = False
 
@@ -546,13 +547,16 @@ class WebUntis:
         try:
             lesson = lesson_list[0]
         except IndexError:
-            _LOGGER.warning(
-                "Updating the property _next_class of '%s@%s' failed - No lesson in the next %s days",
-                self.school,
-                self.username,
-                DAYS_TO_FUTURE,
-            )
+            if not self._no_lessons:
+                _LOGGER.info(
+                    "Updating the property _next_class of '%s@%s' failed - No lesson in the next %s days",
+                    self.school,
+                    self.username,
+                    DAYS_TO_FUTURE,
+                )
+                self._no_lessons = True
             return None
+        self._no_lessons = False
 
         self.next_class_json = self.get_lesson_json(lesson)
 
@@ -586,13 +590,16 @@ class WebUntis:
         try:
             return sorted(time_list_new)[0].astimezone()
         except IndexError:
-            _LOGGER.warning(
-                "Updating the property _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
-                self.school,
-                self.username,
-                DAYS_TO_FUTURE,
-            )
+            if not self._no_lessons:
+                _LOGGER.info(
+                    "Updating the property _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
+                    self.school,
+                    self.username,
+                    DAYS_TO_FUTURE,
+                )
+                self._no_lessons = True
             return None
+        self._no_lessons = False
 
     def _next_day_json(self):
         if self.next_lesson_to_wake_up is None:
