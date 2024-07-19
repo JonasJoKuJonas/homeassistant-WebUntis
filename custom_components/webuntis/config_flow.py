@@ -334,6 +334,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.TextSelector(
                         selector.TextSelectorConfig(multiline=True)
                     ),
+                    vol.Required(
+                        "invalid_subjects",
+                        default=self.config_entry.options.get(
+                            "invalid_subjects"
+                        ),
+                    ): selector.BooleanSelector(),
                 }
             ),
         )

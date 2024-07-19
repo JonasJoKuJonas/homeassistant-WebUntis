@@ -73,6 +73,7 @@ The format for the student's full name must be <"first name"> <"middle name">, <
 | filter_mode | The mode of the filter, e.g., `Blacklist`. |
 | filter_subjects | Subjects excluded from any data. |
 | filter_description | Exclude all lessons with specific text in the lesson info. |
+| invalid_subjects | use lessons with invalid subjects. |
 
 ### Calendar
 | Option | Description | Default |

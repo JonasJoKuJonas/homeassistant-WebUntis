@@ -181,6 +181,8 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
+        self.invalid_subjects = config.options.get("invalid_subjects")
+
         # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
@@ -642,10 +644,15 @@ class WebUntis:
                     if self.calendar_show_room_change and lesson.original_rooms:
                         prefix = "Room change: "
                     if self.calendar_long_name:
-                        event["summary"] = prefix + lesson.subjects[0].long_name
-
+                        try:
+                            event["summary"] = prefix + lesson.subjects[0].long_name
+                        except:
+                            event["summary"] = prefix + "invalid lesson"
                     else:
-                        event["summary"] = prefix + lesson.subjects[0].name
+                        try:
+                            event["summary"] = prefix + lesson.subjects[0].name
+                        except:
+                            event["summary"] = prefix + "invalid lesson"
 
                     if lesson.code == "cancelled":
                         event["summary"] = "Cancelled: " + event["summary"]
@@ -711,17 +718,26 @@ class WebUntis:
         result = {}
 
         for lesson in table:
-            if (
-                lesson.subjects
-                and (not filter_on or self.check_lesson(lesson, count_cancelled))
-                and (count_cancelled or lesson.code != "cancelled")
-            ):
-                name = lesson.subjects[0].long_name
+            try:
+                if (
+                    lesson.subjects
+                    and (not filter_on or self.check_lesson(lesson, count_cancelled))
+                    and (count_cancelled or lesson.code != "cancelled")
+                ):
+                    name = lesson.subjects[0].long_name
 
-                if name in result:
-                    result[name] += 1
+                    if name in result:
+                        result[name] += 1
+                    else:
+                        result[name] = 1
+            except:
+                if self.invalid_subjects:
+                    if "unknown" in result:
+                        result["unknown"] += 1
+                    else:
+                        result["unknown"] = 1
                 else:
-                    result[name] = 1
+                    continue
 
         sorted_result = dict(
             sorted(result.items(), key=lambda item: item[1], reverse=True)
@@ -762,7 +778,10 @@ class WebUntis:
             if not lesson.subjects:
                 return False
         except IndexError:
-            return False
+            if self.invalid_subjects:
+                return True
+            else:
+                return False
 
         for filter_description in self.filter_description:
             if (
@@ -812,7 +831,7 @@ class WebUntis:
                 for subject in lesson.subjects
             ]
         except:
-            pass
+            dic["subjects"] = [{"name": "invalid lesson", "long_name": "invalid lesson"}]
 
         if self.extended_timetable:
             try:
@@ -885,7 +904,11 @@ class WebUntis:
         dic["start"] = lesson.start.astimezone()
         dic["end"] = lesson.end.astimezone()
 
-        dic["subject_id"] = lesson.subjects[0].id
+        try:
+            dic["subject_id"] = lesson.subjects[0].id
+        except:
+            pass
+
         dic["id"] = int(lesson.id)
         dic["lsnumber"] = int(lesson.lsnumber)
 
@@ -903,8 +926,7 @@ class WebUntis:
                 for subject in lesson.subjects
             ]
         except:
-            pass
-
+            dic["subjects"] = [{"name": "invalid lesson", "long_name": "invalid lesson"}]
         try:
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
