@@ -12,8 +12,9 @@
       "student_not_found": "Student niet gevonden. Controleer de naam of kies een andere bron.",
       "teacher_not_found": "Leraar niet gevonden. Controleer de naam of kies een andere bron.",
       "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
-      "no_rights_for_timetable": "Geen rechten voor het tijdschema.",
-      "unknown": "Onverwachte fout"
+      "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
+      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
+      "unknown": "Unexpected error. View Logs for more infos."
     },
     "step": {
       "user": {
@@ -27,6 +28,29 @@
         },
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+        }
+      },
+      "timetable_source": {
+        "description": "Select the data source"
+      },
+      "pick_student": {
+        "description": "Enter a Student Name",
+        "data": {
+          "surname": "Surname",
+          "fore_name": "Fore Name"
+        }
+      },
+      "pick_teacher": {
+        "description": "Enter a Teacher Name",
+        "data": {
+          "surname": "Surname",
+          "fore_name": "Fore Name"
+        }
+      },
+      "pick_klasse": {
+        "description": "Enter class Name",
+        "data": {
+          "klasse": "Class"
         }
       }
     }
@@ -132,8 +156,9 @@
     },
     "timetable_source": {
       "options": {
+        "personal": "Personal Timetable",
         "student": "Student",
-        "klasse": "Class",
+        "klasse": "Klasse",
         "teacher": "Teacher",
         "subject": "Subject",
         "room": "Raum"
