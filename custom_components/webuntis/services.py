@@ -10,7 +10,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.service import async_extract_config_entry_ids
 
 from .const import DOMAIN
-from .utils import get_schoolyear
+from .utils.utils import get_schoolyear
 
 _LOGGER = logging.getLogger(__name__)
 

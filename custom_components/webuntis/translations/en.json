@@ -17,6 +17,13 @@
     },
     "step": {
       "user": {
+        "description": "Login via",
+        "menu_options": {
+          "login_password": "Username & Password",
+          "qr_code": "QR-Code"
+        }
+      },
+      "login_password": {
         "data": {
           "server": "Server",
           "school": "School",
@@ -28,6 +35,17 @@
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
         }
+      },
+      "qr_code": {
+        "data": {
+          "url": "Url",
+          "school": "School",
+          "user": "Username",
+          "key": "Key"
+        }
+      },
+      "timetable_source": {
+        "data_description": "Select the data source"
       }
     }
   },
@@ -132,6 +150,7 @@
     },
     "timetable_source": {
       "options": {
+        "own": "Personal Timetable",
         "student": "Student",
         "klasse": "Class",
         "teacher": "Teacher",

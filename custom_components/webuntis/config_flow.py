@@ -10,11 +10,17 @@ from urllib.parse import urlparse
 
 import requests
 import voluptuous as vol
+
+# import webuntis.session
+
+# pylint: disable=maybe-no-member
 import webuntis
+from .utils.login_qr import login_qr
+
+
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 
@@ -26,9 +32,63 @@ from .const import (
     TEMPLATE_OPTIONS,
 )
 from .notify import get_notification_data
-from .utils import async_notify, get_schoolyear, is_service
+from .utils.errors import *
+from .utils.utils import async_notify, get_schoolyear, is_service
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def validate_login(
+    hass: HomeAssistant, credentials: dict[str, Any]
+) -> dict[str, Any]:
+
+    errors = {}
+
+    if not credentials["server"].startswith(("http://", "https://")):
+        try:
+            socket.gethostbyname(credentials["server"])
+        except Exception as exc:
+            _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
+            errors["server"] = "cannot_connect"
+            return errors
+
+        credentials["server"] = "https://" + credentials["server"]
+
+    if credentials["login_method"] == "qr-code":
+        try:
+            session = await hass.async_add_executor_job(
+                login_qr,
+                credentials["server"],
+                credentials["school"],
+                credentials["user"],
+                credentials["key"],
+            )
+        except BadCredentials:
+            errors["base"] = "invalid_auth"
+
+    elif credentials["login_method"] == "password":
+
+        try:
+            session = webuntis.Session(
+                server=credentials["server"],
+                school=credentials["school"],
+                username=credentials["username"],
+                password=credentials["password"],
+                useragent="home-assistant",
+            )
+            await hass.async_add_executor_job(session.login)
+        except webuntis.errors.BadCredentialsError:
+            errors["username"] = "bad_credentials"
+        except requests.exceptions.ConnectionError as exc:
+            _LOGGER.error("webuntis.Session connection error: %s", exc)
+            errors["server"] = "cannot_connect"
+        except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
+            errors["school"] = "school_not_found"
+        except Exception as exc:
+            _LOGGER.error("webuntis.Session unknown error: %s", exc)
+            errors["base"] = "unknown"
+
+    return errors, session
 
 
 async def validate_input(
@@ -60,7 +120,7 @@ async def validate_input(
         raise CannotConnect from exc
 
     try:
-        # pylint: disable=maybe-no-member
+
         session = webuntis.Session(
             server=user_input["server"],
             school=user_input["school"],
@@ -117,19 +177,33 @@ async def validate_input(
     return {"title": user_input["username"]}
 
 
-def test_timetable(session, timetable_source, source):
+def test_timetable(session, timetable_source, source=None):
     """test if timetable is allowed to be fetched"""
     day = datetime.date.today()
     school_years = session.schoolyears()
     if not get_schoolyear(school_year=school_years):
         day = school_years[-1].start.date()
-    session.timetable(start=day, end=day, **{timetable_source: source})
+
+    try:
+        if timetable_source == "own":
+            session.my_timetable(start=day, end=day)
+        else:
+            session.timetable(start=day, end=day, **{timetable_source: source})
+    except Exception as exc:
+        _LOGGER.error("Error testing timetable: %s", exc)
+        return {"base", "error"}
+
+
+CONFIG_MENU = ["login_password", "qr_code"]
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for webuntisnew."""
 
     VERSION = CONFIG_ENTRY_VERSION
+
+    _session_temp = None
+    _user_input_temp = {}
 
     @staticmethod
     @callback
@@ -140,6 +214,122 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return OptionsFlowHandler(config_entry)
 
     async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return self.async_show_menu(step_id="user", menu_options=CONFIG_MENU)
+
+    async def async_step_qr_code(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+
+        if user_input is not None:
+            errors, self._session_temp = await validate_login(
+                self.hass, {**user_input, "login_method": "qr-code"}
+            )
+            if not errors:
+                self._user_input_temp = user_input
+                return await self.async_step_timetable_source()
+
+        return self.async_show_form(
+            step_id="qr_code",
+            errors=errors,
+            data_schema=vol.Schema(
+                {
+                    vol.Required("server"): str,
+                    vol.Required("school"): str,
+                    vol.Required("user"): str,
+                    vol.Required("key"): str,
+                }
+            ),
+        )
+
+    async def async_step_login_password(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        if user_input is not None:
+            errors, self._session_temp = await validate_login(
+                self.hass, {**user_input, "login_method": "password"}
+            )
+
+            if not errors:
+                self._user_input_temp = user_input
+                return await self.async_step_timetable_source()
+
+        user_input = user_input or {}
+
+        return self.async_show_form(
+            step_id="login_password",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("server", default=user_input.get("server", "")): str,
+                    vol.Required("school", default=user_input.get("school", "")): str,
+                    vol.Required(
+                        "username", default=user_input.get("username", "")
+                    ): str,
+                    vol.Required(
+                        "password", default=user_input.get("password", "")
+                    ): str,
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_timetable_source(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
+        if user_input is not None:
+            if user_input["timetable_source"] == "own":
+                errors = await self.hass.async_add_executor_job(
+                    test_timetable, self._session_temp, "own"
+                )
+                if not errors:
+                    self._user_input_temp.update(user_input)
+                    self._user_input_temp.update({"timetable_source_id": "personal"})
+                    return await self.create_entry()
+
+        return self.async_show_form(
+            step_id="timetable_source",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "timetable_source",
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "own",
+                                "student",
+                                "klasse",
+                                "teacher",
+                            ],  # "subject", "room"
+                            translation_key="timetable_source",
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def create_entry(self):
+
+        user_input = self._user_input_temp
+        await self.async_set_unique_id(
+            # pylint: disable=consider-using-f-string
+            "{username}@{timetable_source_id}@{school}".format(**user_input)
+            .lower()
+            .replace(" ", "-")
+        )
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(
+            title=user_input["username"],
+            data=user_input,
+            options=DEFAULT_OPTIONS,
+        )
+
+    async def async_step_login_password_(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
@@ -670,39 +860,3 @@ def _create_subject_list(server):
     subjects = server.subjects
 
     return [subject.name for subject in subjects]
-
-
-class CannotConnect(HomeAssistantError):
-    """Error to indicate we cannot connect."""
-
-
-class InvalidAuth(HomeAssistantError):
-    """Error to indicate there is invalid auth."""
-
-
-class BadCredentials(HomeAssistantError):
-    """Error to indicate there are bad credentials."""
-
-
-class SchoolNotFound(HomeAssistantError):
-    """Error to indicate the school is not found."""
-
-
-class NameSplitError(HomeAssistantError):
-    """Error to indicate the name format is wrong."""
-
-
-class StudentNotFound(HomeAssistantError):
-    """Error to indicate there is no student with this name."""
-
-
-class TeacherNotFound(HomeAssistantError):
-    """Error to indicate there is no teacher with this name."""
-
-
-class ClassNotFound(HomeAssistantError):
-    """Error to indicate there is no class with this name."""
-
-
-class NoRightsForTimetable(HomeAssistantError):
-    """Error to indicate there is no right for timetable."""

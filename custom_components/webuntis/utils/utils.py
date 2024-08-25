@@ -93,6 +93,8 @@ def compact_list(list, type=None):
 
 
 def get_schoolyear(school_year, date=datetime.now().date()):
+    if not school_year:
+        return None
     for time_range in school_year:
         if time_range.start.date() <= date <= time_range.end.date():
             return time_range
