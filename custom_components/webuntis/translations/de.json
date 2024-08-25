@@ -12,8 +12,9 @@
       "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
-      "no_rights_for_timetable": "Keine Rechte für den Stundenplan.",
-      "unknown": "Unerwarteter Fehler"
+      "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
+      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
+      "unknown": "Unexpected error. View Logs for more infos."
     },
     "step": {
       "user": {
@@ -27,6 +28,29 @@
         },
         "data_description": {
           "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
+        }
+      },
+      "timetable_source": {
+        "description": "Select the data source"
+      },
+      "pick_student": {
+        "description": "Enter a Student Name",
+        "data": {
+          "surname": "Surname",
+          "fore_name": "Fore Name"
+        }
+      },
+      "pick_teacher": {
+        "description": "Enter a Teacher Name",
+        "data": {
+          "surname": "Surname",
+          "fore_name": "Fore Name"
+        }
+      },
+      "pick_klasse": {
+        "description": "Enter class Name",
+        "data": {
+          "klasse": "Class"
         }
       }
     }
@@ -132,6 +156,7 @@
     },
     "timetable_source": {
       "options": {
+        "personal": "Personal Timetable",
         "student": "Schüler",
         "klasse": "Klasse",
         "teacher": "Lehrer",
