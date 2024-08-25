@@ -12,9 +12,9 @@
       "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
-      "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
-      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
-      "unknown": "Unexpected error. View Logs for more infos."
+      "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
+      "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
+      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
     },
     "step": {
       "user": {
@@ -31,26 +31,26 @@
         }
       },
       "timetable_source": {
-        "description": "Select the data source"
+        "description": "Wähle die Quelle"
       },
       "pick_student": {
-        "description": "Enter a Student Name",
+        "description": "Name eines Schülers eingeben",
         "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name"
+          "surname": "Nachnahme",
+          "fore_name": "Vornahme"
         }
       },
       "pick_teacher": {
-        "description": "Enter a Teacher Name",
+        "description": "Name eines Lehrers eingeben",
         "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name"
+          "surname": "Nachnahme",
+          "fore_name": "Vornahme"
         }
       },
       "pick_klasse": {
-        "description": "Enter class Name",
+        "description": "Klasse eingeben",
         "data": {
-          "klasse": "Class"
+          "klasse": "Klasse"
         }
       }
     }
@@ -156,7 +156,7 @@
     },
     "timetable_source": {
       "options": {
-        "personal": "Personal Timetable",
+        "personal": "Persönlicher Stundenplan (empfohlen)",
         "student": "Schüler",
         "klasse": "Klasse",
         "teacher": "Lehrer",
