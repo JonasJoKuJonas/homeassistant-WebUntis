@@ -20,6 +20,7 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
+# pylint: disable=maybe-no-member
 import webuntis  # pylint: disable=import-self
 
 from .const import (
@@ -32,7 +33,9 @@ from .const import (
 )
 from .notify import *
 from .services import async_setup_services
-from .utils import compact_list, get_schoolyear, async_notify
+from .utils.utils import compact_list, async_notify
+
+from .utils.web_untis import get_timetable_object, get_schoolyear
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -181,7 +184,6 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
-        # pylint: disable=maybe-no-member
         self.session = webuntis.Session(
             username=self.username,
             password=self.password,
@@ -241,10 +243,28 @@ class WebUntis:
     async def _async_status_request(self) -> None:
         """Request status and update properties."""
 
-        suggess = await self._hass.async_add_executor_job(self.webuntis_login)
+        login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 
-        if not suggess:
-            return
+        if login_error:
+            if str(login_error) == "bad credentials":
+                self.issue = True
+                ir.async_create_issue(
+                    self._hass,
+                    DOMAIN,
+                    "bad_credentials",
+                    is_fixable=True,
+                    severity=ir.IssueSeverity.ERROR,
+                    translation_key="bad_credentials",
+                    data={
+                        "unique_id": self.unique_id,
+                        "config_data": dict(self._config.data),
+                        "entry_id": self._config.entry_id,
+                    },
+                )
+        elif self.issue:
+            _LOGGER.info("delete issue bad_credentials")
+            ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
+            self.issue = False
 
         # _LOGGER.debug("updating data")
 
@@ -403,7 +423,7 @@ class WebUntis:
                 try:
                     self.session.schoolyears()
                     self.updating += 1
-                    return True
+                    return None
                 except webuntis.errors.NotLoggedInError:
                     _LOGGER.debug("Session invalid")
                     self._loged_in = False
@@ -417,12 +437,7 @@ class WebUntis:
                 self._loged_in = True
                 self.updating += 1
 
-                if self.issue:
-                    _LOGGER.info("delete issue bad_credentials")
-                    ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
-                    self.issue = False
-
-                return True
+                return None
             except OSError as error:
                 # Login error, set all properties to unknown.
                 self.is_class = None
@@ -442,23 +457,7 @@ class WebUntis:
                     )
                 self._last_status_request_failed = True
 
-                if str(error) == "bad credentials":
-                    self.issue = True
-                    ir.async_create_issue(
-                        self._hass,
-                        DOMAIN,
-                        "bad_credentials",
-                        is_fixable=True,
-                        severity=ir.IssueSeverity.ERROR,
-                        translation_key="bad_credentials",
-                        data={
-                            "unique_id": self.unique_id,
-                            "config_data": dict(self._config.data),
-                            "entry_id": self._config.entry_id,
-                        },
-                    )
-
-                return
+                return error
             except Exception as error:
                 _LOGGER.error(
                     "Login to WebUntis '%s@%s' failed - ERROR: %s",
@@ -467,7 +466,7 @@ class WebUntis:
                     error,
                 )
                 self._last_status_request_failed = True
-                return
+                return error
 
     def webuntis_logout(self):
         self.updating -= 1
@@ -476,30 +475,14 @@ class WebUntis:
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
-    def get_timetable_object(self):
-        """return the object to request the timetable"""
-        if self.timetable_source == "student":
-            source = self.session.get_student(
-                self.timetable_source_id[1], self.timetable_source_id[0]
-            )
-        elif self.timetable_source == "klasse":
-            klassen = self.session.klassen()
-            # pylint: disable=maybe-no-member
-            source = klassen.filter(name=self.timetable_source_id)[0]
-        elif self.timetable_source == "teacher":
-            source = self.session.get_teacher(
-                self.timetable_source_id[1], self.timetable_source_id[0]
-            )
-        elif self.timetable_source == "subject":
-            pass
-        elif self.timetable_source == "room":
-            pass
-
-        return {self.timetable_source: source}
-
     def get_timetable(self, start, end: datetime):
         """Get the timetable for the given time period"""
-        timetable_object = self.get_timetable_object()
+        if self.timetable_source == "personal":
+            return self.session.my_timetable(start=start, end=end)
+        else:
+            timetable_object = get_timetable_object(
+                self.timetable_source_id, self.timetable_source, self.session
+            )
 
         start_schoolyear = get_schoolyear(self.school_year, start)
 
@@ -522,7 +505,7 @@ class WebUntis:
         now = datetime.now()
 
         for lesson in table:
-            # pylint: disable=maybe-no-member
+
             if lesson.start < now < lesson.end and self.check_lesson(lesson):
                 return True
         return False
@@ -532,7 +515,6 @@ class WebUntis:
         today = date.today()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
 
-        # pylint: disable=maybe-no-member
         table = self.get_timetable(start=today, end=in_x_days)
 
         now = datetime.now()
@@ -568,7 +550,6 @@ class WebUntis:
         now = datetime.now()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
 
-        # pylint: disable=maybe-no-member
         table = self.get_timetable(start=today, end=in_x_days)
 
         time_list = []
@@ -732,7 +713,6 @@ class WebUntis:
     def _today(self):
         today = date.today()
 
-        # pylint: disable=maybe-no-member
         table = self.get_timetable(start=today, end=today)
 
         time_list_start = []
@@ -998,7 +978,7 @@ class WebUntisEntity(Entity):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._server.unique_id)},
             manufacturer="Web Untis",
-            model=f"{self._server.username}@{self._server.school}",
+            model=f"{self._server.school}@{self._server.username}",
             name=self._server.username,
         )
         self._attr_device_class = device_class
