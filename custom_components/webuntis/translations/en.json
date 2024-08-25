@@ -12,9 +12,8 @@
       "student_not_found": "Student not found. Check the name or choose another source.",
       "teacher_not_found": "Teacher not found. Check the name or choose another source.",
       "class_not_found": "Class not found. Check the class or choose another source.",
-      "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
-      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
-      "unknown": "Unexpected error. View Logs for more infos."
+      "no_rights_for_timetable": "No rights for timetable.",
+      "unknown": "Unexpected error"
     },
     "step": {
       "user": {
@@ -28,29 +27,6 @@
         },
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
-        }
-      },
-      "timetable_source": {
-        "description": "Select the data source"
-      },
-      "pick_student": {
-        "description": "Enter a Student Name",
-        "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name"
-        }
-      },
-      "pick_teacher": {
-        "description": "Enter a Teacher Name",
-        "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name"
-        }
-      },
-      "pick_klasse": {
-        "description": "Enter class Name",
-        "data": {
-          "klasse": "Class"
         }
       }
     }
@@ -156,7 +132,6 @@
     },
     "timetable_source": {
       "options": {
-        "personal": "Personal Timetable",
         "student": "Student",
         "klasse": "Class",
         "teacher": "Teacher",
