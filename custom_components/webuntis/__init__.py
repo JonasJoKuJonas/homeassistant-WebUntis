@@ -33,7 +33,9 @@ from .const import (
 )
 from .notify import *
 from .services import async_setup_services
-from .utils.utils import compact_list, get_schoolyear, async_notify
+from .utils.utils import compact_list, async_notify
+
+from .utils.web_untis import get_timetable_object, get_schoolyear
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
 
@@ -473,33 +475,14 @@ class WebUntis:
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
-    def get_timetable_object(self):
-        """return the object to request the timetable"""
-        if self.timetable_source == "student":
-            source = self.session.get_student(
-                self.timetable_source_id[1], self.timetable_source_id[0]
-            )
-        elif self.timetable_source == "klasse":
-            klassen = self.session.klassen()
-
-            source = klassen.filter(name=self.timetable_source_id)[0]
-        elif self.timetable_source == "teacher":
-            source = self.session.get_teacher(
-                self.timetable_source_id[1], self.timetable_source_id[0]
-            )
-        elif self.timetable_source == "subject":
-            pass
-        elif self.timetable_source == "room":
-            pass
-
-        return {self.timetable_source: source}
-
     def get_timetable(self, start, end: datetime):
         """Get the timetable for the given time period"""
-        if self.timetable_source == "own":
+        if self.timetable_source == "personal":
             return self.session.my_timetable(start=start, end=end)
         else:
-            timetable_object = self.get_timetable_object()
+            timetable_object = get_timetable_object(
+                self.timetable_source_id, self.timetable_source, self.session
+            )
 
         start_schoolyear = get_schoolyear(self.school_year, start)
 

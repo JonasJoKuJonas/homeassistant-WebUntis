@@ -12,18 +12,12 @@
       "student_not_found": "Student not found. Check the name or choose another source.",
       "teacher_not_found": "Teacher not found. Check the name or choose another source.",
       "class_not_found": "Class not found. Check the class or choose another source.",
-      "no_rights_for_timetable": "No rights for timetable.",
-      "unknown": "Unexpected error"
+      "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
+      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
+      "unknown": "Unexpected error. View Logs for more infos."
     },
     "step": {
       "user": {
-        "description": "Login via",
-        "menu_options": {
-          "login_password": "Username & Password",
-          "qr_code": "QR-Code"
-        }
-      },
-      "login_password": {
         "data": {
           "server": "Server",
           "school": "School",
@@ -36,16 +30,28 @@
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
         }
       },
-      "qr_code": {
+      "timetable_source": {
+        "description": "Select the data source"
+      },
+      "pick_student": {
+        "description": "Enter a Student Name",
         "data": {
-          "url": "Url",
-          "school": "School",
-          "user": "Username",
-          "key": "Key"
+          "surname": "Surname",
+          "fore_name": "Fore Name"
         }
       },
-      "timetable_source": {
-        "data_description": "Select the data source"
+      "pick_teacher": {
+        "description": "Enter a Teacher Name",
+        "data": {
+          "surname": "Surname",
+          "fore_name": "Fore Name"
+        }
+      },
+      "pick_klasse": {
+        "description": "Enter class Name",
+        "data": {
+          "klasse": "Class"
+        }
       }
     }
   },
@@ -150,7 +156,7 @@
     },
     "timetable_source": {
       "options": {
-        "own": "Personal Timetable",
+        "personal": "Personal Timetable",
         "student": "Student",
         "klasse": "Class",
         "teacher": "Teacher",
