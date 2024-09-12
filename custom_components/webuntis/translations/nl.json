@@ -13,8 +13,8 @@
       "teacher_not_found": "Leraar niet gevonden. Controleer de naam of kies een andere bron.",
       "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
-      "no_school_year": "Configuration via class only possible during an active school year.",
-      "unknown": "Unexpected error. View logs for more information."
+      "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
+      "unknown": "Unexpected error. View Logs for more infos."
     },
     "step": {
       "user": {
@@ -48,7 +48,7 @@
         }
       },
       "pick_klasse": {
-        "description": "Enter a class name",
+        "description": "Enter class Name",
         "data": {
           "klasse": "Class"
         }
@@ -78,10 +78,12 @@
         "data": {
           "filter_mode": "Filter modus",
           "filter_subjects": "Filtermodus - onderwerpen",
-          "filter_description": "Filtermodus - Beschrijving"
+          "filter_description": "Filtermodus - Beschrijving",
+          "invalid_subjects": "No Subjects"
         },
         "data_description": {
-          "filter_description": "Verberg lessen die de volgende zinnen in de beschrijving bevatten. (Door komma's gescheiden lijst)"
+          "filter_description": "Verberg lessen die de volgende zinnen in de beschrijving bevatten. (Door komma's gescheiden lijst)",
+          "invalid_subjects": "Allow lessons with no subjects"
         }
       },
       "calendar": {
@@ -156,7 +158,7 @@
     },
     "timetable_source": {
       "options": {
-        "personal": "Personal timetable (recommended)",
+        "personal": "Personal Timetable",
         "student": "Student",
         "klasse": "Klasse",
         "teacher": "Teacher",
