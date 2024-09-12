@@ -78,10 +78,12 @@
         "data": {
           "filter_mode": "Fächer Filter",
           "filter_subjects": "Fächer Filter - Fächer",
-          "filter_description": "Fächer Filter- Beschreibung"
+          "filter_description": "Fächer Filter- Beschreibung",
+          "invalid_subjects": "No Subjects"
         },
         "data_description": {
-          "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste)"
+          "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste)",
+          "invalid_subjects": "Allow lessons with no subjects"
         }
       },
       "calendar": {
