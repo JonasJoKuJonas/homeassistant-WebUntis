@@ -13,6 +13,7 @@ import voluptuous as vol
 # pylint: disable=maybe-no-member
 import webuntis
 
+from urllib.parse import urlparse
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
@@ -53,6 +54,7 @@ async def validate_login(
             return errors
 
         credentials["server"] = "https://" + credentials["server"]
+        credentials["server"] = urlparse(credentials["server"]).netloc
 
     try:
         session = webuntis.Session(
