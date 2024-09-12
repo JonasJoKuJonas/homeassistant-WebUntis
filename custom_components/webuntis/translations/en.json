@@ -78,10 +78,12 @@
         "data": {
           "filter_mode": "Filter mode",
           "filter_subjects": "Filter mode - subjects",
-          "filter_description": "Filter mode - Description"
+          "filter_description": "Filter mode - Description",
+          "invalid_subjects": "No Subjects"
         },
         "data_description": {
-          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list)"
+          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list)",
+          "invalid_subjects": "Allow lessons with no subjects"
         }
       },
       "calendar": {

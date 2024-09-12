@@ -177,6 +177,8 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
+        self.invalid_subjects = config.options["invalid_subjects"]
+
         self.notify_config = {}
 
         self.notify_config = config.options.get("notify_config")
@@ -622,11 +624,14 @@ class WebUntis:
                     prefix = ""
                     if self.calendar_show_room_change and lesson.original_rooms:
                         prefix = "Room change: "
-                    if self.calendar_long_name:
-                        event["summary"] = prefix + lesson.subjects[0].long_name
 
+                    if getattr(lesson, "subjects", None):
+                        if self.calendar_long_name:
+                            event["summary"] = prefix + lesson.subjects[0].long_name
+                        else:
+                            event["summary"] = prefix + lesson.subjects[0].name
                     else:
-                        event["summary"] = prefix + lesson.subjects[0].name
+                        event["summary"] = prefix + "None"
 
                     if lesson.code == "cancelled":
                         event["summary"] = "Cancelled: " + event["summary"]
@@ -697,7 +702,10 @@ class WebUntis:
                 and (not filter_on or self.check_lesson(lesson, count_cancelled))
                 and (count_cancelled or lesson.code != "cancelled")
             ):
-                name = lesson.subjects[0].long_name
+                if getattr(lesson, "subjects", None):
+                    name = lesson.subjects[0].long_name
+                else:
+                    name = "None"
 
                 if name in result:
                     result[name] += 1
@@ -738,10 +746,7 @@ class WebUntis:
         if lesson.code == "cancelled" and not ignor_cancelled:
             return False
 
-        try:
-            if not lesson.subjects:
-                return False
-        except IndexError:
+        if not getattr(lesson, "subjects", None) and not self.invalid_subjects:
             return False
 
         for filter_description in self.filter_description:
@@ -865,7 +870,10 @@ class WebUntis:
         dic["start"] = lesson.start.astimezone()
         dic["end"] = lesson.end.astimezone()
 
-        dic["subject_id"] = lesson.subjects[0].id
+        if getattr(lesson, "subjects", None):
+            dic["subject_id"] = lesson.subjects[0].id
+        else:
+            dic["subject_id"] = "None"
         dic["id"] = int(lesson.id)
         dic["lsnumber"] = int(lesson.lsnumber)
 

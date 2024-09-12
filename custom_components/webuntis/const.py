@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 16
+CONFIG_ENTRY_VERSION = 17
 
 DEFAULT_OPTIONS = {
     "calendar_long_name": True,
@@ -18,6 +18,7 @@ DEFAULT_OPTIONS = {
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,
     "notify_config": {},
+    "invalid_subjects": False,
 }
 
 NOTIFY_OPTIONS = ["cancelled", "rooms", "lesson_change", "teachers", "code"]
