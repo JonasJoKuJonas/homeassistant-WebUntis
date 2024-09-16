@@ -760,14 +760,19 @@ class WebUntis:
             ):
                 return False
 
-        if self.filter_mode == "Blacklist":
-            if any(subject.name in self.filter_subjects for subject in lesson.subjects):
-                return False
-        if self.filter_mode == "Whitelist" and self.filter_subjects:
-            if not any(
-                subject.name in self.filter_subjects for subject in lesson.subjects
-            ):
-                return False
+        try:
+            if self.filter_mode == "Blacklist":
+                if any(
+                    subject.name in self.filter_subjects for subject in lesson.subjects
+                ):
+                    return False
+            if self.filter_mode == "Whitelist" and self.filter_subjects:
+                if not any(
+                    subject.name in self.filter_subjects for subject in lesson.subjects
+                ):
+                    return False
+        except IndexError:
+            pass
 
         return True
 
