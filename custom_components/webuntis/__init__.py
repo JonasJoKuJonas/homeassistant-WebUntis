@@ -7,6 +7,7 @@ import logging
 from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
+import uuid
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
@@ -619,7 +620,7 @@ class WebUntis:
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
                 try:
-                    event = {}
+                    event = {"uid": uuid.uuid4()}
 
                     prefix = ""
                     if self.calendar_show_room_change and lesson.original_rooms:
