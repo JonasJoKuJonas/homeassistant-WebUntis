@@ -626,6 +626,8 @@ class WebUntis:
                     prefix = ""
                     if self.calendar_show_room_change and lesson.original_rooms:
                         prefix = "Room change: "
+                    elif lesson.code == "cancelled": 
+                    prefix  = "Cancelled"
 
                     try:
                         if self.calendar_long_name:
@@ -636,9 +638,6 @@ class WebUntis:
                             event["summary"] = event["summary"].replace(key, value)
                     except IndexError:
                         event["summary"] = prefix + "None"
-
-                    if lesson.code == "cancelled":
-                        event["summary"] = "Cancelled: " + event["summary"]
 
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
