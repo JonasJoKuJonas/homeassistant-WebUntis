@@ -626,12 +626,12 @@ class WebUntis:
                     if self.calendar_show_room_change and lesson.original_rooms:
                         prefix = "Room change: "
 
-                    if getattr(lesson, "subjects", None):
+                    try:
                         if self.calendar_long_name:
                             event["summary"] = prefix + lesson.subjects[0].long_name
                         else:
                             event["summary"] = prefix + lesson.subjects[0].name
-                    else:
+                    except IndexError:
                         event["summary"] = prefix + "None"
 
                     if lesson.code == "cancelled":
