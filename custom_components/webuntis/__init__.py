@@ -626,8 +626,8 @@ class WebUntis:
                     prefix = ""
                     if self.calendar_show_room_change and lesson.original_rooms:
                         prefix = "Room change: "
-                    elif lesson.code == "cancelled": 
-                    prefix  = "Cancelled"
+                    if lesson.code == "cancelled":
+                        prefix = "Cancelled: "
 
                     try:
                         if self.calendar_long_name:
