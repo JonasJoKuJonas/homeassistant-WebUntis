@@ -166,7 +166,7 @@ class WebUntis:
         self.calendar_show_room_change = config.options["calendar_show_room_change"]
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
-        self.calendar_replace_name = config.options["calendar_replace_name"]
+        self.calendar_replace_name = config.options.get("calendar_replace_name", {})
 
         self.keep_logged_in = config.options["keep_loged_in"]
 
@@ -179,7 +179,7 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.invalid_subjects = config.options.get("invalid_subjects", {})
+        self.invalid_subjects = config.options["invalid_subjects"]
 
         self.notify_config = {}
 
