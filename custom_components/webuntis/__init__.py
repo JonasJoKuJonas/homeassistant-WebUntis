@@ -166,6 +166,7 @@ class WebUntis:
         self.calendar_show_room_change = config.options["calendar_show_room_change"]
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
+        self.calendar_replace_name = config.options["calendar_replace_name"]
 
         self.keep_logged_in = config.options["keep_loged_in"]
 
@@ -631,6 +632,8 @@ class WebUntis:
                             event["summary"] = prefix + lesson.subjects[0].long_name
                         else:
                             event["summary"] = prefix + lesson.subjects[0].name
+                        for key, value in self.calendar_replace_name.items():
+                            event["summary"] = event["summary"].replace(key, value)
                     except IndexError:
                         event["summary"] = prefix + "None"
 

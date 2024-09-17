@@ -486,14 +486,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, str] = None
     ) -> FlowResult:
         """Manage the calendar options."""
+        errors = {}
         if user_input is not None:
             if user_input["calendar_description"] == "Lesson Info":
                 user_input["extended_timetable"] = True
 
-            return await self.save(user_input)
+            _LOGGER.info(user_input["calendar_replace_name"])
+
+            if not (
+                isinstance(user_input.get("calendar_replace_name"), dict)
+                and all(
+                    isinstance(k, str) and isinstance(v, str)
+                    for k, v in user_input["calendar_replace_name"].items()
+                )
+            ):
+                errors = {"calendar_replace_name": "not_a_dict"}
+            else:
+                return await self.save(user_input)
 
         return self.async_show_form(
             step_id="calendar",
+            errors=errors,
             data_schema=vol.Schema(
                 {
                     vol.Required(
@@ -541,6 +554,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode="dropdown",
                         )
                     ),
+                    vol.Optional(
+                        "calendar_replace_name",
+                        description={
+                            "suggested_value": self.config_entry.options.get(
+                                "calendar_replace_name"
+                            )
+                        },
+                    ): selector.ObjectSelector(),
                 }
             ),
         )
