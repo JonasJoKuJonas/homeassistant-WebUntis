@@ -179,7 +179,7 @@ class WebUntis:
 
         self.extended_timetable = config.options["extended_timetable"]
 
-        self.invalid_subjects = config.options["invalid_subjects"]
+        self.invalid_subjects = config.options.get("invalid_subjects", {})
 
         self.notify_config = {}
 
