@@ -491,8 +491,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if user_input["calendar_description"] == "Lesson Info":
                 user_input["extended_timetable"] = True
 
-            _LOGGER.info(user_input["calendar_replace_name"])
-
             if not (
                 isinstance(user_input.get("calendar_replace_name"), dict)
                 and all(
