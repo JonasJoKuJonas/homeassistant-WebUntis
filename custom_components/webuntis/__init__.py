@@ -628,16 +628,19 @@ class WebUntis:
                         prefix = "Room change: "
                     if lesson.code == "cancelled":
                         prefix = "Cancelled: "
+                    if lesson.code == "irregular":
+                        prefix = "Irregular: "    
 
                     try:
                         if self.calendar_long_name:
                             event["summary"] = prefix + lesson.subjects[0].long_name
                         else:
                             event["summary"] = prefix + lesson.subjects[0].name
-                        for key, value in self.calendar_replace_name.items():
-                            event["summary"] = event["summary"].replace(key, value)
                     except IndexError:
                         event["summary"] = prefix + "None"
+
+                    for key, value in self.calendar_replace_name.items():
+                            event["summary"] = event["summary"].replace(key, value)
 
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
