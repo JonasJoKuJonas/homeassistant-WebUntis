@@ -187,8 +187,8 @@ def get_changes(change, lesson, lesson_old):
         except KeyError:
             pass
 
-        else:
-            changes["old"] = lesson_old[change]
-            changes["new"] = lesson[change]
+    else:
+        changes["old"] = lesson_old[change]
+        changes["new"] = lesson[change]
 
     return changes
