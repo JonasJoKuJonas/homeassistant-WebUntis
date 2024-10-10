@@ -388,6 +388,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 OPTIONS_MENU = [
     "filter",
     "calendar",
+    "lesson",
     "notify_menu",
     "backend",
 ]
@@ -508,10 +509,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "calendar_long_name",
-                        default=self.config_entry.options.get("calendar_long_name"),
-                    ): selector.BooleanSelector(),
-                    vol.Required(
                         "calendar_show_cancelled_lessons",
                         default=self.config_entry.options.get(
                             "calendar_show_cancelled_lessons"
@@ -560,6 +557,55 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             )
                         },
                     ): selector.ObjectSelector(),
+                }
+            ),
+        )
+
+    async def async_step_lesson(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Manage the lesson options."""
+        errors = {}
+        if user_input is not None:
+
+            if not (
+                isinstance(user_input.get("lesson_replace_name"), dict)
+                and all(
+                    isinstance(k, str) and isinstance(v, str)
+                    for k, v in user_input["lesson_replace_name"].items()
+                )
+            ):
+                errors = {"lesson_replace_name": "not_a_dict"}
+            else:
+                return await self.save(user_input)
+
+        server = self.hass.data[DOMAIN][self.config_entry.unique_id]
+
+        return self.async_show_form(
+            step_id="lesson",
+            errors=errors,
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "lesson_long_name",
+                        default=self.config_entry.options.get("lesson_long_name"),
+                    ): selector.BooleanSelector(),
+                    vol.Optional(
+                        "lesson_replace_name",
+                        description={
+                            "suggested_value": self.config_entry.options.get(
+                                "lesson_replace_name"
+                            )
+                        },
+                    ): selector.ObjectSelector(),
+                    vol.Optional(
+                        "lesson_add_teacher",
+                        default=self.config_entry.options.get("lesson_add_teacher"),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_create_subject_list(server),
+                            multiple=True,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        ),
+                    ),
                 }
             ),
         )
@@ -815,6 +861,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.SelectSelectorConfig(
                     options=NOTIFY_OPTIONS,
                     multiple=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
                     translation_key="notify_options",
                 )
             ),

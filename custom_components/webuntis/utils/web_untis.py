@@ -28,3 +28,33 @@ def get_schoolyear(school_year, date=datetime.now().date()):
             return time_range
 
     return None
+
+
+def get_lesson_name(server, lesson):
+
+    try:
+        if server.lesson_long_name:
+            name = lesson.subjects[0].long_name
+        else:
+            name = lesson.subjects[0].name
+    except IndexError:
+        name = "None"
+
+    if name in server.lesson_add_teacher:
+        name += f" - {lesson.teachers[0].name}"
+
+    for key, value in server.lesson_replace_name.items():
+        name = name.replace(key, value)
+
+    return name
+
+
+def get_lesson_name_str(server, name, teacher):
+
+    if name in server.lesson_add_teacher:
+        name += f" - {teacher}"
+
+    for key, value in server.lesson_replace_name.items():
+        name = name.replace(key, value)
+
+    return name

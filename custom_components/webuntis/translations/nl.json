@@ -90,14 +90,12 @@
         "title": "Kalenderinstellingen",
         "description": "Instellingen om de kalender aan te passen.",
         "data": {
-          "calendar_long_name": "Kalender - lange naam",
           "calendar_show_cancelled_lessons": "Kalender - geannuleerde lessen",
           "calendar_description": "Calendar - description",
           "calendar_room": "Calendar - Location",
           "calendar_show_room_change": "Calendar - Room change"
         },
         "data_description": {
-          "calendar_long_name": "Gebruik de lange naam van de uren in de kalender.",
           "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender.",
           "calendar_description": "Determine what should be in the description of a calendar event.",
           "calendar_room": "Specify what to display for location.",

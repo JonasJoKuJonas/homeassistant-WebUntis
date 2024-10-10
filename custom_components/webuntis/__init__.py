@@ -22,7 +22,12 @@ from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
 
 # pylint: disable=maybe-no-member
-import webuntis  # pylint: disable=import-self
+from webuntis import errors
+from .utils.web_untis_extended import ExtendedSession
+from .utils.homework import return_homework_events
+from .utils.exams import return_exam_events
+from .utils.web_untis import get_lesson_name_str
+
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -77,7 +82,7 @@ async def async_update_entry(hass, entry):
     await hass.config_entries.async_reload(entry.entry_id)
 
 
-async def async_migrate_entry(hass, config_entry: ConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
@@ -97,22 +102,32 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
                 "options": options.get("notify_options", {}),
             }
 
-    for notify_key, notify_value in options["notify_config"].items():
-        if "lesson change" in options["notify_config"][notify_key]["options"]:
-            options["notify_config"][notify_key]["options"][
-                options["notify_config"][notify_key]["options"].index("lesson change")
-            ] = "lesson_change"
+    if config_entry.version == 16:
+        for notify_key, notify_value in options["notify_config"].items():
+            if "lesson change" in options["notify_config"][notify_key]["options"]:
+                options["notify_config"][notify_key]["options"][
+                    options["notify_config"][notify_key]["options"].index(
+                        "lesson change"
+                    )
+                ] = "lesson_change"
 
-    for key in [
-        "notify_entity_id",
-        "notify_target",
-        "notify_data",
-        "notify_options",
-    ]:
-        options.pop(key, None)
+        for key in [
+            "notify_entity_id",
+            "notify_target",
+            "notify_data",
+            "notify_options",
+        ]:
+            options.pop(key, None)
 
-    config_entry.version = CONFIG_ENTRY_VERSION
-    hass.config_entries.async_update_entry(config_entry, options=options)
+    if config_entry.version < 18:
+        options["lesson_replace_name"] = options.get("calendar_replace_name", {})
+        options["calendar_replace_name"] = {}
+        options["lesson_long_name"] = options["calendar_long_name"]
+        options.pop("calendar_long_name")
+
+    hass.config_entries.async_update_entry(
+        entry=config_entry, options=options, version=CONFIG_ENTRY_VERSION
+    )
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 
@@ -159,7 +174,6 @@ class WebUntis:
         self.timetable_source_id = config.data["timetable_source_id"]
         self.title = config.title
 
-        self.calendar_long_name = config.options["calendar_long_name"]
         self.calendar_show_cancelled_lessons = config.options[
             "calendar_show_cancelled_lessons"
         ]
@@ -167,6 +181,10 @@ class WebUntis:
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
         self.calendar_replace_name = config.options.get("calendar_replace_name", {})
+
+        self.lesson_long_name = config.options["lesson_long_name"]
+        self.lesson_replace_name = config.options.get("lesson_replace_name", {})
+        self.lesson_add_teacher = config.options.get("lesson_add_teacher", [])
 
         self.keep_logged_in = config.options["keep_loged_in"]
 
@@ -188,7 +206,7 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
-        self.session = webuntis.Session(
+        self.session = ExtendedSession(
             username=self.username,
             password=self.password,
             server=self.server,
@@ -210,6 +228,10 @@ class WebUntis:
         self.next_class_json = None
         self.next_lesson_to_wake_up = None
         self.calendar_events = []
+        self.calendar_exams = []
+        self.calendar_homework = []
+        self.calendar_homework_ids = []
+        self.calendar_homework_ids_setup = False
         self.next_day_json = None
         self.today = [None, None]
 
@@ -288,6 +310,7 @@ class WebUntis:
                 self.next_class_json = None
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
+                self.calendar_homework = []
                 self.next_day_json = None
                 self.today = [None, None]
 
@@ -391,6 +414,71 @@ class WebUntis:
                 error,
             )
 
+        if self.timetable_source != "teacher":
+
+            try:
+                self.calendar_exams = await self._hass.async_add_executor_job(
+                    return_exam_events, self, valid_schoolyear
+                )
+            except OSError as error:
+                self.calendar_exams = []
+
+                _LOGGER.warning(
+                    "Updating the property calendar_exams of '%s@%s' failed - OSError: %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+
+            try:
+                self.calendar_homework, param_list = (
+                    await self._hass.async_add_executor_job(
+                        return_homework_events, self
+                    )
+                )
+            except OSError as error:
+                self.calendar_homework = []
+
+                _LOGGER.warning(
+                    "Updating the property calendar_homework of '%s@%s' failed - OSError: %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+
+            if self.calendar_homework_ids_setup:
+                for event in param_list:
+                    if event["homework_id"] not in self.calendar_homework_ids:
+                        self.calendar_homework_ids.append(event["homework_id"])
+
+                        for service in self.notify_config.values():
+
+                            if "homework" in service.get("options", []):
+
+                                data = {
+                                    "data": service.get("data", {}),
+                                    "target": service.get("target", {}),
+                                }
+
+                                data.update(
+                                    get_notification_data_homework(
+                                        event, service, self.title
+                                    )
+                                )
+
+                                await async_notify(
+                                    self._hass,
+                                    service_id=service["entity_id"],
+                                    data=data,
+                                )
+
+            else:
+                self.calendar_homework_ids_setup = True
+
+            self.calendar_homework_ids = []
+            for event in param_list:
+                self.calendar_homework_ids.append(event["homework_id"])
+
         try:
             self.today = await self._hass.async_add_executor_job(self._today)
         except OSError as error:
@@ -428,7 +516,7 @@ class WebUntis:
                     self.session.schoolyears()
                     self.updating += 1
                     return None
-                except webuntis.errors.NotLoggedInError:
+                except errors.NotLoggedInError:
                     _LOGGER.debug("Session invalid")
                     self._loged_in = False
 
@@ -449,6 +537,8 @@ class WebUntis:
                 self.next_class_json = None
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
+                self.calendar_homework = []
+                self.calendar_exams = []
                 self.next_day_json = None
 
                 # Inform user once about failed update if necessary.
@@ -629,18 +719,11 @@ class WebUntis:
                     if lesson.code == "cancelled":
                         prefix = "Cancelled: "
                     if lesson.code == "irregular":
-                        prefix = "Irregular: "    
+                        prefix = "Irregular: "
 
-                    try:
-                        if self.calendar_long_name:
-                            event["summary"] = prefix + lesson.subjects[0].long_name
-                        else:
-                            event["summary"] = prefix + lesson.subjects[0].name
-                    except IndexError:
-                        event["summary"] = prefix + "None"
-
-                    for key, value in self.calendar_replace_name.items():
-                            event["summary"] = event["summary"].replace(key, value)
+                    event["summary"] = prefix + get_lesson_name(
+                        server=self, lesson=lesson
+                    )
 
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
@@ -856,7 +939,7 @@ class WebUntis:
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.teachers
                 ]
-            except OSError as error:
+            except (OSError, errors.RemoteError) as error:
                 if "no right for getTeachers()" in str(error):
                     self.exclude_data_("teachers")
                     _LOGGER.info(
@@ -965,7 +1048,7 @@ class WebUntis:
                             "target": service.get("target", {}),
                         }
 
-                        changes = get_changes(change, lesson, lesson_old)
+                        changes = get_changes(change, lesson, lesson_old, server=self)
 
                         data.update(get_notification_data(changes, service, self.title))
 

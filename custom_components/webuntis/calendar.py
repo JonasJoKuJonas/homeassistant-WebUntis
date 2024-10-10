@@ -1,4 +1,3 @@
-"""Demo platform that has two fake binary sensors."""
 from __future__ import annotations
 
 import datetime
@@ -8,8 +7,16 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import WebUntis, WebUntisEntity
-from .const import DOMAIN, ICON_CALENDER, NAME_CALENDER
+from . import WebUntis, WebUntisEntity  # pylint: disable=no-name-in-module
+from .const import (
+    DOMAIN,
+    ICON_CALENDER,
+    ICON_CALENDER_HOMEWORK,
+    NAME_CALENDER,
+    NAME_CALENDER_HOMEWORK,
+    ICON_CALENDER_EXAM,
+    NAME_CALENDER_EXAM,
+)
 
 
 async def async_setup_entry(
@@ -17,30 +24,37 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Web Untis binary sensor platform."""
+    """Set up the Web Untis calendar platform."""
     server = hass.data[DOMAIN][config_entry.unique_id]
 
-    # Create entities list.
     entities = [UntisCalendar(server)]
 
-    # Add binary sensor entities.
+    if server.timetable_source != "teacher":
+        entities.append(HomeworkCalendar(server))
+        entities.append(ExamCalendar(server))
+
+    # Add calendar entities.
     async_add_entities(entities, True)
 
 
-class UntisCalendar(WebUntisEntity, CalendarEntity):
-    """Representation of a Web Untis Calendar sensor."""
+class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
+    """Base class for WebUntis calendar entities."""
 
-    def __init__(self, server: WebUntis) -> None:
-        """Initialize status binary sensor."""
+    def __init__(self, server: WebUntis, name: str, icon: str) -> None:
+        """Initialize base calendar entity."""
         super().__init__(
             server=server,
-            type_name=NAME_CALENDER,
-            icon=ICON_CALENDER,
+            type_name=name,
+            icon=icon,
             device_class=None,
         )
-        self._name = NAME_CALENDER
-        self.events = self._server.calendar_events
+        self._name = name
+        self._icon = icon
+        self.events = self._get_events
         self._event = None
+
+    def _get_events(self):
+        return []
 
     @property
     def name(self) -> str:
@@ -59,15 +73,45 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
         end_date: datetime.datetime,
     ) -> list[CalendarEvent]:
         """Return calendar events within a datetime range."""
-        return [
-            event
-            for event in self.events
-            if event.start >= start_date and event.end <= end_date
-        ]
+        events_in_range = []
+        # Use the timezone of the start_date (or Home Assistant timezone)
+        timezone = start_date.tzinfo or datetime.timezone.utc
+
+        for event in self.events:
+            # Convert event.start and event.end to datetime if they are date objects
+            if isinstance(event.start, datetime.date) and not isinstance(
+                event.start, datetime.datetime
+            ):
+                event_start = datetime.datetime.combine(
+                    event.start, datetime.time.min
+                ).replace(tzinfo=timezone)
+            else:
+                event_start = event.start
+
+            if isinstance(event.end, datetime.date) and not isinstance(
+                event.end, datetime.datetime
+            ):
+                event_end = datetime.datetime.combine(
+                    event.end, datetime.time.min
+                ).replace(tzinfo=timezone)
+            else:
+                event_end = event.end
+
+            # Ensure event_start and event_end are timezone-aware
+            if event_start.tzinfo is None:
+                event_start = event_start.replace(tzinfo=timezone)
+            if event_end.tzinfo is None:
+                event_end = event_end.replace(tzinfo=timezone)
+
+            # Now compare the event start and end with the given range
+            if event_start >= start_date and event_end <= end_date:
+                events_in_range.append(event)
+
+        return events_in_range
 
     async def async_update(self) -> None:
         """Update status."""
-        self.events = self._server.calendar_events
+        self.events = self._get_events()
 
         if self.events:
             self.events.sort(key=lambda e: (e.end))
@@ -79,3 +123,42 @@ class UntisCalendar(WebUntisEntity, CalendarEntity):
                     break
         else:
             self._event = None
+
+
+class UntisCalendar(BaseUntisCalendar):
+    """Representation of a Web Untis Calendar sensor."""
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize the Untis Calendar."""
+        super().__init__(server=server, name=NAME_CALENDER, icon=ICON_CALENDER)
+
+    def _get_events(self):
+        return self._server.calendar_events
+
+
+class HomeworkCalendar(BaseUntisCalendar):
+    """Representation of a Web Untis Homework Calendar sensor."""
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize the Homework Calendar."""
+        super().__init__(
+            server=server, name=NAME_CALENDER_HOMEWORK, icon=ICON_CALENDER_HOMEWORK
+        )
+
+    def _get_events(self):
+
+        return self._server.calendar_homework
+
+
+class ExamCalendar(BaseUntisCalendar):
+    """Representation of a Web Untis Exams Calendar sensor."""
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize the Exams Calendar."""
+        super().__init__(
+            server=server, name=NAME_CALENDER_EXAM, icon=ICON_CALENDER_EXAM
+        )
+
+    def _get_events(self):
+
+        return self._server.calendar_exams

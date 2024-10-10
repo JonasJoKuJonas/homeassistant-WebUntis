@@ -1,5 +1,7 @@
 from .const import TEMPLATE_OPTIONS
 
+from .utils.web_untis import get_lesson_name
+
 
 def compare_list(old_list, new_list, blacklist=[]):
     updated_items = []
@@ -142,7 +144,74 @@ New: {changes["new"]}"""
     }
 
 
-def get_changes(change, lesson, lesson_old):
+"""
+parameters = {
+    "homework_id": hw_id,
+    "subject": subject,
+    "teacher": teacher_name,
+    "completed": completed,
+    "date_assigned": date_assigned,
+    "due_date": due_date,
+    "text": text,
+}
+"""
+
+
+def get_notification_data_homework(parameters, service, entry_title):
+    message = ""
+    title = ""
+    data = {}
+
+    template = service.get("template", TEMPLATE_OPTIONS[0])
+
+    if template == "message_title":
+        title = f"WebUntis ({entry_title}) - Homework: {parameters['subject']}"
+        message = f"""{parameters["text"]}
+Subject: {parameters["subject"]}
+Teacher: {parameters["teacher"]}
+Assigned Date: {parameters["date_assigned"]}
+Due Date: {parameters["due_date"]}"""
+
+    elif template == "message":
+        message = f"{title}\n{message}"
+
+    elif template == "discord":
+        data = {
+            "embed": {
+                "title": "Homework: " + parameters["subject"],
+                "description": entry_title,
+                "color": 16750848,
+                "author": {
+                    "name": "WebUntis",
+                    "url": "https://www.home-assistant.io",
+                    "icon_url": "https://brands.home-assistant.io/webuntis/icon.png",
+                },
+                "fields": [
+                    {
+                        "name": "Subject",
+                        "value": parameters["subject"],
+                        "inline": False,
+                    },
+                    {
+                        "name": "Text",
+                        "value": parameters["text"],
+                        "inline": False,
+                    },
+                    {"name": "Date", "value": "", "inline": False},
+                    {"name": "Assigned", "value": parameters["date_assigned"]},
+                    {"name": "Due", "value": parameters["due_date"]},
+                ],
+            }
+        }
+
+    return {
+        "message": message,
+        "title": title,
+        "data": data,
+    }
+
+
+def get_changes(change, lesson, lesson_old, server):
 
     changes = {"change": change}
 
@@ -154,12 +223,7 @@ def get_changes(change, lesson, lesson_old):
         "teachers": "Teacher changed",
     }[change]
 
-    changes["subject"] = ""
-
-    try:
-        changes["subject"] = lesson["subjects"][0].get("long_name", None)
-    except IndexError:
-        pass
+    changes["subject"] = get_lesson_name(server=server, lesson=lesson)
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")

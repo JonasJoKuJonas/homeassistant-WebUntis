@@ -90,7 +90,6 @@
         "title": "Kalender-Einstellungen",
         "description": "Einstellungen zur Kalender Darstellung.",
         "data": {
-          "calendar_long_name": "Kalender - Langer Name",
           "calendar_show_cancelled_lessons": "Kalender - Ausfallende Stunden",
           "calendar_description": "Kalender - Beschreibung",
           "calendar_room": "Kalender - Ort",
@@ -98,12 +97,11 @@
           "calendar_replace_name": "Ereignisnamen ersetzen"
         },
         "data_description": {
-          "calendar_long_name": "Verwende den langen Namen der Stunden im Kalender.",
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
           "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
           "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
           "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an.",
-          "calendar_replace_name": "Bsp:\nM: Mathe"
+          "calendar_replace_name": "Bsp:\nCancelled: ❌"
         }
       },
       "backend": {
@@ -151,6 +149,7 @@
   "selector": {
     "notify_options": {
       "options": {
+        "homework": "Hausaufgaben hinzugefügt",
         "code": "Stunden-Status ändert sich",
         "rooms": "Raum Änderung",
         "teachers": "Lehrer Änderung",
