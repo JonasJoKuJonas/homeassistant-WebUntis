@@ -89,7 +89,7 @@ def get_notification_data(changes, service, entry_title):
 
     template = service.get("template", TEMPLATE_OPTIONS[0])
 
-    if template == "message_title":
+    if template == "message_title" or template == "message":
         title = f"WebUntis ({entry_title}) - {changes['title']}"
         message = f"""Subject: {changes["subject"]}
 Date: {changes["date"]}
