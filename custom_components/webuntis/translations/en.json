@@ -68,7 +68,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Calendar",
-          "lesson": "Lesson",
+          "lesson": "Lesson Name",
           "backend": "Backend",
           "notify_menu": "Notify Menu"
         }
@@ -88,7 +88,7 @@
         }
       },
       "lesson": {
-        "title": "Lesson Settings",
+        "title": "Lesson Name Settings",
         "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
         "data": {
           "lesson_long_name": "Long name",
