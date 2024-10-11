@@ -86,11 +86,13 @@ def get_notification_data(changes, service, entry_title):
     message = ""
     title = ""
     data = {}
+    result = {}
 
     template = service.get("template", TEMPLATE_OPTIONS[0])
 
     if template == "message_title" or template == "message":
         title = f"WebUntis ({entry_title}) - {changes['title']}"
+        result["title"] = title
         message = f"""Subject: {changes["subject"]}
 Date: {changes["date"]}
 Time: {changes["time_start"]} - {changes["time_end"]}"""
@@ -100,10 +102,11 @@ Time: {changes["time_start"]} - {changes["time_end"]}"""
 Old: {changes["old"]}
 New: {changes["new"]}"""
 
-    elif template == "message":
+    if template == "message":
         message = f"{title}\n{message}"
+        result.pop("title")
 
-    elif template == "discord":
+    if template == "discord":
         data = {
             "embed": {
                 "title": changes["title"],
@@ -137,11 +140,10 @@ New: {changes["new"]}"""
                 ]
             )
 
-    return {
-        "message": message,
-        "title": title,
-        "data": data,
-    }
+    result["message"] = message
+    result["data"] = data
+
+    return result
 
 
 """
