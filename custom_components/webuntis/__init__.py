@@ -696,9 +696,10 @@ class WebUntis:
 
     def _get_events(self):
         today = date.today()
+        week_start = today - timedelta(days=today.weekday())
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
 
-        table = self.get_timetable(start=today, end=in_x_days)
+        table = self.get_timetable(start=week_start, end=in_x_days)
 
         event_list = []
         self.event_list = []
