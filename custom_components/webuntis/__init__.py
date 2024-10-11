@@ -726,6 +726,9 @@ class WebUntis:
                         server=self, lesson=lesson
                     )
 
+                    for key, value in self.calendar_replace_name.items():
+                        event["summary"] = event["summary"].replace(key, value)
+
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
                     if self.calendar_description == "JSON":
