@@ -68,6 +68,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Calendar",
+          "lesson": "Lesson Name",
           "backend": "Backend",
           "notify_menu": "Notify Menu"
         }
@@ -86,6 +87,19 @@
           "invalid_subjects": "Allow lessons with no subjects"
         }
       },
+      "lesson": {
+        "title": "Lesson Name Settings",
+        "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
+        "data": {
+          "lesson_long_name": "Long name",
+          "lesson_replace_name": "Replace Lesson name",
+          "lesson_add_teacher": "Add Teacher to subject"
+        },
+        "data_description": {
+          "lesson_replace_name": "e.g.,\nM: Math",
+          "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name."
+        }
+      },
       "calendar": {
         "title": "Kalenderinstellingen",
         "description": "Instellingen om de kalender aan te passen.",
@@ -93,13 +107,15 @@
           "calendar_show_cancelled_lessons": "Kalender - geannuleerde lessen",
           "calendar_description": "Calendar - description",
           "calendar_room": "Calendar - Location",
-          "calendar_show_room_change": "Calendar - Room change"
+          "calendar_show_room_change": "Calendar - Room change",
+          "calendar_replace_name": "Replace event name"
         },
         "data_description": {
           "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender.",
           "calendar_description": "Determine what should be in the description of a calendar event.",
           "calendar_room": "Specify what to display for location.",
-          "calendar_show_room_change": "Show room changes in the calendar."
+          "calendar_show_room_change": "Show room changes in the calendar.",
+          "calendar_replace_name": "e.g.,\nCancelled: ❌"
         }
       },
       "backend": {
@@ -147,6 +163,7 @@
   "selector": {
     "notify_options": {
       "options": {
+        "homework": "Homework added",
         "code": "Lesson status changed",
         "rooms": "Room changed",
         "teachers": "Teacher changed",

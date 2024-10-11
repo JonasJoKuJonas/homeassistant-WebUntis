@@ -36,8 +36,8 @@
       "pick_student": {
         "description": "Name eines Schülers eingeben",
         "data": {
-          "surname": "Nachname",
-          "fore_name": "Vorname"
+          "surname": "Nachnahme",
+          "fore_name": "Vornahme"
         }
       },
       "pick_teacher": {
@@ -68,6 +68,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Kalender",
+          "lesson": "Stunden Name",
           "backend": "Backend",
           "notify_menu": "Notify Menü"
         }
@@ -84,6 +85,19 @@
         "data_description": {
           "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste)",
           "invalid_subjects": "Erlaube Stunden ohne Fach"
+        }
+      },
+      "lesson": {
+        "title": "Stunden Name Einstellungen",
+        "description": "Einstellungen, wie der Stunden-Name angezeigt wird.\n\\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
+        "data": {
+          "lesson_long_name": "Langer Name",
+          "lesson_replace_name": "Stunden-Name ersetzen",
+          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu"
+        },
+        "data_description": {
+          "lesson_replace_name": "Bsp:\nM: Mathe",
+          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen."
         }
       },
       "calendar": {
