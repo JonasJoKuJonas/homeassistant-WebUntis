@@ -1,6 +1,8 @@
 def get_timetable_object(timetable_source_id, timetable_source, session):
     """return the object to request the timetable"""
 
+    source = None
+
     if timetable_source == "student":
         source = session.get_student(timetable_source_id[1], timetable_source_id[0])
     elif timetable_source == "klasse":
