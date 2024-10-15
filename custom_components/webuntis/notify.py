@@ -1,6 +1,6 @@
 from .const import TEMPLATE_OPTIONS
 
-from .utils.web_untis import get_lesson_name
+from .utils.web_untis import get_lesson_name_str
 
 
 def compare_list(old_list, new_list, blacklist=[]):
@@ -159,15 +159,19 @@ parameters = {
 """
 
 
-def get_notification_data_homework(parameters, service, entry_title):
+def get_notification_data_homework(parameters, service, entry_title, server):
     message = ""
     title = ""
     data = {}
 
+    subject = get_lesson_name_str(
+        server=server, name=parameters["subject"], teacher=parameters["teacher"]
+    )
+
     template = service.get("template", TEMPLATE_OPTIONS[0])
 
     if template == "message_title":
-        title = f"WebUntis ({entry_title}) - Homework: {parameters['subject']}"
+        title = f"WebUntis ({entry_title}) - Homework: {subject}"
         message = f"""{parameters["text"]}
 Subject: {parameters["subject"]}
 Teacher: {parameters["teacher"]}
@@ -180,7 +184,7 @@ Due Date: {parameters["due_date"]}"""
     elif template == "discord":
         data = {
             "embed": {
-                "title": "Homework: " + parameters["subject"],
+                "title": "Homework: " + subject,
                 "description": entry_title,
                 "color": 16750848,
                 "author": {
@@ -191,7 +195,7 @@ Due Date: {parameters["due_date"]}"""
                 "fields": [
                     {
                         "name": "Subject",
-                        "value": parameters["subject"],
+                        "value": subject,
                         "inline": False,
                     },
                     {
@@ -225,7 +229,14 @@ def get_changes(change, lesson, lesson_old, server):
         "teachers": "Teacher changed",
     }[change]
 
-    changes["subject"] = get_lesson_name(server=server, lesson=lesson)
+    if server.lesson_long_name:
+        name = lesson["subjects"][0]["long_name"]
+    else:
+        name = lesson["subjects"][0]["name"]
+
+    changes["subject"] = get_lesson_name_str(
+        server=server, name=name, teacher=lesson["teachers"][0]["name"]
+    )
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")

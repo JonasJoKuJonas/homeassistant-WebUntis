@@ -26,7 +26,7 @@ from webuntis import errors
 from .utils.web_untis_extended import ExtendedSession
 from .utils.homework import return_homework_events
 from .utils.exams import return_exam_events
-from .utils.web_untis import get_lesson_name_str
+from .utils.web_untis import get_lesson_name
 
 
 from .const import (
@@ -462,7 +462,7 @@ class WebUntis:
 
                                 data.update(
                                     get_notification_data_homework(
-                                        event, service, self.title
+                                        event, service, self.title, self
                                     )
                                 )
 
@@ -1011,6 +1011,23 @@ class WebUntis:
         except:
             pass
 
+        if "teachers" not in self.exclude_data:
+            try:
+                dic["teachers"] = [
+                    {"name": str(teacher.name), "long_name": str(teacher.long_name)}
+                    for teacher in lesson.teachers
+                ]
+            except (OSError, errors.RemoteError) as error:
+                if "no right for getTeachers()" in str(error):
+                    self.exclude_data_("teachers")
+                    _LOGGER.info(
+                        "No rights for getTeachers() for '%s@%s', getTeachers is now on blacklist",
+                        self.school,
+                        self.username,
+                    )
+            except:
+                pass
+
         return dic
 
     def exclude_data_(self, data):
@@ -1039,6 +1056,7 @@ class WebUntis:
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
+            _LOGGER.debug(updated_items)
 
             updated_items = compact_list(updated_items, "notify")
 
