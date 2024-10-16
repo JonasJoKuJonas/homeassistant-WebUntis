@@ -178,12 +178,11 @@ The automation will be triggered according to the time you defined in the sensor
 for more examples feel free to check in #code-sharing on [Discord](https://discord.com/channels/1090218586565509170/1208159703520120902)
 
 
-# Support me ♥️
-## Support me
+## Support me ♥️
+I'm a 18-year-old software developer from Germany. I love to develop software in my free time. If you like my projects consider donating a small amount to support my work. 
+
 <a href="https://www.buymeacoffee.com/Jonas_JoKu" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174" ></a>
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=29CAZV3ZHWDMW">
   <img src="https://raw.githubusercontent.com/andreostrovsky/donate-with-paypal/925c5a9e397363c6f7a477973fdeed485df5fdd9/blue.svg" alt="Donate with PayPal" height="40"/>
 </a>
-
-
