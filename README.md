@@ -42,6 +42,16 @@ Help us:
 ### Docker
 If your Home Assistant is running in Docker, you may need to set your local timezone in the Docker configuration!
 
+Example:
+
+Add to compose
+```
+volumes:
+ - /etc/localtime:/etc/localtime:ro
+```
+Or add environment variable
+
+```TZ=Europe/Berlin```
 
 ## Configuration via UI
 
