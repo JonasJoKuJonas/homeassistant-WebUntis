@@ -192,6 +192,8 @@ class WebUntis:
         self.filter_subjects = config.options["filter_subjects"]
 
         self.exclude_data = config.options["exclude_data"]
+        self.exclude_data_run = []
+
         self.filter_description = config.options["filter_description"]
         self.generate_json = config.options["generate_json"]
 
@@ -268,6 +270,10 @@ class WebUntis:
 
     async def _async_status_request(self) -> None:
         """Request status and update properties."""
+
+        if self.exclude_data_run:
+            for i in self.exclude_data_run:
+                self.exclude_data_(i)
 
         login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 
@@ -945,12 +951,9 @@ class WebUntis:
                 ]
             except (OSError, errors.RemoteError) as error:
                 if "no right for getTeachers()" in str(error):
-                    self.exclude_data_("teachers")
-                    _LOGGER.info(
-                        "No rights for getTeachers() for '%s@%s', getTeachers is now on blacklist",
-                        self.school,
-                        self.username,
-                    )
+                    self.exclude_data_run.append("teachers")
+                    self.exclude_data.append("teachers")
+
             except:
                 pass
 
@@ -1019,12 +1022,9 @@ class WebUntis:
                 ]
             except (OSError, errors.RemoteError) as error:
                 if "no right for getTeachers()" in str(error):
-                    self.exclude_data_("teachers")
-                    _LOGGER.info(
-                        "No rights for getTeachers() for '%s@%s', getTeachers is now on blacklist",
-                        self.school,
-                        self.username,
-                    )
+                    self.exclude_data_run.append("teachers")
+                    self.exclude_data.append("teachers")
+
             except:
                 pass
 
@@ -1033,11 +1033,20 @@ class WebUntis:
     def exclude_data_(self, data):
         """adds data to exclude_data list"""
 
+        self.exclude_data_run.remove(data)
+
         new_options = {**self._config.options}
         new_options["exclude_data"] = [*new_options["exclude_data"], data]
 
         self._hass.config_entries.async_update_entry(self._config, options=new_options)
         self.exclude_data.append(data)
+
+        _LOGGER.info(
+            "No rights for %s, is now on blacklist '%s@%s'",
+            data,
+            self.school,
+            self.username,
+        )
 
     async def update_notify(self):
         """Update data and notify"""
