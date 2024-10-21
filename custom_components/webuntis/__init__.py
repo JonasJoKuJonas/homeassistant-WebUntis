@@ -734,7 +734,6 @@ class WebUntis:
 
         lessons = []
         for lesson in table:
-            _LOGGER.info(str(lesson.subjects))
             if self.check_lesson(lesson):
                 lessons.append(str(self.get_lesson_json(lesson)))
 
