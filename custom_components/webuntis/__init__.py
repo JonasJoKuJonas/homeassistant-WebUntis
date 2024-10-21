@@ -235,6 +235,7 @@ class WebUntis:
         self.calendar_homework_ids = []
         self.calendar_homework_ids_setup = False
         self.next_day_json = None
+        self.day_json = None
         self.today = [None, None]
 
         self.subjects = []
@@ -318,6 +319,7 @@ class WebUntis:
                 self.calendar_events = []
                 self.calendar_homework = []
                 self.next_day_json = None
+                self.day_json = None
                 self.today = [None, None]
 
                 # Inform user once about failed update if necessary.
@@ -400,6 +402,18 @@ class WebUntis:
 
             _LOGGER.warning(
                 "Updating the property next_day_json of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
+            self.day_json = await self._hass.async_add_executor_job(self._day_json)
+        except OSError as error:
+            self.day_json = None
+
+            _LOGGER.warning(
+                "Updating the property day_json of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -546,6 +560,7 @@ class WebUntis:
                 self.calendar_homework = []
                 self.calendar_exams = []
                 self.next_day_json = None
+                self.day_json = None
 
                 # Inform user once about failed update if necessary.
                 if not self._last_status_request_failed:
@@ -575,11 +590,10 @@ class WebUntis:
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
 
-    def get_timetable(self, start, end: datetime):
+    def get_timetable(self, start, end: datetime, sort=False):
         """Get the timetable for the given time period"""
-        if self.timetable_source == "personal":
-            return self.session.my_timetable(start=start, end=end)
-        else:
+        timetable_object = None
+        if self.timetable_source != "personal":
             timetable_object = get_timetable_object(
                 self.timetable_source_id, self.timetable_source, self.session
             )
@@ -590,11 +604,20 @@ class WebUntis:
             if start_schoolyear.end.date() < end:
                 end = start_schoolyear.end.date()
 
-        if self.extended_timetable:
-            return self.session.timetable_extended(
+        result = []
+        if self.timetable_source == "personal":
+            result = self.session.my_timetable(start=start, end=end)
+        elif self.extended_timetable:
+            result = self.session.timetable_extended(
                 start=start, end=end, **timetable_object
             )
-        return self.session.timetable(start=start, end=end, **timetable_object)
+        else:
+            result = self.session.timetable(start=start, end=end, **timetable_object)
+
+        if sort:
+            result = sorted(result, key=lambda x: x.start)
+
+        return result
 
     def _is_class(self):
         """return if is class"""
@@ -689,10 +712,29 @@ class WebUntis:
             return "JSON data is disabled - activate it in the options"
         day = self.next_lesson_to_wake_up.date()
 
-        table = self.get_timetable(start=day, end=day)
+        table = self.get_timetable(start=day, end=day, sort=True)
 
         lessons = []
         for lesson in table:
+            if self.check_lesson(lesson):
+                lessons.append(str(self.get_lesson_json(lesson)))
+
+        json_str = "[" + ", ".join(lessons) + "]"
+
+        return json_str
+
+    def _day_json(self):
+        if self.next_lesson_to_wake_up is None:
+            return None
+        if not self.generate_json:
+            return "JSON data is disabled - activate it in the options"
+        day = date.today()
+
+        table = self.get_timetable(start=day, end=day, sort=True)
+
+        lessons = []
+        for lesson in table:
+            _LOGGER.info(str(lesson.subjects))
             if self.check_lesson(lesson):
                 lessons.append(str(self.get_lesson_json(lesson)))
 
@@ -964,6 +1006,9 @@ class WebUntis:
                 ]
             except:
                 pass
+
+        dic["name"] = get_lesson_name(self, lesson)
+
         if output_str:
             return str(json.dumps(dic))
         return dic
