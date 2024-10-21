@@ -45,16 +45,20 @@ async def validate_login(
 
     errors = {}
 
-    if not credentials["server"].startswith(("http://", "https://")):
-        try:
-            socket.gethostbyname(credentials["server"])
-        except Exception as exc:
-            _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
-            errors["server"] = "cannot_connect"
-            return errors
+    credentials["server"] = credentials["server"].strip()
 
+    if not credentials["server"].startswith(("http://", "https://")):
         credentials["server"] = "https://" + credentials["server"]
-        credentials["server"] = urlparse(credentials["server"]).netloc
+
+    credentials["server"] = urlparse(credentials["server"]).netloc
+
+
+    try:
+        socket.gethostbyname(credentials["server"])
+    except Exception as exc:
+        _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
+        errors["server"] = "cannot_connect"
+        return errors, None
 
     try:
         session = webuntis.Session(
@@ -72,6 +76,7 @@ async def validate_login(
         errors["server"] = "cannot_connect"
     except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
         errors["school"] = "school_not_found"
+        raise (exc)
     except Exception as exc:
         _LOGGER.error("webuntis.Session unknown error: %s", exc)
         errors["base"] = "unknown"
