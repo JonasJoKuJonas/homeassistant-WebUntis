@@ -1,4 +1,5 @@
 """The Web Untis sensor platform."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -132,6 +133,7 @@ class WebUntisToayStart(WebUntisSensorEntity):
     async def async_update(self) -> None:
         """Update sensor data."""
         self._attr_native_value = self._server.today[0]
+        self._attr_extra_state_attributes = {"day": self._server.day_json}
 
 
 class WebUntisToayEnd(WebUntisSensorEntity):
