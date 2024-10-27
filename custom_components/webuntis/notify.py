@@ -234,9 +234,11 @@ def get_changes(change, lesson, lesson_old, server):
     else:
         name = lesson["subjects"][0]["name"]
 
-    changes["subject"] = get_lesson_name_str(
-        server=server, name=name, teacher=lesson["teachers"][0]["name"]
-    )
+    teacher = None
+    if "teachers" not in server.exclude_data:
+        teacher = lesson["teachers"][0]["name"]
+
+    changes["subject"] = get_lesson_name_str(server=server, name=name, teacher=teacher)
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")
