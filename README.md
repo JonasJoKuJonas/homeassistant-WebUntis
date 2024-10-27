@@ -70,10 +70,15 @@ Unfortunately, it is not possible to use the Untis API with an anonymous user.
 
 You can ask the school administration to give you access, otherwise it won't work.
 
-### Timetable Source & Full Name/ Class/ Subject/ Room
-With the timetable source, you can select the data source for the sensor.
-The final configuration field allows you to specify a name or class for data collection.
-The format for the student's full name must be <"first name"> <"middle name">, <"last name">. (This could vary from school to school)
+### Timetable Source
+Select from witch source the intigration should pull the data.
+
+If the student or Teacher is not found try
+
+first name: `first name` `middle name` <br>
+last name: `last name`
+
+(This could vary from school to school)
 
 ## Optional Configurations
 
@@ -83,21 +88,35 @@ The format for the student's full name must be <"first name"> <"middle name">, <
 | filter_mode | The mode of the filter, e.g., `Blacklist`. |
 | filter_subjects | Subjects excluded from any data. |
 | filter_description | Exclude all lessons with specific text in the lesson info. |
+| invalid_subjects | Allow lessons with no subjects |
 
 ### Calendar
 | Option | Description | Default |
 |:------|:------------|-------|
-| calendar_long_name | Use the long subject name. | `True` |
 | calendar_show_cancelled_lessons | Show cancelled lessons. | `False` |
 | calendar_description | Pick what to show in event descriptions. | `JSON` |
+| calendar_room | Specify what to display for location. | `Room long name` |
+| calendar_show_room_change | Show room changes in the calendar. | `False` |
+| calendar_replace_name | Replace words in event Name | `None` |
+
+
+### Lesson
+| Option | Description | Default |
+|:------|:------------|-------|
+| lesson_long_name | Show long lesson name | `True` |
+| lesson_replace_name | Replace Lesson name | `None` |
+| lesson_add_teacher | Select which subjects should be displayed with the teacher's name. | `None` |
+
 
 ### Notification Configuration
 | Option | Description | Default |
 |:------|:------------|-------|
+| name | The Notify Name | entity_id |
 | notify_entity_id | Home Assistant notification service to send lesson changes via, e.g., notify.telegram. | `None` |
-| notify_target | Object with additional notification service targets. | `None` |
-| notify_data | Object with additional notification service data. | `None` |
-| notify_options | Options that will trigger a notification. | `None` |
+| target | Object with additional notification service targets. | `None` |
+| data | Object with additional notification service data. | `None` |
+| template | Notify Template that is used for notification | `message_title` |
+| options | Options that will trigger a notification. | `None` |
 
 ### Backend
 |Option|Description|Default
@@ -116,7 +135,12 @@ The integration creates several entities in the format `sensor.NAME_entity`.
 | `binary_sensor.NAME_class` | bool | Indicates if a lesson is currently taking place. |
 | `sensor.NAME_next_class` | datetime | The start time of the next lesson. |
 | `sensor.NAME_next_lesson_to_wake_up` | datetime | The start of the next first lesson of the day. |
-| `calendar.NAME_webuntis_calendar` | calendar | Calendar entry |
+| `sensor.NAME_today_school_start` | datetime | The start time of todays fist lesson. Can also have todays lessons as JSON. |
+| `sensor.NAME_today_school_end` | datetime | The end time of todays last lesson. |
+| `calendar.NAME_webuntis_calendar` | calendar | Calendar entry. |
+| `calendar.NAME_webuntis_exam_calendar` | calendar | Calendar with current exams. |
+| `calendar.NAME_webuntis_homework_calendar` | calendar | Calendar with current homework. |
+
 
 ## Templates
 Before you can use templates, you need to enable the option to generate JSON in the options flow (Backend - generate JSON).
