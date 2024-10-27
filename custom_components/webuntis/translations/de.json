@@ -36,15 +36,15 @@
       "pick_student": {
         "description": "Name eines Schülers eingeben",
         "data": {
-          "surname": "Nachnahme",
-          "fore_name": "Vornahme"
+          "surname": "Nachname",
+          "fore_name": "Vorname"
         }
       },
       "pick_teacher": {
         "description": "Name eines Lehrers eingeben",
         "data": {
-          "surname": "Nachnahme",
-          "fore_name": "Vornahme"
+          "surname": "Nachname",
+          "fore_name": "Vorname"
         }
       },
       "pick_klasse": {
