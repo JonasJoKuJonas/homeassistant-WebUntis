@@ -223,6 +223,7 @@ class WebUntis:
 
         # Data provided by 3rd party library
         self.school_year = None
+        self.student_id = None
 
         # sensor data
         self.is_class = None
@@ -349,7 +350,21 @@ class WebUntis:
             self.subjects = []
 
             _LOGGER.warning(
-                "Updating the property subjects of '%s@%s' failed - OSError: %s",
+                "Updating the subjects of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
+            self.student_id = await self._hass.async_add_executor_job(
+                self.get_student_id
+            )
+        except OSError as error:
+            self.subjects = []
+
+            _LOGGER.warning(
+                "Updating the student_id of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -589,6 +604,13 @@ class WebUntis:
             self.session.logout()
             # _LOGGER.debug("Logout successful")
             self._loged_in = False
+
+    def get_student_id(self):
+        if self.timetable_source == "student":
+            student = self.session.get_student(
+                self.timetable_source_id[1], self.timetable_source_id[0]
+            )
+            return student.id
 
     def get_timetable(self, start, end: datetime, sort=False):
         """Get the timetable for the given time period"""
