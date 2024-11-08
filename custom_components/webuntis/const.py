@@ -23,7 +23,7 @@ DEFAULT_OPTIONS = {
 
 NOTIFY_OPTIONS = ["homework", "cancelled", "rooms", "lesson_change", "teachers", "code"]
 
-TEMPLATE_OPTIONS = ["message_title", "message", "discord"]
+TEMPLATE_OPTIONS = ["message_title", "message", "discord", "telegram"]
 
 ICON_STATUS = "mdi:school-outline"
 ICON_NEXT_CLASS = "mdi:table-clock"

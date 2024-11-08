@@ -185,7 +185,8 @@
       "options": {
         "message_title": "Message & Title",
         "message": "Message",
-        "discord": "Discord"
+        "discord": "Discord",
+        "telegram": "Telegram"
       }
     }
   },

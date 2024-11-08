@@ -106,6 +106,20 @@ New: {changes["new"]}"""
         message = f"{title}\n{message}"
         result.pop("title")
 
+    if template == "telegram":
+        message = f"""
+<b>WebUntis ({entry_title}) - {changes['title']}</b>
+<b>Subject:</b> {changes["subject"]}
+<b>Date:</b> {changes["date"]}
+<b>Time:</b> {changes["time_start"]} - {changes["time_end"]}"""
+
+        if changes["change"] not in ["cancelled", "test"]:
+            message += f"""
+<b>{changes["change"]}</b>
+<b>Old:</b> {changes["old"]}
+<b>New:</b> {changes["new"]}"""
+        data = {"parse_mode": "html"}
+
     if template == "discord":
         data = {
             "embed": {
