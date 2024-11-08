@@ -43,7 +43,10 @@ def get_lesson_name(server, lesson):
         name = "None"
 
     if name in server.lesson_add_teacher:
-        name += f" - {lesson.teachers[0].name}"
+        try:
+            name += f" - {lesson.teachers[0].name}"
+        except IndexError:
+            pass
 
     for key, value in server.lesson_replace_name.items():
         name = name.replace(key, value)
