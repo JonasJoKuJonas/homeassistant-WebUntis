@@ -148,30 +148,36 @@ Before you can use templates, you need to enable the option to generate JSON in 
 
 Now you can copy this examples and don't forget to change the sensor names and start times. (Replace NAME with your name, and time without leading zero)
 ### WebUntis Alarm Clock Automation
-Create a template -> sensor configuration in your configuration.yaml:
+Create a [template helper](https://my.home-assistant.io/redirect/config_flow_start?domain=template) -> sensor <br>
+Edit the template to your needs:
+
+Dynamic Time:
 ```
-- template:
-  - sensor:
-    - name: Webunits Weck Zeit
-        unique_id: "webuntis_wake_up_time"
-        icon: mdi:alarm
-        device_class: timestamp
-        state: >
-          {% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
-          {% if datetime not in ["unknown", "unavailable", None] %}
-            {% set datetime = datetime | as_datetime | as_local %}
-            {% set time = datetime.hour|string + ":" + datetime.minute|string %}
-            {% if time == "8:0" %}
-              {% set wake_up_time = "6:25" %}
-            {% elif time == "9:14" %}
-              {% set wake_up_time = "7:30" %}
-            {% elif time == "10:45" %}
-              {% set wake_up_time = "8:45" %}
-            {% endif %}
-              {{ datetime.replace(hour=wake_up_time.split(":")[0]|int, minute=wake_up_time.split(":")[1]|int) }}
-            {% else %}
-              {{ None }}
-            {% endif %} 
+{% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
+{% if datetime not in ["unknown", "unavailable", None] %}
+  {{ as_datetime(datetime) - timedelta(hours=1, minutes=10) }}
+{% else %}
+  {{ None }}
+{% endif %} 
+```
+
+Fixed Time:
+```
+{% set datetime = states('sensor.NAME_next_lesson_to_wake_up') %}
+{% if datetime not in ["unknown", "unavailable", None] %}
+  {% set datetime = datetime | as_datetime | as_local %}
+  {% set time = datetime.hour|string + ":" + datetime.minute|string %}
+  {% if time == "8:0" %}
+    {% set wake_up_time = "6:25" %}
+  {% elif time == "9:14" %}
+    {% set wake_up_time = "7:30" %}
+  {% elif time == "10:45" %}
+    {% set wake_up_time = "8:45" %}
+  {% endif %}
+    {{ datetime.replace(hour=wake_up_time.split(":")[0]|int, minute=wake_up_time.split(":")[1]|int) }}
+{% else %}
+  {{ None }}
+{% endif %} 
 ```
 This creates a sensor that represents the wake-up time.
 
