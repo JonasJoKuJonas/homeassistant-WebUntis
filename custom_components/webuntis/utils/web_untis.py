@@ -42,24 +42,22 @@ def get_lesson_name(server, lesson):
     except IndexError:
         name = "None"
 
+    name = server.lesson_replace_name.get(name, name)
+
     if name in server.lesson_add_teacher:
         try:
             name += f" - {lesson.teachers[0].name}"
         except IndexError:
             pass
 
-    for key, value in server.lesson_replace_name.items():
-        name = name.replace(key, value)
-
     return name
 
 
 def get_lesson_name_str(server, name, teacher):
 
+    name = server.lesson_replace_name.get(name, name)
+
     if name in server.lesson_add_teacher:
         name += f" - {teacher}"
-
-    for key, value in server.lesson_replace_name.items():
-        name = name.replace(key, value)
 
     return name
