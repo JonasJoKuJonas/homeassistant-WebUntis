@@ -36,15 +36,15 @@ def get_lesson_name(server, lesson):
 
     try:
         if server.lesson_long_name:
-            name = lesson.subjects[0].long_name
+            subject = lesson.subjects[0].long_name
         else:
-            name = lesson.subjects[0].name
+            subject = lesson.subjects[0].name
     except IndexError:
-        name = "None"
+        subject = "None"
 
-    name = server.lesson_replace_name.get(name, name)
+    name = server.lesson_replace_name.get(subject, subject)
 
-    if name in server.lesson_add_teacher:
+    if subject in server.lesson_add_teacher:
         try:
             name += f" - {lesson.teachers[0].name}"
         except IndexError:
@@ -53,11 +53,11 @@ def get_lesson_name(server, lesson):
     return name
 
 
-def get_lesson_name_str(server, name, teacher):
+def get_lesson_name_str(server, subject, teacher):
 
-    name = server.lesson_replace_name.get(name, name)
+    name = server.lesson_replace_name.get(subject, subject)
 
-    if name in server.lesson_add_teacher:
+    if subject in server.lesson_add_teacher:
         name += f" - {teacher}"
 
     return name
