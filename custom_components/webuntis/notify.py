@@ -178,9 +178,7 @@ def get_notification_data_homework(parameters, service, entry_title, server):
     title = ""
     data = {}
 
-    subject = get_lesson_name_str(
-        server=server, name=parameters["subject"], teacher=parameters["teacher"]
-    )
+    subject = get_lesson_name_str(server, parameters["subject"], parameters["teacher"])
 
     template = service.get("template", TEMPLATE_OPTIONS[0])
 
@@ -252,7 +250,7 @@ def get_changes(change, lesson, lesson_old, server):
     if "teachers" not in server.exclude_data:
         teacher = lesson["teachers"][0]["name"]
 
-    changes["subject"] = get_lesson_name_str(server=server, name=name, teacher=teacher)
+    changes["subject"] = get_lesson_name_str(server, name, teacher)
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")
