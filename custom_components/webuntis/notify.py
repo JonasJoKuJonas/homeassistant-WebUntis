@@ -155,9 +155,8 @@ New: {changes["new"]}"""
             )
 
     result["message"] = message
-    result["data"] = data
 
-    return result
+    return result, data
 
 
 """
@@ -225,8 +224,7 @@ Due Date: {parameters["due_date"]}"""
     return {
         "message": message,
         "title": title,
-        "data": data,
-    }
+    }, data
 
 
 def get_changes(change, lesson, lesson_old, server):

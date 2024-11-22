@@ -52,7 +52,6 @@ async def validate_login(
 
     credentials["server"] = urlparse(credentials["server"]).netloc
 
-
     try:
         socket.gethostbyname(credentials["server"])
     except Exception as exc:
@@ -769,9 +768,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "time_end": datetime.datetime.now().strftime("%H:%M:%S"),
                 }
 
-                data.update(
-                    get_notification_data(changes, config, self.config_entry.title)
+                dic, notify_data = get_notification_data(
+                    changes, config, self.config_entry.title
                 )
+
+                for key, value in notify_data.items():
+                    data["data"][key] = value
+
+                data.update(dic)
 
                 success = await async_notify(
                     self.hass,

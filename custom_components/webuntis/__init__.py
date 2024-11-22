@@ -495,11 +495,14 @@ class WebUntis:
                                     "target": service.get("target", {}),
                                 }
 
-                                data.update(
-                                    get_notification_data_homework(
-                                        event, service, self.title, self
-                                    )
+                                dic, notify_data = get_notification_data_homework(
+                                    event, service, self.title, self
                                 )
+
+                                for key, value in notify_data.items():
+                                    data["data"][key] = value
+
+                                data.update(dic)
 
                                 await async_notify(
                                     self._hass,
@@ -1147,7 +1150,14 @@ class WebUntis:
 
                         changes = get_changes(change, lesson, lesson_old, server=self)
 
-                        data.update(get_notification_data(changes, service, self.title))
+                        dic, notify_data = get_notification_data(
+                            changes, service, self.title
+                        )
+
+                        for key, value in notify_data.items():
+                            data["data"][key] = value
+
+                        data.update(dic)
 
                         await async_notify(
                             self._hass,
