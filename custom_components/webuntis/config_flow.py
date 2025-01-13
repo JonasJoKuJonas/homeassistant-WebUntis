@@ -496,6 +496,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if user_input["calendar_description"] == "Lesson Info":
                 user_input["extended_timetable"] = True
 
+            if user_input.get("calendar_replace_name") is None:
+                user_input["calendar_replace_name"] = {}
             if not (
                 isinstance(user_input.get("calendar_replace_name"), dict)
                 and all(
@@ -569,6 +571,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the lesson options."""
         errors = {}
         if user_input is not None:
+
+            if user_input.get("lesson_replace_name") is None:
+                user_input["lesson_replace_name"] = {}
 
             if not (
                 isinstance(user_input.get("lesson_replace_name"), dict)
