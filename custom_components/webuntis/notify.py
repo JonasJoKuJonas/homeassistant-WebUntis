@@ -239,10 +239,13 @@ def get_changes(change, lesson, lesson_old, server):
         "teachers": "Teacher changed",
     }[change]
 
-    if server.lesson_long_name:
-        name = lesson["subjects"][0]["long_name"]
-    else:
-        name = lesson["subjects"][0]["name"]
+    try:
+        if server.lesson_long_name:
+            name = lesson["subjects"][0]["long_name"]
+        else:
+            name = lesson["subjects"][0]["name"]
+    except IndexError:
+        name = "None"
 
     teacher = None
     if "teachers" not in server.exclude_data:
