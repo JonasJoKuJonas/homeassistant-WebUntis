@@ -249,7 +249,10 @@ def get_changes(change, lesson, lesson_old, server):
 
     teacher = None
     if "teachers" not in server.exclude_data:
-        teacher = lesson["teachers"][0]["name"]
+        try:
+            teacher = lesson["teachers"][0]["name"]
+        except IndexError:
+            pass
 
     changes["subject"] = get_lesson_name_str(server, name, teacher)
 
