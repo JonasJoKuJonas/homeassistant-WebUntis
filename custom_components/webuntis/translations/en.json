@@ -269,5 +269,23 @@
       },
       "name": "Count Hours"
     }
+  },
+  "entity": {
+    "event": {
+      "lesson_change_event": {
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "homework": "Homework added",
+              "code": "Lesson status changed",
+              "rooms": "Room changed",
+              "teachers": "Teacher changed",
+              "cancelled": "Lesson is cancelled",
+              "lesson_change": "Lesson was swapped"
+            }
+          }
+        }
+      }
+    }
   }
 }

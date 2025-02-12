@@ -43,7 +43,7 @@ from .utils.utils import compact_list, async_notify
 
 from .utils.web_untis import get_timetable_object, get_schoolyear
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,11 +63,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     server = WebUntis(hass, unique_id, entry)
     domain_data[unique_id] = server
-    await server.async_update()
-    server.start_periodic_update()
 
     # Set up platforms.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    await server.async_update()
+    server.start_periodic_update()
 
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
@@ -250,6 +251,13 @@ class WebUntis:
         # Callback for stopping periodic update.
         self._stop_periodic_update: CALLBACK_TYPE | None = None
 
+        self.lesson_change_callback = None
+
+    def listen_on_lesson_change(self, callback) -> None:
+        """Listen for lesson change events."""
+        self.lesson_change_callback = callback
+        _LOGGER.debug("set lesson_change_callback")
+
     def start_periodic_update(self) -> None:
         """Start periodic execution of update method."""
         self._stop_periodic_update = async_track_time_interval(
@@ -295,6 +303,7 @@ class WebUntis:
                         "entry_id": self._config.entry_id,
                     },
                 )
+            return
         elif self.issue:
             _LOGGER.info("delete issue bad_credentials")
             ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
@@ -486,8 +495,11 @@ class WebUntis:
                     if event["homework_id"] not in self.calendar_homework_ids:
                         self.calendar_homework_ids.append(event["homework_id"])
 
-                        for service in self.notify_config.values():
+                        self.lesson_change_callback(
+                            "homework", {"homework_data": service}
+                        )
 
+                        for service in self.notify_config.values():
                             if "homework" in service.get("options", []):
 
                                 data = {
@@ -529,16 +541,15 @@ class WebUntis:
                 error,
             )
 
-        if self.notify:
-            try:
-                await self.update_notify()
-            except OSError as error:
-                _LOGGER.warning(
-                    "Updating notify '%s@%s' failed - OSError: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
+        try:
+            await self.update_notify()
+        except OSError as error:
+            _LOGGER.warning(
+                "Updating lesson changes '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
 
         await self._hass.async_add_executor_job(self.webuntis_logout)
 
@@ -777,7 +788,7 @@ class WebUntis:
         self.event_list = []
 
         for lesson in table:
-            if self.notify and self.check_lesson(lesson, ignor_cancelled=True):
+            if self.check_lesson(lesson, ignor_cancelled=True):
                 self.event_list.append(self.get_lesson_for_notify(lesson))
 
             if self.check_lesson(
@@ -1135,6 +1146,11 @@ class WebUntis:
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
             _LOGGER.debug(updated_items)
+
+            for change, lesson, lesson_old in updated_items:
+                self.lesson_change_callback(
+                    change, {"old_lesson": lesson_old, "new_lesson": lesson}
+                )
 
             updated_items = compact_list(updated_items, "notify")
 
