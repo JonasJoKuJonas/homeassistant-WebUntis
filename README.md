@@ -140,7 +140,69 @@ The integration creates several entities in the format `sensor.NAME_entity`.
 | `calendar.NAME_webuntis_calendar` | calendar | Calendar entry. |
 | `calendar.NAME_webuntis_exam_calendar` | calendar | Calendar with current exams. |
 | `calendar.NAME_webuntis_homework_calendar` | calendar | Calendar with current homework. |
+| `event.NAME_webuntis_lesson_change` | event | Lesson change events. |
 
+
+### Event Entity
+
+The event entity allows you to trigger an automation on a timetable change.
+The automation can then send your own type of notification, make a announcement on a smart speaker, add homework to a todo list or other cool stuff.
+
+Trigger automation:
+```
+trigger: state
+entity_id: event.NAME_webuntis_lesson_change
+```
+
+There can be different event_type's
+- homework
+- code
+- rooms
+- teachers
+- cancelled
+- lesson_change
+
+Example automation variables
+```
+to_state:
+    entity_id: event.NAME_webuntis_lesson_change
+    attributes:
+      event_type: code
+      old_lesson:
+        start: '2025-02-12T07:45:00+01:00'
+        end: '2025-02-12T09:15:00+01:00'
+        subject_id: xxx
+        id: xxx
+        lsnumber: xxx
+        code: irregular
+        type: ls
+        subjects: 
+          - name: M
+             long_name: Mathe
+        rooms:
+          - name: R1
+            long_name: Raum 1
+        original_rooms: []
+        teachers:
+          - name: x
+            long_name: xxx
+      new_lesson:
+        start: '2025-02-12T07:45:00+01:00'
+        end: '2025-02-12T09:15:00+01:00'
+        subject_id: None
+        id: xxx
+        lsnumber: xxx
+        code: cancelled
+        type: ls
+        subjects: []
+        rooms:
+          - name: R1
+            long_name: Room 1
+        original_rooms: []
+        teachers:
+          - name: x
+            long_name: xxx
+```
 
 ## Templates
 Before you can use templates, you need to enable the option to generate JSON in the options flow (Backend - generate JSON).
