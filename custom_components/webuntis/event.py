@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-
 from homeassistant.components.event import EventEntity
-from homeassistant.core import callback
-
-
 from homeassistant.config_entries import ConfigEntry
-
-
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-
-from .const import DOMAIN, NAME_EVENT_ENTITY, ICON_EVENT_ENTITY
+from . import WebUntisEntity
+from .const import DOMAIN, ICON_EVENT_ENTITY, NAME_EVENT_ENTITY
 
 
 async def async_setup_entry(
@@ -25,7 +19,8 @@ async def async_setup_entry(
     async_add_entities([LessonChangeEventEntity(server)], True)
 
 
-class LessonChangeEventEntity(EventEntity):
+class LessonChangeEventEntity(WebUntisEntity, EventEntity):
+    """Representation of a Web Untis Event entity."""
 
     _attr_event_types = [
         "homework",
@@ -35,13 +30,18 @@ class LessonChangeEventEntity(EventEntity):
         "cancelled",
         "lesson_change",
     ]
-    _attr_name = NAME_EVENT_ENTITY
-    _attr_unique_id = NAME_EVENT_ENTITY
     _attr_translation_key = "lesson_change_event"
-    _attr_icon = ICON_EVENT_ENTITY
 
     def __init__(self, server) -> None:
         """Set up the instance."""
+
+        super().__init__(
+            server=server,
+            type_name=NAME_EVENT_ENTITY,
+            icon=ICON_EVENT_ENTITY,
+            device_class=None,
+        )
+
         self._server = server
 
     @callback

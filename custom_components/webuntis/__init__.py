@@ -1214,10 +1214,6 @@ class WebUntisEntity(Entity):
         self._extra_state_attributes = None
         self._disconnect_dispatcher: CALLBACK_TYPE | None = None
 
-    async def async_update(self) -> None:
-        """Fetch data from the server."""
-        raise NotImplementedError()
-
     async def async_added_to_hass(self) -> None:
         """Connect dispatcher to signal from server."""
         self._disconnect_dispatcher = async_dispatcher_connect(
