@@ -141,6 +141,7 @@ The integration creates several entities in the format `sensor.NAME_entity`.
 | `calendar.NAME_webuntis_exam_calendar` | calendar | Calendar with current exams. |
 | `calendar.NAME_webuntis_homework_calendar` | calendar | Calendar with current homework. |
 | `event.NAME_webuntis_lesson_change` | event | Lesson change events. |
+| `event.NAME_webuntis_homework` | event | Homework events. |
 
 
 ### Event Entity
@@ -155,7 +156,6 @@ entity_id: event.NAME_webuntis_lesson_change
 ```
 
 There can be different event_type's
-- homework
 - code
 - rooms
 - teachers
@@ -202,6 +202,31 @@ to_state:
         teachers:
           - name: x
             long_name: xxx
+```
+
+Trigger automation:
+```
+trigger: state
+entity_id: event.NAME_webuntis_homework
+```
+
+
+Example automation variables
+```
+to_state:
+    entity_id: event.NAME_webuntis_homework
+    attributes:
+      event_type: homework
+      homework_data:
+        homework_id: ???
+        subject: IT
+        teacher: Jonas
+        student_id: 42
+        completed: false
+        date_assigned: '2025-02-18'
+        due_date: '2025-02-25'
+        text: Fix all bugs in the WebUntis integration!
+      
 ```
 
 ## Templates
