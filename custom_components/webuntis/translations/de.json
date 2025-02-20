@@ -275,12 +275,20 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "homework": "Hausaufgabe hinzugefügt",
               "code": "Stunden-Status geändert",
               "rooms": "Raum Änderung",
               "teachers": "Lehrer Änderung",
               "cancelled": "Stunde fällt aus",
               "lesson_change": "Stunde ausgetauscht"
+            }
+          }
+        }
+      },
+      "homework_event": {
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "homework": "Hausaufgabe hinzugefügt"
             }
           }
         }

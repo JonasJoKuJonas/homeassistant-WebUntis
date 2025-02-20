@@ -276,12 +276,20 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "homework": "Homework added",
               "code": "Lesson status changed",
               "rooms": "Room changed",
               "teachers": "Teacher changed",
               "cancelled": "Lesson cancelled",
               "lesson_change": "Lesson swapped"
+            }
+          }
+        }
+      },
+      "homework_event": {
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "homework": "Homework added"
             }
           }
         }

@@ -252,11 +252,14 @@ class WebUntis:
         self._stop_periodic_update: CALLBACK_TYPE | None = None
 
         self.lesson_change_callback = None
+        self.homework_change_callback = None
 
-    def listen_on_lesson_change(self, callback) -> None:
+    def event_entity_listen(self, callback, id) -> None:
         """Listen for lesson change events."""
-        self.lesson_change_callback = callback
-        _LOGGER.debug("set lesson_change_callback")
+        if id == "lesson_change_event":
+            self.lesson_change_callback = callback
+        elif id == "homework_event":
+            self.homework_change_callback = callback
 
     def start_periodic_update(self) -> None:
         """Start periodic execution of update method."""
@@ -495,7 +498,7 @@ class WebUntis:
                     if event["homework_id"] not in self.calendar_homework_ids:
                         self.calendar_homework_ids.append(event["homework_id"])
 
-                        self.lesson_change_callback(
+                        self.homework_change_callback(
                             "homework", {"homework_data": service}
                         )
 

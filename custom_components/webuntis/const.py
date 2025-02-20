@@ -33,7 +33,8 @@ ICON_TODAY_START = "mdi:calendar-start"
 ICON_TODAY_END = "mdi:calendar-end"
 ICON_CALENDER_HOMEWORK = "mdi:home-edit"
 ICON_CALENDER_EXAM = "mdi:pen"
-ICON_EVENT_ENTITY = "mdi:calendar-clock"
+ICON_EVENT_LESSNON_CHANGE = "mdi:calendar-clock"
+ICON_EVENT_HOMEWORK = "mdi:home-edit"
 
 NAME_STATUS = "Class"
 NAME_NEXT_CLASS = "Next Class"
@@ -43,7 +44,8 @@ NAME_TODAY_START = "Today school start"
 NAME_TODAY_END = "Today school end"
 NAME_CALENDER_HOMEWORK = "Webuntis Homework Calendar"
 NAME_CALENDER_EXAM = "Webuntis Exam Calendar"
-NAME_EVENT_ENTITY = "WebUntis Lesson Change"
+NAME_EVENT_LESSNON_CHANGE = "WebUntis Lesson Change"
+NAME_EVENT_HOMEWORK = "WebUntis Homework"
 
 
 SCAN_INTERVAL = 10 * 60  # 10min

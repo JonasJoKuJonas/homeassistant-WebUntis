@@ -6,7 +6,13 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import WebUntisEntity
-from .const import DOMAIN, ICON_EVENT_ENTITY, NAME_EVENT_ENTITY
+from .const import (
+    DOMAIN,
+    ICON_EVENT_LESSNON_CHANGE,
+    NAME_EVENT_LESSNON_CHANGE,
+    ICON_EVENT_HOMEWORK,
+    NAME_EVENT_HOMEWORK,
+)
 
 
 async def async_setup_entry(
@@ -16,45 +22,70 @@ async def async_setup_entry(
 ) -> None:
     """Set up Example sensor based on a config entry."""
     server = hass.data[DOMAIN][config_entry.unique_id]
-    async_add_entities([LessonChangeEventEntity(server)], True)
+    entities = [LessonChangeEventEntity(server)]
+    if server.timetable_source != "teacher":
+        entities.append(HomeworkEventEntity(server))
+    async_add_entities(
+        entities,
+        True,
+    )
 
 
-class LessonChangeEventEntity(WebUntisEntity, EventEntity):
-    """Representation of a Web Untis Event entity."""
+class BaseUntisEventEntity(WebUntisEntity, EventEntity):
+    """Base class for WebUntis event entities."""
 
-    _attr_event_types = [
-        "homework",
-        "code",
-        "rooms",
-        "teachers",
-        "cancelled",
-        "lesson_change",
-    ]
-    _attr_translation_key = "lesson_change_event"
-
-    def __init__(self, server) -> None:
-        """Set up the instance."""
-
-        super().__init__(
-            server=server,
-            type_name=NAME_EVENT_ENTITY,
-            icon=ICON_EVENT_ENTITY,
-            device_class=None,
-        )
-
+    def __init__(
+        self,
+        server,
+        name: str,
+        sensor_id: str,
+        icon: str,
+        event_types: list[str],
+    ) -> None:
+        """Initialize the base event entity."""
+        super().__init__(server=server, type_name=name, icon=icon, device_class=None)
+        self.sensor_id = sensor_id
         self._server = server
+        self._attr_event_types = event_types
+        self._attr_translation_key = sensor_id
 
     @callback
     def _async_handle_event(self, event: str, data: dict) -> None:
-        """Handle the demo button event."""
+        """Handle incoming event and update state."""
         self._trigger_event(event, data)
         self.async_write_ha_state()
 
     async def async_added_to_hass(self) -> None:
-        """Register callbacks with your device API/library."""
-        self._server.listen_on_lesson_change(self._async_handle_event)
+        """Register event listener with the server."""
+        self._server.event_entity_listen(self._async_handle_event, self.sensor_id)
 
     @property
     def available(self) -> bool:
         """Return sensor availability."""
         return True
+
+
+class LessonChangeEventEntity(BaseUntisEventEntity):
+    """Event entity for lesson changes."""
+
+    def __init__(self, server) -> None:
+        super().__init__(
+            server=server,
+            name=NAME_EVENT_LESSNON_CHANGE,
+            sensor_id="lesson_change_event",
+            icon=ICON_EVENT_LESSNON_CHANGE,
+            event_types=["lesson_change", "rooms", "teachers", "cancelled", "code"],
+        )
+
+
+class HomeworkEventEntity(BaseUntisEventEntity):
+    """Event entity for homework changes."""
+
+    def __init__(self, server) -> None:
+        super().__init__(
+            server=server,
+            name=NAME_EVENT_HOMEWORK,
+            sensor_id="homework_event",
+            icon=ICON_EVENT_HOMEWORK,
+            event_types=["homework"],
+        )
