@@ -1151,8 +1151,13 @@ class WebUntis:
             _LOGGER.debug(updated_items)
 
             for change, lesson, lesson_old in updated_items:
+
+                lesson_old["name"] = generate_lesson_name(lesson_old, self)
+                lesson["name"] = generate_lesson_name(lesson, self)
+
                 self.lesson_change_callback(
-                    change, {"old_lesson": lesson_old, "new_lesson": lesson}
+                    change,
+                    {"old_lesson": lesson_old, "new_lesson": lesson},
                 )
 
             updated_items = compact_list(updated_items, "notify")

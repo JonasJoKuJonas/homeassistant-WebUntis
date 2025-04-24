@@ -239,22 +239,7 @@ def get_changes(change, lesson, lesson_old, server):
         "teachers": "Teacher changed",
     }[change]
 
-    try:
-        if server.lesson_long_name:
-            name = lesson["subjects"][0]["long_name"]
-        else:
-            name = lesson["subjects"][0]["name"]
-    except IndexError:
-        name = "None"
-
-    teacher = None
-    if "teachers" not in server.exclude_data:
-        try:
-            teacher = lesson["teachers"][0]["name"]
-        except IndexError:
-            pass
-
-    changes["subject"] = get_lesson_name_str(server, name, teacher)
+    changes["subject"] = generate_lesson_name(lesson, server)
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")
@@ -287,3 +272,22 @@ def get_changes(change, lesson, lesson_old, server):
         changes["new"] = lesson[change]
 
     return changes
+
+
+def generate_lesson_name(lesson, server):
+    try:
+        if server.lesson_long_name:
+            name = lesson["subjects"][0]["long_name"]
+        else:
+            name = lesson["subjects"][0]["name"]
+    except IndexError:
+        name = "None"
+
+    teacher = None
+    if "teachers" not in server.exclude_data:
+        try:
+            teacher = lesson["teachers"][0]["name"]
+        except IndexError:
+            pass
+
+    return get_lesson_name_str(server, name, teacher)
