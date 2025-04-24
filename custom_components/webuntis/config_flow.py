@@ -403,7 +403,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self,
@@ -415,7 +415,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def save(self, user_input):
         """Save the options"""
         _LOGGER.debug("Saving options: %s", user_input)
-        options = dict(self.config_entry.options)  # old options
+        options = dict(self._config_entry.options)  # old options
         options.update(user_input)  # update old options with new options
         _LOGGER.debug("New options: %s", options)
         return self.async_create_entry(title="", data=options)
@@ -440,7 +440,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             return await self.save(user_input)
 
-        server = self.hass.data[DOMAIN][self.config_entry.unique_id]
+        server = self.hass.data[DOMAIN][self._config_entry.unique_id]
 
         return self.async_show_form(
             step_id="filter",
@@ -448,7 +448,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "filter_mode",
-                        default=str(self.config_entry.options.get("filter_mode")),
+                        default=str(self._config_entry.options.get("filter_mode")),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -461,7 +461,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "filter_subjects",
-                        default=self.config_entry.options.get("filter_subjects"),
+                        default=self._config_entry.options.get("filter_subjects"),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),
@@ -473,7 +473,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "filter_description",
                         description={
                             "suggested_value": ", ".join(
-                                self.config_entry.options.get("filter_description")
+                                self._config_entry.options.get("filter_description")
                             )
                         },
                     ): selector.TextSelector(
@@ -481,7 +481,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "invalid_subjects",
-                        default=self.config_entry.options.get("invalid_subjects"),
+                        default=self._config_entry.options.get("invalid_subjects"),
                     ): selector.BooleanSelector(),
                 }
             ),
@@ -516,20 +516,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "calendar_show_cancelled_lessons",
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             "calendar_show_cancelled_lessons"
                         ),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "calendar_show_room_change",
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             "calendar_show_room_change"
                         ),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "calendar_description",
                         default=str(
-                            self.config_entry.options.get("calendar_description")
+                            self._config_entry.options.get("calendar_description")
                         ),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
@@ -543,7 +543,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "calendar_room",
-                        default=str(self.config_entry.options.get("calendar_room")),
+                        default=str(self._config_entry.options.get("calendar_room")),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -558,7 +558,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         "calendar_replace_name",
                         description={
-                            "suggested_value": self.config_entry.options.get(
+                            "suggested_value": self._config_entry.options.get(
                                 "calendar_replace_name"
                             )
                         },
@@ -586,7 +586,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             else:
                 return await self.save(user_input)
 
-        server = self.hass.data[DOMAIN][self.config_entry.unique_id]
+        server = self.hass.data[DOMAIN][self._config_entry.unique_id]
 
         return self.async_show_form(
             step_id="lesson",
@@ -595,19 +595,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "lesson_long_name",
-                        default=self.config_entry.options.get("lesson_long_name"),
+                        default=self._config_entry.options.get("lesson_long_name"),
                     ): selector.BooleanSelector(),
                     vol.Optional(
                         "lesson_replace_name",
                         description={
-                            "suggested_value": self.config_entry.options.get(
+                            "suggested_value": self._config_entry.options.get(
                                 "lesson_replace_name"
                             )
                         },
                     ): selector.ObjectSelector(),
                     vol.Optional(
                         "lesson_add_teacher",
-                        default=self.config_entry.options.get("lesson_add_teacher"),
+                        default=self._config_entry.options.get("lesson_add_teacher"),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),
@@ -628,12 +628,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             if (
                 not user_input["extended_timetable"]
-                and self.config_entry.options["filter_description"]
+                and self._config_entry.options["filter_description"]
             ):
                 errors = {"extended_timetable": "extended_timetable"}
             elif (
                 user_input["extended_timetable"] is False
-                and self.config_entry.options["calendar_description"] == "Lesson Info"
+                and self._config_entry.options["calendar_description"] == "Lesson Info"
             ):
                 errors = {"extended_timetable": "extended_timetable"}
             else:
@@ -644,15 +644,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "keep_loged_in",
-                        default=self.config_entry.options.get("keep_loged_in"),
+                        default=self._config_entry.options.get("keep_loged_in"),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "generate_json",
-                        default=self.config_entry.options.get("generate_json"),
+                        default=self._config_entry.options.get("generate_json"),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "exclude_data",
-                        default=self.config_entry.options.get("exclude_data"),
+                        default=self._config_entry.options.get("exclude_data"),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=["teachers"],
@@ -662,7 +662,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "extended_timetable",
-                        default=self.config_entry.options.get("extended_timetable"),
+                        default=self._config_entry.options.get("extended_timetable"),
                     ): selector.BooleanSelector(),
                 }
             ),
@@ -674,7 +674,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ):
         services = {
             id: service["name"]
-            for id, service in self.config_entry.options["notify_config"].items()
+            for id, service in self._config_entry.options["notify_config"].items()
         }
 
         select = cv.multi_select if multible else vol.In
@@ -697,7 +697,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the notify_menu options."""
 
-        if not self.config_entry.options["notify_config"]:
+        if not self._config_entry.options["notify_config"]:
             options = [
                 "edit_notify_service",
             ]
@@ -734,13 +734,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "remove_notify_service", multible=True
             )
         else:
-            notify_config = self.config_entry.options["notify_config"]
+            notify_config = self._config_entry.options["notify_config"]
             for key in user_input["services"]:
                 notify_config.pop(key, None)
             return await self.save(
                 {
                     "notify_config": notify_config,
-                    "toggle": not self.config_entry.options.get("toggle"),
+                    "toggle": not self._config_entry.options.get("toggle"),
                 }
             )
 
@@ -757,7 +757,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         else:
             for service in user_input.get("services", {}):
 
-                config = self.config_entry.options["notify_config"][service]
+                config = self._config_entry.options["notify_config"][service]
 
                 data = {
                     "data": config.get("data", {}),
@@ -774,7 +774,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 }
 
                 dic, notify_data = get_notification_data(
-                    changes, config, self.config_entry.title
+                    changes, config, self._config_entry.title
                 )
 
                 for key, value in notify_data.items():
@@ -803,7 +803,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         options = {}
         if edit:
-            options = self.config_entry.options["notify_config"].get(edit)
+            options = self._config_entry.options["notify_config"].get(edit)
 
         if user_input is not None:
             errors = {}
@@ -825,17 +825,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 user_input["name"] = user_input["entity_id"]
 
             if not errors:
-                notify_config = self.config_entry.options["notify_config"]
+                notify_config = self._config_entry.options["notify_config"]
                 notify_config[user_input["entity_id"]] = user_input
 
                 return await self.save(
                     {
                         "notify_config": notify_config,
-                        "toggle": not self.config_entry.options.get("toggle"),
+                        "toggle": not self._config_entry.options.get("toggle"),
                     }
                 )
 
-            options = self.config_entry.options["notify_config"].get(
+            options = self._config_entry.options["notify_config"].get(
                 user_input["entity_id"], {}
             )
 
