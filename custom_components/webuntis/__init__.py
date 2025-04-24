@@ -821,6 +821,12 @@ class WebUntis:
                         event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "Lesson Info":
                         event["description"] = str(lesson.substText)
+                    elif self.calendar_description == "Class Name (short)":
+                        event["description"] = ", ".join(k.name for k in lesson.klassen)
+                    elif self.calendar_description == "Class Name (long)":
+                        event["description"] = ", ".join(
+                            k.long_name for k in lesson.klassen
+                        )
 
                     # add Room as location
                     try:

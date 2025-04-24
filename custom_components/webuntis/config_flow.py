@@ -537,7 +537,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                                 "None",
                                 "JSON",
                                 "Lesson Info",
+                                "Class Name (short)",
+                                "Class Name (long)",
                             ],
+                            translation_key="calendar_description",
                             mode="dropdown",
                         )
                     ),

@@ -188,6 +188,15 @@
         "discord": "Discord",
         "telegram": "Telegram"
       }
+    },
+    "calendar_description": {
+      "options": {
+        "None": "None",
+        "JSON": "JSON",
+        "Lesson Info": "Lesson Info",
+        "Class Name (short)": "Class Name (short)",
+        "Class Name (long)": "Class Name (long)"
+      }
     }
   },
   "issues": {

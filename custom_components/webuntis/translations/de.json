@@ -187,6 +187,15 @@
         "message": "Nachricht",
         "discord": "Discord"
       }
+    },
+    "calendar_description": {
+      "options": {
+        "None": "Keine",
+        "JSON": "JSON",
+        "Lesson Info": "Stunden Info",
+        "Class Name (short)": "Klassen Name (kurz)",
+        "Class Name (long)": "Klassen Name (lang)"
+      }
     }
   },
   "issues": {
