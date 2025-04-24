@@ -499,7 +499,7 @@ class WebUntis:
                         self.calendar_homework_ids.append(event["homework_id"])
 
                         self.homework_change_callback(
-                            "homework", {"homework_data": service}
+                            "homework", {"homework_data": event}
                         )
 
                         for service in self.notify_config.values():

@@ -98,7 +98,8 @@ Date: {changes["date"]}
 Time: {changes["time_start"]} - {changes["time_end"]}"""
 
         if changes["change"] not in ["cancelled", "test"]:
-            message += f"""{changes["change"]}
+            message += f"""
+Change ({changes["change"]}):
 Old: {changes["old"]}
 New: {changes["new"]}"""
 
@@ -251,25 +252,26 @@ def get_changes(change, lesson, lesson_old, server):
     if change == "cancelled":
         pass
     elif change == "lesson_change":
-        changes["old"] = lesson_old["subjects"][0]["long_name"]
-        changes["new"] = lesson["subjects"][0]["long_name"]
-
+        changes.update(
+            {
+                "old": lesson_old.get("subjects", [{}])[0].get("long_name", ""),
+                "new": lesson.get("subjects", [{}])[0].get("long_name", ""),
+            }
+        )
     elif change == "rooms":
-        try:
-            changes["old"] = lesson_old["rooms"][0]["name"]
-            changes["new"] = lesson["rooms"][0]["name"]
-        except KeyError:
-            pass
+        changes.update(
+            {
+                "old": lesson_old.get("rooms", [{}])[0].get("name", ""),
+                "new": lesson.get("rooms", [{}])[0].get("name", ""),
+            }
+        )
     elif change == "teachers":
-        try:
-            changes["old"] = lesson_old["teachers"][0]["name"]
-            changes["new"] = lesson["teachers"][0]["name"]
-        except KeyError:
-            pass
-
-    else:
-        changes["old"] = lesson_old[change]
-        changes["new"] = lesson[change]
+        changes.update(
+            {
+                "old": lesson_old.get("teachers", [{}])[0].get("name", ""),
+                "new": lesson.get("teachers", [{}])[0].get("name", ""),
+            }
+        )
 
     return changes
 
