@@ -51,6 +51,7 @@ class ExamEventsFetcher:
             subject = exam.get("subject", "Unknown Subject")
             text = exam.get("text", "")
             grade = exam.get("grade", "")
+            student_id = exam.get("assignedStudents", [])[0].get("id", None)
 
             # Parse dates and times for the exam
             exam_date = exam.get("examDate")
@@ -85,8 +86,8 @@ class ExamEventsFetcher:
                 "location": rooms,
             }
 
-            # Create the CalendarEvent object and append it to the event list
-            event_list.append(CalendarEvent(**event))
+            if self.server.student_id is None or self.server.student_id == student_id:
+                event_list.append(CalendarEvent(**event))
 
         return event_list
 
