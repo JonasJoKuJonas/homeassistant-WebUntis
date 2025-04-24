@@ -191,7 +191,7 @@
     },
     "calendar_description": {
       "options": {
-        "None": "None",
+        "none": "None",
         "JSON": "JSON",
         "Lesson Info": "Lesson Info",
         "Class Name (short)": "Class Name (short)",

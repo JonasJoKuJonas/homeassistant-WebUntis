@@ -534,7 +534,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "None",
+                                "none",
                                 "JSON",
                                 "Lesson Info",
                                 "Class Name (short)",
