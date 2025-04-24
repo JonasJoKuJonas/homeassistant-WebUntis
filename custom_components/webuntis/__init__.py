@@ -817,13 +817,13 @@ class WebUntis:
 
                     event["start"] = lesson.start.astimezone()
                     event["end"] = lesson.end.astimezone()
-                    if self.calendar_description == "JSON":
+                    if self.calendar_description == "json":
                         event["description"] = self.get_lesson_json(lesson, True)
-                    elif self.calendar_description == "Lesson Info":
+                    elif self.calendar_description == "lesson_info":
                         event["description"] = str(lesson.substText)
-                    elif self.calendar_description == "Class Name (short)":
+                    elif self.calendar_description == "class_name_short":
                         event["description"] = ", ".join(k.name for k in lesson.klassen)
-                    elif self.calendar_description == "Class Name (long)":
+                    elif self.calendar_description == "class_ame_long":
                         event["description"] = ", ".join(
                             k.long_name for k in lesson.klassen
                         )

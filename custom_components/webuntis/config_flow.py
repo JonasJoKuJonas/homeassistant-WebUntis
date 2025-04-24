@@ -493,7 +493,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the calendar options."""
         errors = {}
         if user_input is not None:
-            if user_input["calendar_description"] == "Lesson Info":
+            if user_input["calendar_description"] == "lesson_info":
                 user_input["extended_timetable"] = True
 
             if user_input.get("calendar_replace_name") is None:
@@ -535,10 +535,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         selector.SelectSelectorConfig(
                             options=[
                                 "none",
-                                "JSON",
-                                "Lesson Info",
-                                "Class Name (short)",
-                                "Class Name (long)",
+                                "json",
+                                "lesson_info",
+                                "class_name_short",
+                                "class_name_long",
                             ],
                             translation_key="calendar_description",
                             mode="dropdown",
@@ -636,7 +636,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 errors = {"extended_timetable": "extended_timetable"}
             elif (
                 user_input["extended_timetable"] is False
-                and self._config_entry.options["calendar_description"] == "Lesson Info"
+                and self._config_entry.options["calendar_description"] == "lesson_info"
             ):
                 errors = {"extended_timetable": "extended_timetable"}
             else:

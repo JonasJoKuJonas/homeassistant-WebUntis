@@ -191,10 +191,10 @@
     "calendar_description": {
       "options": {
         "none": "Keine",
-        "JSON": "JSON",
-        "Lesson Info": "Stunden Info",
-        "Class Name (short)": "Klassen Name (kurz)",
-        "Class Name (long)": "Klassen Name (lang)"
+        "json": "JSON",
+        "lesson_info": "Stunden Info",
+        "class_name_short": "Klassen Name (kurz)",
+        "class_name_long": "Klassen Name (lang)"
       }
     }
   },
