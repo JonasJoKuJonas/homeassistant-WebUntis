@@ -51,7 +51,12 @@ class ExamEventsFetcher:
             subject = exam.get("subject", "Unknown Subject")
             text = exam.get("text", "")
             grade = exam.get("grade", "")
-            student_id = exam.get("assignedStudents", [])[0].get("id", None)
+
+            assigned_students = exam.get("assignedStudents", [])
+            if assigned_students:  # Checks if the list is not empty
+                student_id = assigned_students[0].get("id", None)
+            else:
+                student_id = None
 
             # Parse dates and times for the exam
             exam_date = exam.get("examDate")
