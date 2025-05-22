@@ -291,5 +291,7 @@ def generate_lesson_name(lesson, server):
             teacher = lesson["teachers"][0]["name"]
         except IndexError:
             pass
+        except KeyError:
+            pass
 
     return get_lesson_name_str(server, name, teacher)
