@@ -639,9 +639,18 @@ class WebUntis:
 
         start_schoolyear = get_schoolyear(self.school_year, start)
 
-        if start_schoolyear:
-            if start_schoolyear.end.date() < end:
-                end = start_schoolyear.end.date()
+        if not start_schoolyear:
+            _LOGGER.warning(
+                "No valid school year found for start date %s. Returning empty timetable.",
+                start,
+            )
+            return []
+
+        # Ensure start and end are within the school year boundaries
+        if start < start_schoolyear.start.date():
+            start = start_schoolyear.start.date()
+        if end > start_schoolyear.end.date():
+            end = start_schoolyear.end.date()
 
         result = []
         if self.timetable_source == "personal":
@@ -782,9 +791,14 @@ class WebUntis:
 
     def _get_events(self):
         today = date.today()
-        week_start = today - timedelta(days=today.weekday())
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
-
+        # Get the current school year for today
+        schoolyear = get_schoolyear(self.school_year, today)
+        if schoolyear:
+            # Use the later of week_start and schoolyear.start.date()
+            week_start = max(today - timedelta(days=today.weekday()), schoolyear.start.date())
+        else:
+            week_start = today - timedelta(days=today.weekday())
         table = self.get_timetable(start=week_start, end=in_x_days)
 
         event_list = []
