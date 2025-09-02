@@ -156,11 +156,11 @@ class WebUntis:
     """Representation of a WebUntis client."""
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        unique_id: str,
-        config: Mapping[str, Any],
-    ) -> None:
+            self,
+            hass: HomeAssistant,
+            unique_id: str,
+            config: Mapping[str, Any],
+        ) -> None:
         """Initialize client instance."""
         self._hass = hass
         self._config = config
@@ -171,8 +171,8 @@ class WebUntis:
         self.school = config.data["school"]
         self.username = config.data["username"]
         self.password = config.data["password"]
-        self.timetable_source = config.data["timetable_source"]
-        self.timetable_source_id = config.data["timetable_source_id"]
+        self.timetable_source = config.options.get("timetable_source", config.data.get("timetable_source"))
+        self.timetable_source_id = config.options.get("timetable_source_id", config.data.get("timetable_source_id"))
         self.title = config.title
 
         self.calendar_show_cancelled_lessons = config.options[

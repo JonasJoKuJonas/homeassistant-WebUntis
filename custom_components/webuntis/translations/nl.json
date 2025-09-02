@@ -70,7 +70,31 @@
           "calendar": "Calendar",
           "lesson": "Lesson Name",
           "backend": "Backend",
-          "notify_menu": "Notify Menu"
+          "notify_menu": "Notify Menu",
+          "timetable_source": "Tijdschema bron"
+        }
+      },
+      "timetable_source": {
+        "description": "Selecteer de tijdschema bron"
+      },
+      "timetable_source_klasse": {
+        "description": "Voer de klasnaam in",
+        "data": {
+          "klasse": "Klasse"
+        }
+      },
+      "timetable_source_teacher": {
+        "description": "Voer de naam van de leraar in",
+        "data": {
+          "fore_name": "Voornaam",
+          "surname": "Achternaam"
+        }
+      },
+      "timetable_source_student": {
+        "description": "Voer de naam van de student in",
+        "data": {
+          "fore_name": "Voornaam",
+          "surname": "Achternaam"
         }
       },
       "filter": {

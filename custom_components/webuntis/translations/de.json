@@ -70,7 +70,31 @@
           "calendar": "Kalender",
           "lesson": "Stunden Name",
           "backend": "Backend",
-          "notify_menu": "Notify Menü"
+          "notify_menu": "Notify Menü",
+          "timetable_source": "Stundenplan-Quelle"
+        }
+      },
+      "timetable_source": {
+        "description": "Wähle die Stundenplan-Quelle"
+      },
+      "timetable_source_klasse": {
+        "description": "Geben Sie den Klassenname ein",
+        "data": {
+          "klasse": "Klasse"
+        }
+      },
+      "timetable_source_teacher": {
+        "description": "Geben Sie den Namen des Lehrers ein",
+        "data": {
+          "fore_name": "Vorname",
+          "surname": "Nachname"
+        }
+      },
+      "timetable_source_student": {
+        "description": "Geben Sie den Namen des Schülers ein",
+        "data": {
+          "fore_name": "Vorname",
+          "surname": "Nachname"
         }
       },
       "filter": {
