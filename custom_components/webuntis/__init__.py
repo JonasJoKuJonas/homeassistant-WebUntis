@@ -198,8 +198,6 @@ class WebUntis:
         self.filter_description = config.options["filter_description"]
         self.generate_json = config.options["generate_json"]
 
-        self.extended_timetable = config.options["extended_timetable"]
-
         self.invalid_subjects = config.options["invalid_subjects"]
 
         self.notify_config = {}
@@ -655,12 +653,10 @@ class WebUntis:
         result = []
         if self.timetable_source == "personal":
             result = self.session.my_timetable(start=start, end=end)
-        elif self.extended_timetable:
+        else:
             result = self.session.timetable_extended(
                 start=start, end=end, **timetable_object
             )
-        else:
-            result = self.session.timetable(start=start, end=end, **timetable_object)
 
         if sort:
             result = sorted(result, key=lambda x: x.start)
@@ -796,7 +792,9 @@ class WebUntis:
         schoolyear = get_schoolyear(self.school_year, today)
         if schoolyear:
             # Use the later of week_start and schoolyear.start.date()
-            week_start = max(today - timedelta(days=today.weekday()), schoolyear.start.date())
+            week_start = max(
+                today - timedelta(days=today.weekday()), schoolyear.start.date()
+            )
         else:
             week_start = today - timedelta(days=today.weekday())
         table = self.get_timetable(start=week_start, end=in_x_days)
@@ -1007,19 +1005,18 @@ class WebUntis:
         except:
             pass
 
-        if self.extended_timetable:
-            try:
-                dic["lstext"] = str(lesson.lstext)
-            except:
-                pass
-            try:
-                dic["substText"] = str(lesson.substText)
-            except:
-                pass
-            try:
-                dic["lsnumber"] = str(lesson.lsnumber)
-            except:
-                pass
+        try:
+            dic["lstext"] = str(lesson.lstext)
+        except:
+            pass
+        try:
+            dic["substText"] = str(lesson.substText)
+        except:
+            pass
+        try:
+            dic["lsnumber"] = str(lesson.lsnumber)
+        except:
+            pass
 
         try:
             dic["rooms"] = [

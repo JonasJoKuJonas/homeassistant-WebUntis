@@ -430,7 +430,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 user_input["filter_mode"] = "None"
 
             if user_input["filter_description"]:
-                user_input["extended_timetable"] = True
                 user_input["filter_description"] = user_input[
                     "filter_description"
                 ].split(",")
@@ -493,9 +492,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the calendar options."""
         errors = {}
         if user_input is not None:
-            if user_input["calendar_description"] == "lesson_info":
-                user_input["extended_timetable"] = True
-
             if user_input.get("calendar_replace_name") is None:
                 user_input["calendar_replace_name"] = {}
             if not (
@@ -629,18 +625,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the backend options."""
         if user_input is not None:
-            if (
-                not user_input["extended_timetable"]
-                and self._config_entry.options["filter_description"]
-            ):
-                errors = {"extended_timetable": "extended_timetable"}
-            elif (
-                user_input["extended_timetable"] is False
-                and self._config_entry.options["calendar_description"] == "lesson_info"
-            ):
-                errors = {"extended_timetable": "extended_timetable"}
-            else:
-                return await self.save(user_input)
+            return await self.save(user_input)
         return self.async_show_form(
             step_id="backend",
             data_schema=vol.Schema(
@@ -663,10 +648,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
-                    vol.Required(
-                        "extended_timetable",
-                        default=self._config_entry.options.get("extended_timetable"),
-                    ): selector.BooleanSelector(),
                 }
             ),
             errors=errors,

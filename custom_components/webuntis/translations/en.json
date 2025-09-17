@@ -57,7 +57,6 @@
   },
   "options": {
     "error": {
-      "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" and \"Calendar Description\" (Lesson Info) option",
       "unknown_service": "Service ID not found.",
       "not_a_dict": "Has to be a dictionary",
       "notification_invalid": "Notification could not be sent. See logs for more information.",
@@ -124,8 +123,7 @@
         "data": {
           "keep_loged_in": "Keep logged in",
           "generate_json": "Generate JSON",
-          "exclude_data": "Exclude data from request",
-          "extended_timetable": "Request extended timetable"
+          "exclude_data": "Exclude data from request"
         },
         "data_description": {
           "keep_loged_in": "Try to save the session data. (BETA)",

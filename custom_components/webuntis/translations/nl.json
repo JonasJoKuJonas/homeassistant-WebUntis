@@ -57,7 +57,6 @@
   },
   "options": {
     "error": {
-      "extended_timetable": "\"Uitgebreid rooster aanvragen\" is vereist voor de optie \"Onderwerpfilter - Beschrijving\"",
       "unknown_service": "Service ID not found.",
       "not_a_dict": "Has to be a dictionary",
       "notification_invalid": "Notification could not be sent. See logs for more information.",
@@ -124,8 +123,7 @@
         "data": {
           "keep_loged_in": "Ingelogd blijven",
           "generate_json": "JSON genereren",
-          "exclude_data": "Gegevens uitsluiten van verzoek",
-          "extended_timetable": "Verzoek om verlengd tijdschema"
+          "exclude_data": "Gegevens uitsluiten van verzoek"
         },
         "data_description": {
           "keep_loged_in": "Probeer de sessiegegevens op te slaan. (BETA)",

@@ -57,7 +57,6 @@
   },
   "options": {
     "error": {
-      "extended_timetable": "Für die Optionen \"Fächer Filter - Beschreibung\" und \"Kalender-Beschreibung\" (Lesson Info) wird \"Erweiterten Stundenplan anfordern\" benötigt",
       "unknown_service": "Service-ID nicht gefunden.",
       "not_a_dict": "Muss ein Dictionary sein",
       "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
@@ -124,8 +123,7 @@
         "data": {
           "keep_loged_in": "Eingeloggt bleiben",
           "generate_json": "JSON generieren",
-          "exclude_data": "Daten von request ausschließen",
-          "extended_timetable": "Erweiterten Stundenplan anfordern"
+          "exclude_data": "Daten von request ausschließen"
         },
         "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
