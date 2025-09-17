@@ -34,21 +34,39 @@ def get_schoolyear(school_year, date=datetime.now().date()):
 
 def get_lesson_name(server, lesson):
 
+    def get_attr(obj, attr, default=None):
+        """Versucht obj.attr oder obj[attr] zu holen"""
+        if hasattr(obj, attr):
+            return getattr(obj, attr, default)
+        if isinstance(obj, dict):
+            return obj.get(attr, default)
+        return default
+
     try:
-        if server.lesson_long_name:
-            subject = lesson.subjects[0].long_name
+        subjects = get_attr(lesson, "subjects", [])
+        first_subject = subjects[0] if subjects else None
+        if first_subject:
+            if server.lesson_long_name:
+                subject = get_attr(first_subject, "long_name", None)
+            else:
+                subject = get_attr(first_subject, "name", None)
         else:
-            subject = lesson.subjects[0].name
+            subject = None
     except IndexError:
-        subject = "None"
+        subject = None
+
+    if not subject:
+        subject = get_attr(lesson, "lstext", get_attr(lesson, "substText", "Noneasd"))
 
     name = server.lesson_replace_name.get(subject, subject)
 
     if subject in server.lesson_add_teacher:
-        try:
-            name += f" - {lesson.teachers[0].name}"
-        except IndexError:
-            pass
+
+        teachers = get_attr(lesson, "teachers", [])
+        if teachers:
+            teacher = get_attr(teachers[0], "name", None)
+
+            name += f" - {teacher}"
 
     return name
 

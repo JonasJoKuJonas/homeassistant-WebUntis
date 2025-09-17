@@ -1,6 +1,6 @@
 from .const import TEMPLATE_OPTIONS
 
-from .utils.web_untis import get_lesson_name_str
+from .utils.web_untis import get_lesson_name_str, get_lesson_name
 
 
 def compare_list(old_list, new_list, blacklist=[]):
@@ -240,7 +240,7 @@ def get_changes(change, lesson, lesson_old, server):
         "teachers": "Teacher changed",
     }[change]
 
-    changes["subject"] = generate_lesson_name(lesson, server)
+    changes["subject"] = get_lesson_name(server, lesson)
 
     changes["date"] = lesson["start"].strftime("%d.%m.%Y")
     changes["time_start"] = lesson["start"].strftime("%H:%M")
@@ -274,24 +274,3 @@ def get_changes(change, lesson, lesson_old, server):
         )
 
     return changes
-
-
-def generate_lesson_name(lesson, server):
-    try:
-        if server.lesson_long_name:
-            name = lesson["subjects"][0]["long_name"]
-        else:
-            name = lesson["subjects"][0]["name"]
-    except IndexError:
-        name = "None"
-
-    teacher = None
-    if "teachers" not in server.exclude_data:
-        try:
-            teacher = lesson["teachers"][0]["name"]
-        except IndexError:
-            pass
-        except KeyError:
-            pass
-
-    return get_lesson_name_str(server, name, teacher)
