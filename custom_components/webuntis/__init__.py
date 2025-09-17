@@ -41,7 +41,7 @@ from .notify import *
 from .services import async_setup_services
 from .utils.utils import compact_list, async_notify
 
-from .utils.web_untis import get_timetable_object, get_schoolyear
+from .utils.web_untis import get_timetable_object
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
 
@@ -221,7 +221,8 @@ class WebUntis:
         self.issue = False
 
         # Data provided by 3rd party library
-        self.school_year = None
+        self.schoolyears = None
+        self.current_schoolyear = None
         self.student_id = None
 
         # sensor data
@@ -313,15 +314,14 @@ class WebUntis:
         # _LOGGER.debug("updating data")
 
         try:
-            self.school_year = await self._hass.async_add_executor_job(
+            self.schoolyears = await self._hass.async_add_executor_job(
                 self.session.schoolyears
             )
-
-            valid_schoolyear = await self._hass.async_add_executor_job(
-                get_schoolyear, self.school_year
+            self.current_schoolyear = await self._hass.async_add_executor_job(
+                lambda: self.schoolyears.current
             )
 
-            if not valid_schoolyear:
+            if not self.current_schoolyear:
                 # Login error, set all properties to unknown.
                 self.is_class = None
                 self.next_class = None
@@ -339,6 +339,13 @@ class WebUntis:
                         "No active schoolyear '%s@%s'",
                         self.school,
                         self.username,
+                    )
+                    _LOGGER.info(
+                        "Found schoolyears for '%s@%s': %s (%s)",
+                        self.school,
+                        self.username,
+                        self.schoolyears,
+                        self.current_schoolyear,
                     )
                 self._last_status_request_failed = True
                 await self._hass.async_add_executor_job(self.webuntis_logout)
@@ -463,7 +470,7 @@ class WebUntis:
 
             try:
                 self.calendar_exams = await self._hass.async_add_executor_job(
-                    return_exam_events, self, valid_schoolyear
+                    return_exam_events, self
                 )
             except OSError as error:
                 self.calendar_exams = []
@@ -635,9 +642,7 @@ class WebUntis:
                 self.timetable_source_id, self.timetable_source, self.session
             )
 
-        start_schoolyear = get_schoolyear(self.school_year, start)
-
-        if not start_schoolyear:
+        if not self.current_schoolyear:
             _LOGGER.warning(
                 "No valid school year found for start date %s. Returning empty timetable.",
                 start,
@@ -645,10 +650,10 @@ class WebUntis:
             return []
 
         # Ensure start and end are within the school year boundaries
-        if start < start_schoolyear.start.date():
-            start = start_schoolyear.start.date()
-        if end > start_schoolyear.end.date():
-            end = start_schoolyear.end.date()
+        if start < self.current_schoolyear.start.date():
+            start = self.current_schoolyear.start.date()
+        if end > self.current_schoolyear.end.date():
+            end = self.current_schoolyear.end.date()
 
         result = []
         if self.timetable_source == "personal":
@@ -789,11 +794,11 @@ class WebUntis:
         today = date.today()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
         # Get the current school year for today
-        schoolyear = get_schoolyear(self.school_year, today)
-        if schoolyear:
+        if self.current_schoolyear:
             # Use the later of week_start and schoolyear.start.date()
             week_start = max(
-                today - timedelta(days=today.weekday()), schoolyear.start.date()
+                today - timedelta(days=today.weekday()),
+                self.current_schoolyear.start.date(),
             )
         else:
             week_start = today - timedelta(days=today.weekday())
@@ -914,6 +919,23 @@ class WebUntis:
         )
 
         return sorted_result
+
+    def _get_schoolyears(self):
+        """convert self.schoolyears to dict"""
+        if not self.schoolyears:
+            return None
+        schoolyear_list = []
+        for schoolyear in self.schoolyears:
+            schoolyear_list.append(
+                {
+                    "id": schoolyear.id,
+                    "name": schoolyear.name,
+                    "start": schoolyear.start.date().isoformat(),
+                    "end": schoolyear.end.date().isoformat(),
+                    "current": schoolyear.is_current,
+                }
+            )
+        return {"schoolyears": schoolyear_list}
 
     def _today(self):
         today = date.today()

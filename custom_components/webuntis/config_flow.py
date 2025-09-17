@@ -31,7 +31,7 @@ from .const import (
 from .notify import get_notification_data
 from .utils.errors import *
 from .utils.utils import async_notify, is_service
-from .utils.web_untis import get_schoolyear, get_timetable_object
+from .utils.web_untis import get_timetable_object
 
 # import webuntis.session
 
@@ -86,9 +86,10 @@ async def validate_login(
 def test_timetable(session, user_input):
     """test if timetable is allowed to be fetched"""
     day = datetime.date.today()
-    school_years = session.schoolyears()
-    if not get_schoolyear(school_year=school_years):
-        day = school_years[-1].start.date()
+    schoolyears = session.schoolyears()
+    current_schoolyear = schoolyears.current
+    if not current_schoolyear:
+        day = schoolyears[-1].start.date()
 
     try:
         if user_input["timetable_source"] == "personal":
@@ -106,7 +107,6 @@ def test_timetable(session, user_input):
             )
 
     except Exception as exc:
-
         if str(exc) == "'Student not found'":
             return {"base": "student_not_found"}
         elif str(exc) == "no right for timetable":
@@ -187,11 +187,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_pick_teacher()
 
             elif user_input["timetable_source"] == "klasse":
-                school_years = await self.hass.async_add_executor_job(
+                schoolyears = await self.hass.async_add_executor_job(
                     self._session_temp.schoolyears
                 )
-                school_year = bool(get_schoolyear(school_years))
-                if school_year:
+
+                current_schoolyear = await self.hass.async_add_executor_job(
+                    lambda: schoolyears.current
+                )
+                if current_schoolyear:
                     return await self.async_step_pick_klasse()
                 else:
                     errors = {"base": "no_school_year"}

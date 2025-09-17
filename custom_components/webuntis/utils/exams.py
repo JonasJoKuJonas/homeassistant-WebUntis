@@ -9,11 +9,11 @@ from ..utils.web_untis import get_lesson_name_str
 
 
 class ExamEventsFetcher:
-    def __init__(self, server, current_schoolyear, timezone_str="UTC"):
+    def __init__(self, server, timezone_str="UTC"):
         self.server = server
         self.session = server.session
         self.event_list = []
-        self.current_schoolyear = current_schoolyear
+        self.current_schoolyear = server.current_schoolyear
 
     def _get_exam_events(self):
         """
@@ -23,8 +23,8 @@ class ExamEventsFetcher:
         # Fetch exam data using the session object
         try:
             exam_data = self.session.get_exams(
-                start=self.current_schoolyear.start,
-                end=self.current_schoolyear.end,
+                start=self.current_schoolyear.start.date(),
+                end=self.current_schoolyear.end.date(),
             )
         except errors.NotLoggedInError:
             raise Exception("You are not logged in. Please log in and try again.")
@@ -98,9 +98,9 @@ class ExamEventsFetcher:
 
 
 # Example usage:
-def return_exam_events(server, current_schoolyear, timezone_str="UTC"):
+def return_exam_events(server, timezone_str="UTC"):
     """
     Function to initialize the ExamEventsFetcher class and return the exam events.
     """
-    fetcher = ExamEventsFetcher(server, current_schoolyear, timezone_str)
+    fetcher = ExamEventsFetcher(server, timezone_str=timezone_str)
     return fetcher._get_exam_events()

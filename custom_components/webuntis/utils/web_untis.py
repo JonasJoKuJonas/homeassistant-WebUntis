@@ -22,16 +22,6 @@ def get_timetable_object(timetable_source_id, timetable_source, session):
 from datetime import datetime
 
 
-def get_schoolyear(school_year, date=datetime.now().date()):
-    if not school_year:
-        return None
-    for time_range in school_year:
-        if time_range.start.date() <= date <= time_range.end.date():
-            return time_range
-
-    return None
-
-
 def get_lesson_name(server, lesson):
 
     def get_attr(obj, attr, default=None):
