@@ -275,6 +275,16 @@
         }
       },
       "name": "Stunden zählen"
+    },
+    "get_schoolyears": {
+      "description": "WebUntis Schuljahre abrufen.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Eine Instanz auswählen"
+        }
+      },
+      "name": "Schuljahre abrufen"
     }
   },
   "entity": {

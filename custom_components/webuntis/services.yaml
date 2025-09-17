@@ -58,3 +58,13 @@ count_lessons:
       default: false
       selector:
         boolean:
+
+get_schoolyears:
+  description: Get WebUntis schoolyears
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          filter:
+            - integration: webuntis

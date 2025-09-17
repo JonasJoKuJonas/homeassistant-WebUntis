@@ -276,6 +276,16 @@
         }
       },
       "name": "Count Hours"
+    },
+    "get_schoolyears": {
+      "description": "Get WebUntis schoolyears",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        }
+      },
+      "name": "Get Schoolyears"
     }
   },
   "entity": {

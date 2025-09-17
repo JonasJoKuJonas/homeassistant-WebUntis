@@ -146,6 +146,50 @@ The integration creates several entities in the format `sensor.NAME_entity`.
 | `event.NAME_webuntis_lesson_change`        | event    | Lesson change events.                                                       |
 | `event.NAME_webuntis_homework`             | event    | Homework events.                                                            |
 
+## Services
+
+The integration provides several services to directly fetch data from WebUntis.
+
+---
+
+### 🔹 `webuntis.get_timetable`
+
+Fetches the timetable for a given date range.
+The result includes all lessons within the range, depending on your filter settings.
+
+**Fields:**
+
+- `device_id` (**required**) – The device/instance of the WebUntis integration.
+- `start` (**required**) – Start date (`YYYY-MM-DD`).
+- `end` (**required**) – End date (`YYYY-MM-DD`).
+- `apply_filter` (default: `true`) – Apply filters defined in the integration (e.g., subject or teacher filters).
+- `show_cancelled` (default: `true`) – Include cancelled lessons.
+- `compact_result` (default: `true`) – Return a compact result format.
+
+---
+
+### 🔹 `webuntis.count_lessons`
+
+Counts the number of lessons in a given date range.
+
+**Fields:**
+
+- `device_id` (**required**) – The device/instance of the WebUntis integration.
+- `start` (**required**) – Start date (`YYYY-MM-DD`).
+- `end` (**required**) – End date (`YYYY-MM-DD`).
+- `apply_filter` (default: `true`) – Apply filters defined in the integration.
+- `count_cancelled` (default: `false`) – Count cancelled lessons as well.
+
+---
+
+### 🔹 `webuntis.get_schoolyears`
+
+Fetches all available school years from WebUntis.
+
+**Fields:**
+
+- `device_id` (**required**) – The device/instance of the WebUntis integration.
+
 ### Event Entity
 
 The event entity allows you to trigger an automation on a timetable change.
