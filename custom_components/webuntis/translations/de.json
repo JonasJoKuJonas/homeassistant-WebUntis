@@ -127,7 +127,8 @@
         },
         "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
-          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird."
+          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
+          "exclude_data": "Diese Option wird automatisch gesetzt, wenn der Benutzer keine Rechte hat, um das spamen von Fehlermeldungen zu vermeiden."
         }
       },
       "edit_notify_service": {

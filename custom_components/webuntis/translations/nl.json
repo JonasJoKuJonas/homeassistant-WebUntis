@@ -127,7 +127,8 @@
         },
         "data_description": {
           "keep_loged_in": "Probeer de sessiegegevens op te slaan. (BETA)",
-          "generate_json": "Genereer JSON in Sensorattributen - alleen inschakelen indien nodig."
+          "generate_json": "Genereer JSON in Sensorattributen - alleen inschakelen indien nodig.",
+          "exclude_data": "Deze optie wordt automatisch ingesteld als de gebruiker geen rechten heeft, om het spammen van foutmeldingen te voorkomen."
         }
       },
       "edit_notify_service": {
