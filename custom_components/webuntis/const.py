@@ -14,7 +14,7 @@ DEFAULT_OPTIONS = {
     "exclude_data": [],
     "filter_description": [],
     "extended_timetable": False,
-    "calendar_description": "None",
+    "calendar_description": "none",
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,
     "notify_config": {},
