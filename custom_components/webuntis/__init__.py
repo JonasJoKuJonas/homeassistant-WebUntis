@@ -1097,10 +1097,14 @@ class WebUntis:
         dic["start"] = lesson.start.astimezone()
         dic["end"] = lesson.end.astimezone()
 
-        if getattr(lesson, "subjects", None):
-            dic["subject_id"] = lesson.subjects[0].id
-        else:
-            dic["subject_id"] = "None"
+        dic["subject_id"] = "None"  # Defaultwert setzen
+        try:
+            subjects = getattr(lesson, "subjects", [])
+            if subjects:  # nur wenn nicht leer
+                dic["subject_id"] = subjects[0].id
+        except:
+            pass
+
         dic["id"] = int(lesson.id)
         dic["lsnumber"] = int(lesson.lsnumber)
 
