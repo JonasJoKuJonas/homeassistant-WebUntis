@@ -289,8 +289,31 @@
     }
   },
   "entity": {
+    "sensor": {
+      "next_class": {
+        "name": "Next Lesson"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Next Lesson to Wake Up"
+      },
+      "today_school_start": {
+        "name": "Today's School Start"
+      },
+      "today_school_end": {
+        "name": "Today's School End"
+      }
+    },
+    "calendar": {
+      "homework": {
+        "name": "Homework"
+      },
+      "exam": {
+        "name": "Exams"
+      }
+    },
     "event": {
-      "lesson_change_event": {
+      "lesson_change": {
+        "name": "Lesson Change",
         "state_attributes": {
           "event_type": {
             "state": {
@@ -303,7 +326,8 @@
           }
         }
       },
-      "homework_event": {
+      "new_homework": {
+        "name": "New Homework",
         "state_attributes": {
           "event_type": {
             "state": {

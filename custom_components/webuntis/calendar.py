@@ -44,22 +44,15 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         """Initialize base calendar entity."""
         super().__init__(
             server=server,
-            type_name=name,
+            name=name,
             icon=icon,
             device_class=None,
         )
-        self._name = name
-        self._icon = icon
         self.events = self._get_events
         self._event = None
 
     def _get_events(self):
         return []
-
-    @property
-    def name(self) -> str:
-        """Return the name of the entity."""
-        return self._name
 
     @property
     def event(self) -> CalendarEvent:
@@ -127,6 +120,8 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
 
 class UntisCalendar(BaseUntisCalendar):
     """Representation of a Web Untis Calendar sensor."""
+
+    _attr_name = None
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Untis Calendar."""

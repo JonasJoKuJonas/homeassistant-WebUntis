@@ -288,8 +288,31 @@
     }
   },
   "entity": {
+    "sensor": {
+      "next_class": {
+        "name": "Nächste Stunde"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Nächste Stunde zum Aufstehen"
+      },
+      "today_school_start": {
+        "name": "Heutiger Schulbeginn"
+      },
+      "today_school_end": {
+        "name": "Heutiges Schulende"
+      }
+    },
+    "calendar": {
+      "homework": {
+        "name": "Hausaufgaben"
+      },
+      "exam": {
+        "name": "Prüfungen"
+      }
+    },
     "event": {
-      "lesson_change_event": {
+      "lesson_change": {
+        "name": "Stundenänderung",
         "state_attributes": {
           "event_type": {
             "state": {
@@ -302,7 +325,8 @@
           }
         }
       },
-      "homework_event": {
+      "new_homework": {
+        "name": "Neue Hausaufgabe",
         "state_attributes": {
           "event_type": {
             "state": {

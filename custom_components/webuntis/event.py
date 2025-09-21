@@ -38,16 +38,14 @@ class BaseUntisEventEntity(WebUntisEntity, EventEntity):
         self,
         server,
         name: str,
-        sensor_id: str,
         icon: str,
         event_types: list[str],
     ) -> None:
         """Initialize the base event entity."""
-        super().__init__(server=server, type_name=name, icon=icon, device_class=None)
-        self.sensor_id = sensor_id
+        super().__init__(server=server, name=name, icon=icon, device_class=None)
         self._server = server
         self._attr_event_types = event_types
-        self._attr_translation_key = sensor_id
+        self.id = name
 
     @callback
     def _async_handle_event(self, event: str, data: dict) -> None:
@@ -57,7 +55,7 @@ class BaseUntisEventEntity(WebUntisEntity, EventEntity):
 
     async def async_added_to_hass(self) -> None:
         """Register event listener with the server."""
-        self._server.event_entity_listen(self._async_handle_event, self.sensor_id)
+        self._server.event_entity_listen(self._async_handle_event, self.id)
 
     @property
     def available(self) -> bool:
@@ -72,7 +70,6 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
         super().__init__(
             server=server,
             name=NAME_EVENT_LESSNON_CHANGE,
-            sensor_id="lesson_change_event",
             icon=ICON_EVENT_LESSNON_CHANGE,
             event_types=["lesson_change", "rooms", "teachers", "cancelled", "code"],
         )
@@ -85,7 +82,6 @@ class HomeworkEventEntity(BaseUntisEventEntity):
         super().__init__(
             server=server,
             name=NAME_EVENT_HOMEWORK,
-            sensor_id="homework_event",
             icon=ICON_EVENT_HOMEWORK,
             event_types=["homework"],
         )
