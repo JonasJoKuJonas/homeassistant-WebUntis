@@ -609,7 +609,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.ObjectSelector(),
                     vol.Optional(
                         "lesson_add_teacher",
-                        default=self._config_entry.options.get("lesson_add_teacher"),
+                        default=self._config_entry.options.get(
+                            "lesson_add_teacher", []
+                        ),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),
