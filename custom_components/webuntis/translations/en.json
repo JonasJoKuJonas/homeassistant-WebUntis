@@ -69,7 +69,31 @@
           "calendar": "Calendar",
           "lesson": "Lesson Name",
           "backend": "Backend",
-          "notify_menu": "Notify Menu"
+          "notify_menu": "Notify Menu",
+          "timetable_source": "Timetable source"
+        }
+      },
+      "timetable_source": {
+        "description": "Select the timetable source"
+      },
+      "timetable_source_klasse": {
+        "description": "Enter the class name",
+        "data": {
+          "klasse": "Class"
+        }
+      },
+      "timetable_source_teacher": {
+        "description": "Enter the teacher's name",
+        "data": {
+          "fore_name": "First Name",
+          "surname": "Last Name"
+        }
+      },
+      "timetable_source_student": {
+        "description": "Enter the student's name",
+        "data": {
+          "fore_name": "First Name",
+          "surname": "Last Name"
         }
       },
       "filter": {

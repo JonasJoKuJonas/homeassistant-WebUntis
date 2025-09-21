@@ -398,10 +398,150 @@ OPTIONS_MENU = [
     "lesson",
     "notify_menu",
     "backend",
+    "timetable_source",
 ]
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
+    async def async_step_timetable_source(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Select timetable source and redirect to appropriate sub-form."""
+        timetable_source_options = [
+            "personal",
+            "student",
+            "teacher",
+            "klasse",
+        ]
+        errors = {}
+        
+        if user_input is not None:
+            timetable_source = user_input["timetable_source"]
+            
+            # Redirect to appropriate sub-form based on selection
+            if timetable_source == "personal":
+                # Save directly for personal
+                options = dict(self._config_entry.options)
+                options["timetable_source"] = "personal"
+                options["timetable_source_id"] = "personal"
+                return await self.save(options)
+            elif timetable_source == "klasse":
+                return await self.async_step_timetable_source_klasse()
+            elif timetable_source == "teacher":
+                return await self.async_step_timetable_source_teacher()
+            elif timetable_source == "student":
+                return await self.async_step_timetable_source_student()
+
+        return self.async_show_form(
+            step_id="timetable_source",
+            data_schema=vol.Schema({
+                vol.Required(
+                    "timetable_source",
+                    default=self._config_entry.options.get("timetable_source", "personal")
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=timetable_source_options,
+                        mode="dropdown",
+                        translation_key="timetable_source",
+                    )
+                ),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_timetable_source_klasse(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Handle class input."""
+        errors = {}
+        
+        if user_input is not None:
+            if not user_input.get("klasse", "").strip():
+                errors["klasse"] = "required"
+            else:
+                options = dict(self._config_entry.options)
+                options["timetable_source"] = "klasse"
+                options["timetable_source_id"] = user_input["klasse"]
+                return await self.save(options)
+
+        return self.async_show_form(
+            step_id="timetable_source_klasse",
+            data_schema=vol.Schema({
+                vol.Required(
+                    "klasse",
+                    default=self._config_entry.options.get("timetable_source_id", "") if self._config_entry.options.get("timetable_source") == "klasse" else ""
+                ): selector.TextSelector(),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_timetable_source_teacher(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Handle teacher input."""
+        errors = {}
+        
+        if user_input is not None:
+            if not user_input.get("fore_name", "").strip():
+                errors["fore_name"] = "required"
+            if not user_input.get("surname", "").strip():
+                errors["surname"] = "required"
+                
+            if not errors:
+                options = dict(self._config_entry.options)
+                options["timetable_source"] = "teacher"
+                options["timetable_source_id"] = [user_input["fore_name"], user_input["surname"]]
+                return await self.save(options)
+
+        # Get current values if already set
+        timetable_source_id = self._config_entry.options.get("timetable_source_id", ["", ""])
+        current_fore_name = timetable_source_id[0] if isinstance(timetable_source_id, list) and len(timetable_source_id) > 0 else ""
+        current_surname = timetable_source_id[1] if isinstance(timetable_source_id, list) and len(timetable_source_id) > 1 else ""
+
+        return self.async_show_form(
+            step_id="timetable_source_teacher",
+            data_schema=vol.Schema({
+                vol.Required(
+                    "fore_name",
+                    default=current_fore_name
+                ): selector.TextSelector(),
+                vol.Required(
+                    "surname",
+                    default=current_surname
+                ): selector.TextSelector(),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_timetable_source_student(self, user_input: dict[str, str] = None) -> FlowResult:
+        """Handle student input."""
+        errors = {}
+        
+        if user_input is not None:
+            if not user_input.get("fore_name", "").strip():
+                errors["fore_name"] = "required"
+            if not user_input.get("surname", "").strip():
+                errors["surname"] = "required"
+                
+            if not errors:
+                options = dict(self._config_entry.options)
+                options["timetable_source"] = "student"
+                options["timetable_source_id"] = [user_input["fore_name"], user_input["surname"]]
+                return await self.save(options)
+
+        # Get current values if already set
+        timetable_source_id = self._config_entry.options.get("timetable_source_id", ["", ""])
+        current_fore_name = timetable_source_id[0] if isinstance(timetable_source_id, list) and len(timetable_source_id) > 0 else ""
+        current_surname = timetable_source_id[1] if isinstance(timetable_source_id, list) and len(timetable_source_id) > 1 else ""
+
+        return self.async_show_form(
+            step_id="timetable_source_student",
+            data_schema=vol.Schema({
+                vol.Required(
+                    "fore_name",
+                    default=current_fore_name
+                ): selector.TextSelector(),
+                vol.Required(
+                    "surname",
+                    default=current_surname
+                ): selector.TextSelector(),
+            }),
+            errors=errors,
+        )
     """Handle the option flow for WebUntis."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
