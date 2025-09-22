@@ -14,7 +14,6 @@
       "class_not_found": "Class not found. Check the class or choose another source.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "Configuration via class only possible during an active school year.",
-      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "unknown": "Unexpected error. View logs for more information."
     },
     "step": {
@@ -38,29 +37,27 @@
         "description": "Enter a Student Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name",
-          "back": "Back"
+          "fore_name": "Fore Name"
         }
       },
       "pick_teacher": {
         "description": "Enter a Teacher Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name",
-          "back": "Back"
+          "fore_name": "Fore Name"
         }
       },
       "pick_klasse": {
         "description": "Enter a class name",
         "data": {
-          "klasse": "Class",
-          "back": "Back"
+          "klasse": "Class"
         }
       }
     }
   },
   "options": {
     "error": {
+      "extended_timetable": "\"Request extended timetable\" is required for the \"Subject Filter - Description\" and \"Calendar Description\" (Lesson Info) option",
       "unknown_service": "Service ID not found.",
       "not_a_dict": "Has to be a dictionary",
       "notification_invalid": "Notification could not be sent. See logs for more information.",
@@ -127,12 +124,12 @@
         "data": {
           "keep_loged_in": "Keep logged in",
           "generate_json": "Generate JSON",
-          "exclude_data": "Exclude data from request"
+          "exclude_data": "Exclude data from request",
+          "extended_timetable": "Request extended timetable"
         },
         "data_description": {
           "keep_loged_in": "Try to save the session data. (BETA)",
-          "generate_json": "Generate JSON in Sensor Attributes - enable only if needed.",
-          "exclude_data": "This option is set automatically if the user has no rights, to prevent error spamming."
+          "generate_json": "Generate JSON in Sensor Attributes - enable only if needed."
         }
       },
       "edit_notify_service": {
@@ -190,15 +187,6 @@
         "message": "Message",
         "discord": "Discord",
         "telegram": "Telegram"
-      }
-    },
-    "calendar_description": {
-      "options": {
-        "none": "None",
-        "json": "JSON",
-        "lesson_info": "Lesson Info",
-        "class_name_short": "Class Name (short)",
-        "class_name_long": "Class Name (long)"
       }
     }
   },
@@ -280,44 +268,11 @@
         }
       },
       "name": "Count Hours"
-    },
-    "get_schoolyears": {
-      "description": "Get WebUntis schoolyears",
-      "fields": {
-        "device_id": {
-          "name": "Device",
-          "description": "Select an instance"
-        }
-      },
-      "name": "Get Schoolyears"
     }
   },
   "entity": {
-    "sensor": {
-      "next_class": {
-        "name": "Next Lesson"
-      },
-      "next_lesson_to_wake_up": {
-        "name": "Next Lesson to Wake Up"
-      },
-      "today_school_start": {
-        "name": "Today's School Start"
-      },
-      "today_school_end": {
-        "name": "Today's School End"
-      }
-    },
-    "calendar": {
-      "homework": {
-        "name": "Homework"
-      },
-      "exam": {
-        "name": "Exams"
-      }
-    },
     "event": {
-      "lesson_change": {
-        "name": "Lesson Change",
+      "lesson_change_event": {
         "state_attributes": {
           "event_type": {
             "state": {
@@ -330,8 +285,7 @@
           }
         }
       },
-      "new_homework": {
-        "name": "New Homework",
+      "homework_event": {
         "state_attributes": {
           "event_type": {
             "state": {
