@@ -14,7 +14,7 @@
 
 You can install WebUntis via HACS or manually. For detailed instructions, see the dedicated setup guide:
 
-[**Setup & Installation Guide**](docs/Setup.md)
+[**Setup & Installation Guide**](docs/SETUP.md)
 
 [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JonasJoKuJonas&repository=Homeassistant-WebUntis)
 
