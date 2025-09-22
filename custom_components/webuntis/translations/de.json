@@ -14,7 +14,7 @@
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
-      "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
+      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
     },
     "step": {
@@ -39,7 +39,7 @@
         "data": {
           "surname": "Nachname",
           "fore_name": "Vorname",
-          "back": "Zurück"
+          "back": "Back"
         }
       },
       "pick_teacher": {
@@ -47,14 +47,14 @@
         "data": {
           "surname": "Nachname",
           "fore_name": "Vorname",
-          "back": "Zurück"
+          "back": "Back"
         }
       },
       "pick_klasse": {
         "description": "Klasse eingeben",
         "data": {
           "klasse": "Klasse",
-          "back": "Zurück"
+          "back": "Back"
         }
       }
     }
@@ -132,7 +132,7 @@
         "data_description": {
           "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
           "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
-          "exclude_data": "Diese Option wird automatisch gesetzt, wenn der Benutzer keine Rechte hat, um das spamen von Fehlermeldungen zu vermeiden."
+          "exclude_data": "This option is set automatically if the user has no rights, to prevent error spamming."
         }
       },
       "edit_notify_service": {
@@ -188,16 +188,17 @@
       "options": {
         "message_title": "Nachricht & Titel",
         "message": "Nachricht",
-        "discord": "Discord"
+        "discord": "Discord",
+        "telegram": "Telegram"
       }
     },
     "calendar_description": {
       "options": {
-        "none": "Keine",
+        "none": "None",
         "json": "JSON",
-        "lesson_info": "Stunden Info",
-        "class_name_short": "Klassen Name (kurz)",
-        "class_name_long": "Klassen Name (lang)"
+        "lesson_info": "Lesson Info",
+        "class_name_short": "Class Name (short)",
+        "class_name_long": "Class Name (long)"
       }
     }
   },
@@ -281,60 +282,60 @@
       "name": "Stunden zählen"
     },
     "get_schoolyears": {
-      "description": "WebUntis Schuljahre abrufen.",
+      "description": "Get WebUntis schoolyears",
       "fields": {
         "device_id": {
-          "name": "Gerät",
-          "description": "Eine Instanz auswählen"
+          "name": "Device",
+          "description": "Select an instance"
         }
       },
-      "name": "Schuljahre abrufen"
+      "name": "Get Schoolyears"
     }
   },
   "entity": {
     "sensor": {
       "next_class": {
-        "name": "Nächste Stunde"
+        "name": "Next Lesson"
       },
       "next_lesson_to_wake_up": {
-        "name": "Nächste Stunde zum Aufstehen"
+        "name": "Next Lesson to Wake Up"
       },
       "today_school_start": {
-        "name": "Heutiger Schulbeginn"
+        "name": "Today's School Start"
       },
       "today_school_end": {
-        "name": "Heutiges Schulende"
+        "name": "Today's School End"
       }
     },
     "calendar": {
       "homework": {
-        "name": "Hausaufgaben"
+        "name": "Homework"
       },
       "exam": {
-        "name": "Prüfungen"
+        "name": "Exams"
       }
     },
     "event": {
       "lesson_change": {
-        "name": "Stundenänderung",
+        "name": "Lesson Change",
         "state_attributes": {
           "event_type": {
             "state": {
-              "code": "Stunden-Status geändert",
-              "rooms": "Raum Änderung",
-              "teachers": "Lehrer Änderung",
-              "cancelled": "Stunde fällt aus",
-              "lesson_change": "Stunde ausgetauscht"
+              "code": "Lesson status changed",
+              "rooms": "Room changed",
+              "teachers": "Teacher changed",
+              "cancelled": "Lesson cancelled",
+              "lesson_change": "Lesson swapped"
             }
           }
         }
       },
       "new_homework": {
-        "name": "Neue Hausaufgabe",
+        "name": "New Homework",
         "state_attributes": {
           "event_type": {
             "state": {
-              "homework": "Hausaufgabe hinzugefügt"
+              "homework": "Homework added"
             }
           }
         }

@@ -14,6 +14,7 @@
       "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
+      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "unknown": "Unexpected error. View Logs for more infos."
     },
     "step": {
@@ -37,20 +38,23 @@
         "description": "Enter a Student Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_teacher": {
         "description": "Enter a Teacher Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_klasse": {
         "description": "Enter class Name",
         "data": {
-          "klasse": "Class"
+          "klasse": "Class",
+          "back": "Back"
         }
       }
     }
@@ -128,7 +132,7 @@
         "data_description": {
           "keep_loged_in": "Probeer de sessiegegevens op te slaan. (BETA)",
           "generate_json": "Genereer JSON in Sensorattributen - alleen inschakelen indien nodig.",
-          "exclude_data": "Deze optie wordt automatisch ingesteld als de gebruiker geen rechten heeft, om het spammen van foutmeldingen te voorkomen."
+          "exclude_data": "This option is set automatically if the user has no rights, to prevent error spamming."
         }
       },
       "edit_notify_service": {
@@ -184,7 +188,17 @@
       "options": {
         "message_title": "Message & Title",
         "message": "Message",
-        "discord": "Discord"
+        "discord": "Discord",
+        "telegram": "Telegram"
+      }
+    },
+    "calendar_description": {
+      "options": {
+        "none": "None",
+        "json": "JSON",
+        "lesson_info": "Lesson Info",
+        "class_name_short": "Class Name (short)",
+        "class_name_long": "Class Name (long)"
       }
     }
   },
@@ -266,6 +280,66 @@
         }
       },
       "name": "Count Hours"
+    },
+    "get_schoolyears": {
+      "description": "Get WebUntis schoolyears",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        }
+      },
+      "name": "Get Schoolyears"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_class": {
+        "name": "Next Lesson"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Next Lesson to Wake Up"
+      },
+      "today_school_start": {
+        "name": "Today's School Start"
+      },
+      "today_school_end": {
+        "name": "Today's School End"
+      }
+    },
+    "calendar": {
+      "homework": {
+        "name": "Homework"
+      },
+      "exam": {
+        "name": "Exams"
+      }
+    },
+    "event": {
+      "lesson_change": {
+        "name": "Lesson Change",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "code": "Lesson status changed",
+              "rooms": "Room changed",
+              "teachers": "Teacher changed",
+              "cancelled": "Lesson cancelled",
+              "lesson_change": "Lesson swapped"
+            }
+          }
+        }
+      },
+      "new_homework": {
+        "name": "New Homework",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "homework": "Homework added"
+            }
+          }
+        }
+      }
     }
   }
 }
