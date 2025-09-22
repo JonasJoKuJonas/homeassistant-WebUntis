@@ -14,6 +14,7 @@
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
+      "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
       "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
     },
     "step": {

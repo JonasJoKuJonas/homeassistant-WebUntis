@@ -14,6 +14,7 @@
       "class_not_found": "Class not found. Check the class or choose another source.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "Configuration via class only possible during an active school year.",
+      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "unknown": "Unexpected error. View logs for more information."
     },
     "step": {

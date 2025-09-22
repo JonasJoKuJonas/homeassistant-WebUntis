@@ -397,6 +397,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return {"base": "teacher_not_found"}
             elif str(exc) == "list index out of range":
                 return {"base": "class_not_found"}
+            elif str(exc) == "invalid elementType: 12":
+                return {"base": "no_personal_timetable"}
 
             _LOGGER.error("Error testing timetable: %s", exc)
             return {"base": "unknown"}
