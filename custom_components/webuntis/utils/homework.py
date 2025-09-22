@@ -101,7 +101,7 @@ class HomeworkEventsFetcher:
                 "summary": summary,
                 "start": date_assigned,
                 "end": due_date,
-                "description": text + str(lesson),
+                "description": text,
             }
 
             parameters = {
