@@ -25,7 +25,7 @@ Customize what is shown in calendar entities.
 
 ### Lesson Options
 
-Control how lesson sensors display information.
+Control how the lesson name is displayed.
 
 | Option              | Description                                    | Default |
 | :------------------ | :--------------------------------------------- | :------ |
