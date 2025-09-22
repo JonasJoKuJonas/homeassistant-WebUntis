@@ -82,7 +82,7 @@
           "invalid_subjects": "No Subjects"
         },
         "data_description": {
-          "filter_description": "Verberg lessen die de volgende zinnen in de beschrijving bevatten. (Door komma's gescheiden lijst)",
+          "filter_description": "Verberg lessen die de volgende zinnen in de beschrijving bevatten. (Door komma's gescheiden lijst) \nWordt niet beïnvloed door zwarte lijst/witte lijst.",
           "invalid_subjects": "Allow lessons with no subjects"
         }
       },

@@ -86,7 +86,7 @@
           "invalid_subjects": "No Subjects"
         },
         "data_description": {
-          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list)",
+          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list) \nNot affected by blacklist/whitelist.",
           "invalid_subjects": "Allow lessons with no subjects"
         }
       },
