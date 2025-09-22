@@ -992,7 +992,11 @@ class WebUntis:
             pass
         try:
             dic["subjects"] = [
-                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                {
+                    "name": str(subject.name),
+                    "long_name": str(subject.long_name),
+                    "id": subject.id,
+                }
                 for subject in lesson.subjects
             ]
         except:
