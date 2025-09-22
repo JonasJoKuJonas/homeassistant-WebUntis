@@ -6,8 +6,6 @@
 ![Version](https://img.shields.io/github/v/release/JonasJoKuJonas/homeassistant-WebUntis)
 [![Downloads](https://img.shields.io/github/downloads/JonasJoKuJonas/homeassistant-WebUntis/total)](https://tooomm.github.io/github-release-stats/?username=JonasJoKuJonas&repository=HomeAssistant-WebUntis)
 
-[![Join our Discord](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner4)](https://discord.gg/34EHnHQaPm)
-
 ---
 
 ## 🚀 Setup
@@ -36,6 +34,12 @@ You can install WebUntis via HACS or manually. For detailed instructions, see th
 We use Crowdin to simplify translations. If you’re fluent in another language and want to contribute, you can help translate the project. Contributions in any language are welcome!
 
 [![Help Translate on Crowdin](https://badges.crowdin.net/badge/light/crowdin-on-dark.png)](https://crowdin.com/project/homeassistant-webuntis)
+
+---
+
+## 📰 Discord
+
+## [![Join our Discord](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner4)](https://discord.gg/34EHnHQaPm)
 
 ---
 
