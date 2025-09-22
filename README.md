@@ -11,6 +11,19 @@
 
 ---
 
+## 🌟 Features
+
+| Feature | Description | Link |
+|---------|-------------|------|
+| 📅 **30-Day Calendar** | Displays all lessons in the calendar or calendar-card for the upcoming month. | [Entities & Services](docs/ENTITIES_AND_SERVICES.md) |
+| ⏰ **Lesson Sensors** | Includes school start/end times and next lesson, useful for wake-up automations. | [Examples & Automations](docs/EXAMPLES_AND_AUTOMATIONS.md) |
+| 🔔 **Lesson Change Notifications** | Get notified for cancellations, room changes, teacher changes, and lesson swaps. | [Notification Options](docs/OPTIONAL_CONFIGURATIONS.md#notification-options) |
+| 📝 **Fetch Lessons Service** | Request lessons for a specific date range. | [`webuntis.get_timetable`](docs/ENTITIES_AND_SERVICES.md#-webuntisget_timetable) |
+| 📊 **Count Lessons Service** | Count lessons by subject within a given date range. | [`webuntis.count_lessons`](docs/ENTITIES_AND_SERVICES.md#-webuntiscount_lessons) |
+
+
+---
+
 ## 🚀 Setup
 [![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JonasJoKuJonas&repository=Homeassistant-WebUntis)
 
