@@ -146,6 +146,11 @@ The integration creates several entities in the format `sensor.NAME_entity`.
 | `event.NAME_webuntis_lesson_change`        | event    | Lesson change events.                                                       |
 | `event.NAME_webuntis_homework`             | event    | Homework events.                                                            |
 
+### ⚠️ **Important:**
+
+The **Exam Calendar** and **Homework Calendar** are **not available when using a parent account**.  
+Please use a **student account** to access exams and homework.
+
 ## Services
 
 The integration provides several services to directly fetch data from WebUntis.
