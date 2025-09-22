@@ -131,19 +131,17 @@ last name: `last name`
 
 ## Entities
 
-The integration creates several entities in the format `sensor.NAME_entity`.
-
-| Sensor                               | Type     | Description                                                                 |
-| :----------------------------------- | :------- | :-------------------------------------------------------------------------- |
-| `sensor.NAME_next_class`             | datetime | The start time of the next lesson.                                          |
-| `sensor.NAME_next_lesson_to_wake_up` | datetime | The start of the next first lesson of the day.                              |
-| `sensor.NAME_today_s_school_start`   | datetime | The start time of todays fist lesson. Can also have todays lessons as JSON. |
-| `sensor.NAME_today_s_school_end`     | datetime | The end time of todays last lesson.                                         |
-| `calendar.NAME`                      | calendar | Calendar entry.                                                             |
-| `calendar.NAME_exam`                 | calendar | Calendar with current exams.                                                |
-| `calendar.NAME_homework`             | calendar | Calendar with current homework.                                             |
-| `event.NAME_lesson_change`           | event    | Lesson change events.                                                       |
-| `event.NAME_homework`                | event    | Homework events.                                                            |
+| Entity ID (English)                    | Entity ID (German)                           |
+| -------------------------------------- | -------------------------------------------- |
+| `sensor.<name>_next_lesson`            | `sensor.<name>_nachste_stunde`               |
+| `sensor.<name>_next_lesson_to_wake_up` | `sensor.<name>_nachste_stunde_zum_aufstehen` |
+| `sensor.<name>_today_s_school_start`   | `sensor.<name>_heutiger_schulbeginn`         |
+| `sensor.<name>_today_s_school_end`     | `sensor.<name>_heutiges_schulende`           |
+| `calendar.<name>`                      | `calendar.<name>`                            |
+| `calendar.<name>_exams`                | `calendar.<name>_prufungen`                  |
+| `calendar.<name>_homework`             | `calendar.<name>_hausaufgaben`               |
+| `event.<name>_lesson_change`           | `event.<name>_stundenanderung`               |
+| `event.<name>_new_homework`            | `event.<name>_neue_hausaufgabe`              |
 
 ### ⚠️ **Important:**
 
