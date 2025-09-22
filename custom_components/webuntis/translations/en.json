@@ -37,20 +37,23 @@
         "description": "Enter a Student Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_teacher": {
         "description": "Enter a Teacher Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_klasse": {
         "description": "Enter a class name",
         "data": {
-          "klasse": "Class"
+          "klasse": "Class",
+          "back": "Back"
         }
       }
     }

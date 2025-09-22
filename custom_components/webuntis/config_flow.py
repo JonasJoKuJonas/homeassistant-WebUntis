@@ -149,6 +149,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
             self._user_input_temp.update(
                 {
                     "timetable_source": "student",
@@ -162,18 +164,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_student",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "fore_name",
+                    vol.Optional(
+                        "fore_name", default=user_input.get("fore_name", "")
                     ): str,
-                    vol.Required(
-                        "surname",
-                    ): str,
+                    vol.Optional("surname", default=user_input.get("surname", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -184,31 +187,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
             self._user_input_temp.update(
                 {
                     "timetable_source": "teacher",
                     "timetable_source_id": [
-                        user_input["fore_name"],
-                        user_input["surname"],
+                        user_input.get("fore_name"),
+                        user_input.get("surname"),
                     ],
                 }
             )
             errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_teacher",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "fore_name",
+                    vol.Optional(
+                        "fore_name", default=user_input.get("fore_name", "")
                     ): str,
-                    vol.Required(
-                        "surname",
-                    ): str,
+                    vol.Optional("surname", default=user_input.get("surname", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -219,32 +224,38 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
+            if not user_input.get("klasse"):
+                errors = {"base": "class_not_found"}
+            else:
+                klassen = await self.hass.async_add_executor_job(
+                    self._session_temp.klassen
+                )
+                try:
+                    source = klassen.filter(name=user_input["klasse"])[0]
+                except Exception as exc:
+                    errors = {"base": "class_not_found"}
 
-            klassen = await self.hass.async_add_executor_job(self._session_temp.klassen)
-            try:
-                source = klassen.filter(name=user_input["klasse"])[0]
-            except Exception as exc:
-                errors = {"base": "klasse_not_found"}
-
-            self._user_input_temp.update(
-                {
-                    "timetable_source": "klasse",
-                    "timetable_source_id": user_input["klasse"],
-                }
-            )
-
-            errors = await self.hass.async_add_executor_job(self.test_timetable)
+                self._user_input_temp.update(
+                    {
+                        "timetable_source": "klasse",
+                        "timetable_source_id": user_input["klasse"],
+                    }
+                )
+                errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_klasse",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "klasse",
-                    ): str
+                    vol.Optional("klasse", default=user_input.get("klasse", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -310,12 +321,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         errors = {}
 
-        credentials["server"] = credentials["server"].strip()
+        server = credentials["server"].strip()
 
-        if not credentials["server"].startswith(("http://", "https://")):
-            credentials["server"] = "https://" + credentials["server"]
+        if not server.lower().startswith(("http://", "https://")):
+            server = "https://" + server
 
-        credentials["server"] = urlparse(credentials["server"]).netloc
+        parsed = urlparse(server)
+        credentials["server"] = f"{parsed.scheme}://{parsed.netloc}"
 
         try:
             socket.gethostbyname(credentials["server"])
@@ -381,6 +393,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return {"base": "student_not_found"}
             elif str(exc) == "no right for timetable":
                 return {"base": "no_rights_for_timetable"}
+            elif str(exc) == "'Teacher not found'":
+                return {"base": "teacher_not_found"}
+            elif str(exc) == "list index out of range":
+                return {"base": "class_not_found"}
 
             _LOGGER.error("Error testing timetable: %s", exc)
             return {"base": "unknown"}
