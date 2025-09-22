@@ -14,6 +14,7 @@
       "class_not_found": "Class not found. Check the class or choose another source.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "Configuration via class only possible during an active school year.",
+      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "unknown": "Unexpected error. View logs for more information."
     },
     "step": {
@@ -37,20 +38,23 @@
         "description": "Enter a Student Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_teacher": {
         "description": "Enter a Teacher Name",
         "data": {
           "surname": "Surname",
-          "fore_name": "Fore Name"
+          "fore_name": "Fore Name",
+          "back": "Back"
         }
       },
       "pick_klasse": {
         "description": "Enter a class name",
         "data": {
-          "klasse": "Class"
+          "klasse": "Class",
+          "back": "Back"
         }
       }
     }
@@ -289,8 +293,31 @@
     }
   },
   "entity": {
+    "sensor": {
+      "next_class": {
+        "name": "Next Lesson"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Next Lesson to Wake Up"
+      },
+      "today_school_start": {
+        "name": "Today's School Start"
+      },
+      "today_school_end": {
+        "name": "Today's School End"
+      }
+    },
+    "calendar": {
+      "homework": {
+        "name": "Homework"
+      },
+      "exam": {
+        "name": "Exams"
+      }
+    },
     "event": {
-      "lesson_change_event": {
+      "lesson_change": {
+        "name": "Lesson Change",
         "state_attributes": {
           "event_type": {
             "state": {
@@ -303,7 +330,8 @@
           }
         }
       },
-      "homework_event": {
+      "new_homework": {
+        "name": "New Homework",
         "state_attributes": {
           "event_type": {
             "state": {

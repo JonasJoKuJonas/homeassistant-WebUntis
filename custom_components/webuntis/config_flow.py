@@ -39,83 +39,6 @@ from .utils.web_untis import get_timetable_object
 _LOGGER = logging.getLogger(__name__)
 
 
-async def validate_login(
-    hass: HomeAssistant, credentials: dict[str, Any]
-) -> dict[str, Any]:
-
-    errors = {}
-
-    credentials["server"] = credentials["server"].strip()
-
-    if not credentials["server"].startswith(("http://", "https://")):
-        credentials["server"] = "https://" + credentials["server"]
-
-    credentials["server"] = urlparse(credentials["server"]).netloc
-
-    try:
-        socket.gethostbyname(credentials["server"])
-    except Exception as exc:
-        _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
-        errors["server"] = "cannot_connect"
-        return errors, None
-
-    try:
-        session = webuntis.Session(
-            server=credentials["server"],
-            school=credentials["school"],
-            username=credentials["username"],
-            password=credentials["password"],
-            useragent="home-assistant",
-        )
-        await hass.async_add_executor_job(session.login)
-    except webuntis.errors.BadCredentialsError:
-        errors["username"] = "bad_credentials"
-    except requests.exceptions.ConnectionError as exc:
-        _LOGGER.error("webuntis.Session connection error: %s", exc)
-        errors["server"] = "cannot_connect"
-    except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
-        errors["school"] = "school_not_found"
-        raise (exc)
-    except Exception as exc:
-        _LOGGER.error("webuntis.Session unknown error: %s", exc)
-        errors["base"] = "unknown"
-
-    return errors, session
-
-
-def test_timetable(session, user_input):
-    """test if timetable is allowed to be fetched"""
-    day = datetime.date.today()
-    schoolyears = session.schoolyears()
-    current_schoolyear = schoolyears.current
-    if not current_schoolyear:
-        day = schoolyears[-1].start.date()
-
-    try:
-        if user_input["timetable_source"] == "personal":
-            session.my_timetable(start=day, end=day)
-        else:
-            timetable_object = get_timetable_object(
-                user_input["timetable_source_id"],
-                user_input["timetable_source"],
-                session,
-            )
-            session.timetable(
-                start=day,
-                end=day,
-                **timetable_object,
-            )
-
-    except Exception as exc:
-        if str(exc) == "'Student not found'":
-            return {"base": "student_not_found"}
-        elif str(exc) == "no right for timetable":
-            return {"base": "no_rights_for_timetable"}
-
-        _LOGGER.error("Error testing timetable: %s", exc)
-        return {"base": "unknown"}
-
-
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for webuntisnew."""
 
@@ -123,6 +46,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     _session_temp = None
     _user_input_temp = {}
+    _source_id = None
 
     @staticmethod
     @callback
@@ -138,7 +62,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         if user_input is not None:
-            errors, self._session_temp = await validate_login(self.hass, user_input)
+            errors, self._session_temp = await self.validate_login(user_input)
 
             if not errors:
                 self._user_input_temp = user_input
@@ -175,9 +99,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if user_input["timetable_source"] == "personal":
                 self._user_input_temp.update(user_input)
                 self._user_input_temp.update({"timetable_source_id": "personal"})
-                errors = await self.hass.async_add_executor_job(
-                    test_timetable, self._session_temp, self._user_input_temp
-                )
+                errors = await self.hass.async_add_executor_job(self.test_timetable)
                 if not errors:
                     return await self.create_entry()
             elif user_input["timetable_source"] == "student":
@@ -227,6 +149,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
             self._user_input_temp.update(
                 {
                     "timetable_source": "student",
@@ -237,23 +161,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             )
 
-            errors = await self.hass.async_add_executor_job(
-                test_timetable, self._session_temp, self._user_input_temp
-            )
+            errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_student",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "fore_name",
+                    vol.Optional(
+                        "fore_name", default=user_input.get("fore_name", "")
                     ): str,
-                    vol.Required(
-                        "surname",
-                    ): str,
+                    vol.Optional("surname", default=user_input.get("surname", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -264,33 +187,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
             self._user_input_temp.update(
                 {
                     "timetable_source": "teacher",
                     "timetable_source_id": [
-                        user_input["fore_name"],
-                        user_input["surname"],
+                        user_input.get("fore_name"),
+                        user_input.get("surname"),
                     ],
                 }
             )
-            errors = await self.hass.async_add_executor_job(
-                test_timetable, self._session_temp, self._user_input_temp
-            )
+            errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_teacher",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "fore_name",
+                    vol.Optional(
+                        "fore_name", default=user_input.get("fore_name", "")
                     ): str,
-                    vol.Required(
-                        "surname",
-                    ): str,
+                    vol.Optional("surname", default=user_input.get("surname", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -301,34 +224,38 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
+            if user_input.get("back"):
+                return await self.async_step_timetable_source()
+            if not user_input.get("klasse"):
+                errors = {"base": "class_not_found"}
+            else:
+                klassen = await self.hass.async_add_executor_job(
+                    self._session_temp.klassen
+                )
+                try:
+                    source = klassen.filter(name=user_input["klasse"])[0]
+                except Exception as exc:
+                    errors = {"base": "class_not_found"}
 
-            klassen = await self.hass.async_add_executor_job(self._session_temp.klassen)
-            try:
-                source = klassen.filter(name=user_input["klasse"])[0]
-            except Exception as exc:
-                errors = {"base": "klasse_not_found"}
-
-            self._user_input_temp.update(
-                {
-                    "timetable_source": "klasse",
-                    "timetable_source_id": user_input["klasse"],
-                }
-            )
-
-            errors = await self.hass.async_add_executor_job(
-                test_timetable, self._session_temp, self._user_input_temp
-            )
+                self._user_input_temp.update(
+                    {
+                        "timetable_source": "klasse",
+                        "timetable_source_id": user_input["klasse"],
+                    }
+                )
+                errors = await self.hass.async_add_executor_job(self.test_timetable)
             if not errors:
                 return await self.create_entry()
+        else:
+            user_input = {}
 
         return self.async_show_form(
             errors=errors,
             step_id="pick_klasse",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "klasse",
-                    ): str
+                    vol.Optional("klasse", default=user_input.get("klasse", "")): str,
+                    vol.Optional("back", default=False): bool,
                 }
             ),
         )
@@ -337,10 +264,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         user_input = self._user_input_temp
         await self.async_set_unique_id(
-            # pylint: disable=consider-using-f-string
-            "{username}@{timetable_source_id}@{school}".format(**user_input)
-            .lower()
-            .replace(" ", "-")
+            f"{self._source_id}@{user_input['school']}".lower().replace(" ", "-")
         )
         self._abort_if_unique_id_configured()
         return self.async_create_entry(
@@ -390,6 +314,94 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
             errors=errors,
         )
+
+    async def validate_login(self, credentials: dict[str, Any]) -> dict[str, Any]:
+
+        hass: HomeAssistant = self.hass
+
+        errors = {}
+
+        server = credentials["server"].strip()
+
+        if not server.lower().startswith(("http://", "https://")):
+            server = "https://" + server
+
+        parsed = urlparse(server)
+        credentials["server"] = f"{parsed.scheme}://{parsed.netloc}"
+
+        try:
+            socket.gethostbyname(credentials["server"])
+        except Exception as exc:
+            _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
+            errors["server"] = "cannot_connect"
+            return errors, None
+
+        try:
+            session = webuntis.Session(
+                server=credentials["server"],
+                school=credentials["school"],
+                username=credentials["username"],
+                password=credentials["password"],
+                useragent="home-assistant",
+            )
+            await hass.async_add_executor_job(session.login)
+        except webuntis.errors.BadCredentialsError:
+            errors["username"] = "bad_credentials"
+        except requests.exceptions.ConnectionError as exc:
+            _LOGGER.error("webuntis.Session connection error: %s", exc)
+            errors["server"] = "cannot_connect"
+        except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
+            errors["school"] = "school_not_found"
+            raise (exc)
+        except Exception as exc:
+            _LOGGER.error("webuntis.Session unknown error: %s", exc)
+            errors["base"] = "unknown"
+
+        return errors, session
+
+    def test_timetable(self):
+        """test if timetable is allowed to be fetched"""
+
+        session: webuntis.Session = self._session_temp
+        user_input = self._user_input_temp
+
+        day = datetime.date.today()
+        schoolyears = session.schoolyears()
+        current_schoolyear = schoolyears.current
+        if not current_schoolyear:
+            day = schoolyears[-1].start.date()
+
+        try:
+            if user_input["timetable_source"] == "personal":
+                session.my_timetable(start=day, end=day)
+                self._source_id = session.login_result["personId"]
+            else:
+                timetable_object = get_timetable_object(
+                    user_input["timetable_source_id"],
+                    user_input["timetable_source"],
+                    session,
+                )
+                session.timetable(
+                    start=day,
+                    end=day,
+                    **timetable_object,
+                )
+                self._source_id = timetable_object[user_input["timetable_source"]].id
+
+        except Exception as exc:
+            if str(exc) == "'Student not found'":
+                return {"base": "student_not_found"}
+            elif str(exc) == "no right for timetable":
+                return {"base": "no_rights_for_timetable"}
+            elif str(exc) == "'Teacher not found'":
+                return {"base": "teacher_not_found"}
+            elif str(exc) == "list index out of range":
+                return {"base": "class_not_found"}
+            elif str(exc) == "invalid elementType: 12":
+                return {"base": "no_personal_timetable"}
+
+            _LOGGER.error("Error testing timetable: %s", exc)
+            return {"base": "unknown"}
 
 
 OPTIONS_MENU = [
@@ -609,7 +621,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.ObjectSelector(),
                     vol.Optional(
                         "lesson_add_teacher",
-                        default=self._config_entry.options.get("lesson_add_teacher"),
+                        default=self._config_entry.options.get(
+                            "lesson_add_teacher", []
+                        ),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),

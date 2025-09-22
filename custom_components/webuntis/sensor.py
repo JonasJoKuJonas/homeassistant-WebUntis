@@ -12,14 +12,14 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import WebUntis, WebUntisEntity
 from .const import (
     DOMAIN,
-    ICON_NEXT_CLASS,
-    ICON_NEXT_LESSON_TO_WAKE_UP,
-    ICON_TODAY_END,
-    ICON_TODAY_START,
-    NAME_NEXT_CLASS,
-    NAME_NEXT_LESSON_TO_WAKE_UP,
-    NAME_TODAY_END,
-    NAME_TODAY_START,
+    ICON_SENSOR_NEXT_CLASS,
+    ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP,
+    ICON_SENSOR_TODAY_END,
+    ICON_SENSOR_TODAY_START,
+    NAME_SENSOR_NEXT_CLASS,
+    NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP,
+    NAME_SENSOR_TODAY_END,
+    NAME_SENSOR_TODAY_START,
 )
 
 
@@ -52,12 +52,12 @@ class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
     def __init__(
         self,
         server: WebUntis,
-        type_name: str,
+        name: str,
         icon: str,
         device_class: Optional[str] = None,
     ) -> None:
         """Initialize sensor base entity."""
-        super().__init__(server, type_name, icon, device_class)
+        super().__init__(server, name, icon, device_class)
         self._attr_native_unit_of_measurement = self.unit
 
     @property
@@ -76,8 +76,8 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
         """Initialize next class sensor."""
         super().__init__(
             server=server,
-            type_name=NAME_NEXT_CLASS,
-            icon=ICON_NEXT_CLASS,
+            name=NAME_SENSOR_NEXT_CLASS,
+            icon=ICON_SENSOR_NEXT_CLASS,
             device_class=self.device_class,
         )
 
@@ -102,8 +102,8 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
         """Initialize next lesson to wake up sensor."""
         super().__init__(
             server=server,
-            type_name=NAME_NEXT_LESSON_TO_WAKE_UP,
-            icon=ICON_NEXT_LESSON_TO_WAKE_UP,
+            name=NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP,
+            icon=ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP,
             device_class=self.device_class,
         )
         self._attr_extra_state_attributes = {}
@@ -124,8 +124,8 @@ class WebUntisToayStart(WebUntisSensorEntity):
         """Initialize sensor."""
         super().__init__(
             server=server,
-            type_name=NAME_TODAY_START,
-            icon=ICON_TODAY_START,
+            name=NAME_SENSOR_TODAY_START,
+            icon=ICON_SENSOR_TODAY_START,
             device_class=self.device_class,
         )
         self._attr_extra_state_attributes = {}
@@ -146,8 +146,8 @@ class WebUntisToayEnd(WebUntisSensorEntity):
         """Initialize sensor."""
         super().__init__(
             server=server,
-            type_name=NAME_TODAY_END,
-            icon=ICON_TODAY_END,
+            name=NAME_SENSOR_TODAY_END,
+            icon=ICON_SENSOR_TODAY_END,
             device_class=self.device_class,
         )
         self._attr_extra_state_attributes = {}

@@ -43,7 +43,7 @@ from .utils.utils import compact_list, async_notify
 
 from .utils.web_untis import get_timetable_object
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
+PLATFORMS = [Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -226,7 +226,6 @@ class WebUntis:
         self.student_id = None
 
         # sensor data
-        self.is_class = None
         self.next_class = None
         self.next_class_json = None
         self.next_lesson_to_wake_up = None
@@ -323,7 +322,6 @@ class WebUntis:
 
             if not self.current_schoolyear:
                 # Login error, set all properties to unknown.
-                self.is_class = None
                 self.next_class = None
                 self.next_class_json = None
                 self.next_lesson_to_wake_up = None
@@ -382,18 +380,6 @@ class WebUntis:
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",
-                self.school,
-                self.username,
-                error,
-            )
-
-        try:
-            self.is_class = await self._hass.async_add_executor_job(self._is_class)
-        except OSError as error:
-            self.is_class = None
-
-            _LOGGER.warning(
-                "Updating the property is_class of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -589,7 +575,6 @@ class WebUntis:
                 return None
             except OSError as error:
                 # Login error, set all properties to unknown.
-                self.is_class = None
                 self.next_class = None
                 self.next_class_json = None
                 self.next_lesson_to_wake_up = None
@@ -667,20 +652,6 @@ class WebUntis:
             result = sorted(result, key=lambda x: x.start)
 
         return result
-
-    def _is_class(self):
-        """return if is class"""
-        today = date.today()
-
-        table = self.get_timetable(start=today, end=today)
-
-        now = datetime.now()
-
-        for lesson in table:
-
-            if lesson.start < now < lesson.end and self.check_lesson(lesson):
-                return True
-        return False
 
     def _next_class(self):
         """returns time of next class."""
@@ -837,7 +808,7 @@ class WebUntis:
                     if self.calendar_description == "json":
                         event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "lesson_info":
-                        event["description"] = str(lesson.substText)
+                        event["description"] = str(lesson.lstext or lesson.substText)
                     elif self.calendar_description == "class_name_short":
                         event["description"] = ", ".join(k.name for k in lesson.klassen)
                     elif self.calendar_description == "class_ame_long":
@@ -1021,7 +992,11 @@ class WebUntis:
             pass
         try:
             dic["subjects"] = [
-                {"name": str(subject.name), "long_name": str(subject.long_name)}
+                {
+                    "name": str(subject.name),
+                    "long_name": str(subject.long_name),
+                    "id": subject.id,
+                }
                 for subject in lesson.subjects
             ]
         except:
@@ -1246,15 +1221,15 @@ class WebUntisEntity(Entity):
     def __init__(
         self,
         server: WebUntis,
-        type_name: str,
+        name: str,
         icon: str,
         device_class: str | None,
     ) -> None:
         """Initialize base entity."""
         self._server = server
-        self._attr_name = type_name
         self._attr_icon = icon
-        self._attr_unique_id = f"{self._server.unique_id}-{type_name}"
+        self._attr_translation_key = name
+        self._attr_unique_id = f"{self._server.unique_id}_{name}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._server.unique_id)},
             manufacturer="Web Untis",

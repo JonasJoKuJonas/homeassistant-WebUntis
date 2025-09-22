@@ -10,12 +10,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import WebUntis, WebUntisEntity  # pylint: disable=no-name-in-module
 from .const import (
     DOMAIN,
-    ICON_CALENDER,
-    ICON_CALENDER_HOMEWORK,
-    NAME_CALENDER,
-    NAME_CALENDER_HOMEWORK,
-    ICON_CALENDER_EXAM,
-    NAME_CALENDER_EXAM,
+    ICON_CALENDAR,
+    ICON_CALENDAR_HOMEWORK,
+    NAME_CALENDAR,
+    NAME_CALENDAR_HOMEWORK,
+    ICON_CALENDAR_EXAM,
+    NAME_CALENDAR_EXAM,
 )
 
 
@@ -44,22 +44,15 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         """Initialize base calendar entity."""
         super().__init__(
             server=server,
-            type_name=name,
+            name=name,
             icon=icon,
             device_class=None,
         )
-        self._name = name
-        self._icon = icon
         self.events = self._get_events
         self._event = None
 
     def _get_events(self):
         return []
-
-    @property
-    def name(self) -> str:
-        """Return the name of the entity."""
-        return self._name
 
     @property
     def event(self) -> CalendarEvent:
@@ -128,9 +121,11 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
 class UntisCalendar(BaseUntisCalendar):
     """Representation of a Web Untis Calendar sensor."""
 
+    _attr_name = None
+
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Untis Calendar."""
-        super().__init__(server=server, name=NAME_CALENDER, icon=ICON_CALENDER)
+        super().__init__(server=server, name=NAME_CALENDAR, icon=ICON_CALENDAR)
 
     def _get_events(self):
         return self._server.calendar_events
@@ -142,7 +137,7 @@ class HomeworkCalendar(BaseUntisCalendar):
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Homework Calendar."""
         super().__init__(
-            server=server, name=NAME_CALENDER_HOMEWORK, icon=ICON_CALENDER_HOMEWORK
+            server=server, name=NAME_CALENDAR_HOMEWORK, icon=ICON_CALENDAR_HOMEWORK
         )
 
     def _get_events(self):
@@ -156,7 +151,7 @@ class ExamCalendar(BaseUntisCalendar):
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Exams Calendar."""
         super().__init__(
-            server=server, name=NAME_CALENDER_EXAM, icon=ICON_CALENDER_EXAM
+            server=server, name=NAME_CALENDAR_EXAM, icon=ICON_CALENDAR_EXAM
         )
 
     def _get_events(self):

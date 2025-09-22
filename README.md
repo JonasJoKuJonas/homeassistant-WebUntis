@@ -133,18 +133,22 @@ last name: `last name`
 
 The integration creates several entities in the format `sensor.NAME_entity`.
 
-| Sensor                                     | Type     | Description                                                                 |
-| :----------------------------------------- | :------- | :-------------------------------------------------------------------------- |
-| `binary_sensor.NAME_class`                 | bool     | Indicates if a lesson is currently taking place.                            |
-| `sensor.NAME_next_class`                   | datetime | The start time of the next lesson.                                          |
-| `sensor.NAME_next_lesson_to_wake_up`       | datetime | The start of the next first lesson of the day.                              |
-| `sensor.NAME_today_school_start`           | datetime | The start time of todays fist lesson. Can also have todays lessons as JSON. |
-| `sensor.NAME_today_school_end`             | datetime | The end time of todays last lesson.                                         |
-| `calendar.NAME_webuntis_calendar`          | calendar | Calendar entry.                                                             |
-| `calendar.NAME_webuntis_exam_calendar`     | calendar | Calendar with current exams.                                                |
-| `calendar.NAME_webuntis_homework_calendar` | calendar | Calendar with current homework.                                             |
-| `event.NAME_webuntis_lesson_change`        | event    | Lesson change events.                                                       |
-| `event.NAME_webuntis_homework`             | event    | Homework events.                                                            |
+| Sensor                               | Type     | Description                                                                 |
+| :----------------------------------- | :------- | :-------------------------------------------------------------------------- |
+| `sensor.NAME_next_class`             | datetime | The start time of the next lesson.                                          |
+| `sensor.NAME_next_lesson_to_wake_up` | datetime | The start of the next first lesson of the day.                              |
+| `sensor.NAME_today_s_school_start`   | datetime | The start time of todays fist lesson. Can also have todays lessons as JSON. |
+| `sensor.NAME_today_s_school_end`     | datetime | The end time of todays last lesson.                                         |
+| `calendar.NAME`                      | calendar | Calendar entry.                                                             |
+| `calendar.NAME_exam`                 | calendar | Calendar with current exams.                                                |
+| `calendar.NAME_homework`             | calendar | Calendar with current homework.                                             |
+| `event.NAME_lesson_change`           | event    | Lesson change events.                                                       |
+| `event.NAME_homework`                | event    | Homework events.                                                            |
+
+### ⚠️ **Important:**
+
+The **Exam Calendar** and **Homework Calendar** are **not available when using a parent account**.  
+Please use a **student account** to access exams and homework.
 
 ## Services
 

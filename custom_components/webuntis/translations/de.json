@@ -14,6 +14,7 @@
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
+      "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
       "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
     },
     "step": {
@@ -37,20 +38,23 @@
         "description": "Name eines Schülers eingeben",
         "data": {
           "surname": "Nachname",
-          "fore_name": "Vorname"
+          "fore_name": "Vorname",
+          "back": "Zurück"
         }
       },
       "pick_teacher": {
         "description": "Name eines Lehrers eingeben",
         "data": {
           "surname": "Nachname",
-          "fore_name": "Vorname"
+          "fore_name": "Vorname",
+          "back": "Zurück"
         }
       },
       "pick_klasse": {
         "description": "Klasse eingeben",
         "data": {
-          "klasse": "Klasse"
+          "klasse": "Klasse",
+          "back": "Zurück"
         }
       }
     }
@@ -288,8 +292,31 @@
     }
   },
   "entity": {
+    "sensor": {
+      "next_class": {
+        "name": "Nächste Stunde"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Nächste Stunde zum Aufstehen"
+      },
+      "today_school_start": {
+        "name": "Heutiger Schulbeginn"
+      },
+      "today_school_end": {
+        "name": "Heutiges Schulende"
+      }
+    },
+    "calendar": {
+      "homework": {
+        "name": "Hausaufgaben"
+      },
+      "exam": {
+        "name": "Prüfungen"
+      }
+    },
     "event": {
-      "lesson_change_event": {
+      "lesson_change": {
+        "name": "Stundenänderung",
         "state_attributes": {
           "event_type": {
             "state": {
@@ -302,7 +329,8 @@
           }
         }
       },
-      "homework_event": {
+      "new_homework": {
+        "name": "Neue Hausaufgabe",
         "state_attributes": {
           "event_type": {
             "state": {

@@ -116,6 +116,11 @@ class HomeworkEventsFetcher:
             }
 
             if self.server.student_id is None or self.server.student_id == student_id:
+                if (
+                    subject in self.server.filter_subjects
+                    and self.server.filter_mode == "Blacklist"
+                ):
+                    continue
                 # Add the homework event to the event list
                 event_list.append(CalendarEvent(**event))
 
