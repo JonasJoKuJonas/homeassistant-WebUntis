@@ -1225,7 +1225,7 @@ class WebUntisEntity(Entity):
         self._server = server
         self._attr_icon = icon
         self._attr_translation_key = name
-        self._attr_unique_id = f"{self._server.unique_id}-{name}"
+        self._attr_unique_id = f"{self._server.unique_id}_{name}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._server.unique_id)},
             manufacturer="Web Untis",
