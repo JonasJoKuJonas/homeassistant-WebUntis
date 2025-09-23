@@ -54,8 +54,6 @@ Unfortunately, it is not possible to use the Untis API with an anonymous user.
 You can ask the school administration to give you access, otherwise it won't work.
 
 
-Got it 👍 — here’s the improved version with your correction about the authentication process needing to be **reworked**:
-
 ---
 
 ### iServ or Office365 Login
