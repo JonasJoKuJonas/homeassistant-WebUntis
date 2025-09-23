@@ -53,11 +53,28 @@ Unfortunately, it is not possible to use the Untis API with an anonymous user.
 
 You can ask the school administration to give you access, otherwise it won't work.
 
+
+Got it 👍 — here’s the improved version with your correction about the authentication process needing to be **reworked**:
+
+---
+
+### iServ or Office365 Login
+
+Currently, the only possible way to integrate login via iServ or Office365 would be through the **QR-Code login** ([#111](https://github.com/JonasJoKuJonas/homeassistant-WebUntis/issues/111)).
+However, this feature is not natively supported in the `python-webuntis` library.
+
+I have tested different approaches to make QR-Code login work, but to support it, the entire authentication process would need to be **reworked**. If anyone has experience with this and would like to collaborate, feel free to send me a DM on Discord so we can work on it together.
+
+Until then, **login via iServ or Office365 will unfortunately not be possible.**
+
+---
+
+
 ### Timetable Source
 
 Select from witch source the intigration should pull the data.
 
-If the student or Teacher is not found try
+If the student or teacher is not found try
 
 first name: `first name` `middle name` <br>
 last name: `last name`
