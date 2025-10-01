@@ -9,7 +9,7 @@ from . import WebUntisEntity
 from .const import (
     DOMAIN,
     ICON_EVENT_LESSNON_CHANGE,
-    NAME_EVENT_LESSNON_CHANGE,
+    NAME_EVENT_LESSON_CHANGE,
     ICON_EVENT_HOMEWORK,
     NAME_EVENT_HOMEWORK,
 )
@@ -69,7 +69,7 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
     def __init__(self, server) -> None:
         super().__init__(
             server=server,
-            name=NAME_EVENT_LESSNON_CHANGE,
+            name=NAME_EVENT_LESSON_CHANGE,
             icon=ICON_EVENT_LESSNON_CHANGE,
             event_types=["lesson_change", "rooms", "teachers", "cancelled", "code"],
         )

@@ -36,6 +36,8 @@ from .const import (
     DOMAIN,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
+    NAME_EVENT_LESSON_CHANGE,
+    NAME_EVENT_HOMEWORK
 )
 from .notify import *
 from .services import async_setup_services
@@ -254,9 +256,9 @@ class WebUntis:
 
     def event_entity_listen(self, callback, id) -> None:
         """Listen for lesson change events."""
-        if id == "lesson_change_event":
+        if id == NAME_EVENT_LESSON_CHANGE:
             self.lesson_change_callback = callback
-        elif id == "homework_event":
+        elif id == NAME_EVENT_HOMEWORK:
             self.homework_change_callback = callback
 
     def start_periodic_update(self) -> None:

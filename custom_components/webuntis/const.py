@@ -42,7 +42,7 @@ NAME_SENSOR_TODAY_END = "today_school_end"
 NAME_CALENDAR = "calendar"
 NAME_CALENDAR_HOMEWORK = "homework"
 NAME_CALENDAR_EXAM = "exam"
-NAME_EVENT_LESSNON_CHANGE = "lesson_change"
+NAME_EVENT_LESSON_CHANGE = "lesson_change"
 NAME_EVENT_HOMEWORK = "new_homework"
 
 
