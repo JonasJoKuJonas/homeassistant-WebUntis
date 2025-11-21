@@ -261,7 +261,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def create_entry(self):
-
         user_input = self._user_input_temp
         await self.async_set_unique_id(
             f"{self._source_id}@{user_input['school']}".lower().replace(" ", "-")
@@ -316,7 +315,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def validate_login(self, credentials: dict[str, Any]) -> dict[str, Any]:
-
         hass: HomeAssistant = self.hass
 
         errors = {}
@@ -326,8 +324,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not server.lower().startswith(("http://", "https://")):
             server = "https://" + server
 
-        parsed = urlparse(server)
-        credentials["server"] = f"{parsed.scheme}://{parsed.netloc}"
+        parsed = urlparse(server).hostname
+        credentials["server"] = parsed
 
         try:
             socket.gethostbyname(credentials["server"])
@@ -585,7 +583,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the lesson options."""
         errors = {}
         if user_input is not None:
-
             if user_input.get("lesson_replace_name") is None:
                 user_input["lesson_replace_name"] = {}
 
@@ -757,7 +754,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
         else:
             for service in user_input.get("services", {}):
-
                 config = self._config_entry.options["notify_config"][service]
 
                 data = {
@@ -801,7 +797,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors: dict[str, Any] | None = None,
         edit=None,
     ) -> FlowResult:
-
         options = {}
         if edit:
             options = self._config_entry.options["notify_config"].get(edit)

@@ -7,7 +7,7 @@ from homeassistant.components.repairs import ConfirmRepairFlow, RepairsFlow
 from homeassistant.core import HomeAssistant
 
 
-from .config_flow import BadCredentials, CannotConnect, InvalidAuth, validate_login
+from .config_flow import ConfigFlow
 
 
 class IssueChangePassword(RepairsFlow):
@@ -36,9 +36,9 @@ class IssueChangePassword(RepairsFlow):
         if user_input is not None:
             data = self._config
             data["password"] = user_input["password"]
-
-            if user_input is not None:
-                errors, _session_temp = await validate_login(self.hass, data)
+            flow = ConfigFlow()
+            flow.hass = self._hass
+            errors, _session_temp = await flow.validate_login(data)
 
             if not errors:
                 entry = self.hass.config_entries.async_get_entry(self._entry_id)
