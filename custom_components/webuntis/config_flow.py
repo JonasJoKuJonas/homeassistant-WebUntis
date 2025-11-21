@@ -324,11 +324,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not server.lower().startswith(("http://", "https://")):
             server = "https://" + server
 
-        parsed = urlparse(server).hostname
-        credentials["server"] = parsed
+        parsed = urlparse(server)
+        hostname = parsed.hostname
+        credentials["server"] = f"{parsed.scheme}://{parsed.netloc}"
 
         try:
-            socket.gethostbyname(credentials["server"])
+            socket.gethostbyname(hostname)
         except Exception as exc:
             _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
             errors["server"] = "cannot_connect"
