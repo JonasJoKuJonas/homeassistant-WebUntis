@@ -14,7 +14,7 @@
   ],
   "quality_scale": "silver",
   "requirements": [
-    "webuntis==0.1.23"
+    "webuntis==0.1.24"
   ],
   "version": "v0.0.0"
 }
