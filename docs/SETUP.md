@@ -47,6 +47,13 @@ https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
               Server                          School
 ```
 
+If your school has the new address pattern, similar to this:
+
+```
+https://demo-school.webuntis.com/today
+```
+then the server is `https://demo-school.webuntis.com` and the school is `demo-school`.
+
 ### Username and Password
 
 Unfortunately, it is not possible to use the Untis API with an anonymous user.
