@@ -62,6 +62,10 @@ def compare_list(old_list, new_list, blacklist=[]):
                     and old_item["teachers"]
                     and new_item["teachers"] != old_item["teachers"]
                     and new_item["code"] != "cancelled"
+                    or "teachers" not in new_item
+                    and "teachers" in old_item
+                    and old_item["teachers"]
+                    and new_item["code"] != "cancelled"
                 ):
                     updated_items.append(["teachers", new_item, old_item])
 
