@@ -1165,8 +1165,6 @@ class WebUntis:
             self.event_list_old = self.event_list
             return
 
-        blacklist = get_notify_blacklist(self.event_list)
-
         if self.exclude_filter_comparison:
             updated_items = compare_timetables(
                 self.unfiltered_event_list_old, self.unfiltered_event_list
@@ -1177,7 +1175,7 @@ class WebUntis:
             )
 
         if updated_items:
-            _LOGGER.debug("Timetable has chaged!")
+            _LOGGER.debug("Timetable has changed!")
             _LOGGER.debug(updated_items)
 
             for change, lesson, lesson_old in updated_items:
