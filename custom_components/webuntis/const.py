@@ -18,6 +18,7 @@ DEFAULT_OPTIONS = {
     "calendar_show_room_change": False,
     "notify_config": {},
     "invalid_subjects": False,
+    "exclude_filter_comparison": False
 }
 
 NOTIFY_OPTIONS = ["homework", "cancelled", "rooms", "lesson_change", "teachers", "code"]
