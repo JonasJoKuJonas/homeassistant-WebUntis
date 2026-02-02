@@ -193,6 +193,7 @@ class WebUntis:
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
+        self.exclude_filter_comparison = config.options["exclude_filter_comparison"]
 
         self.exclude_data = config.options["exclude_data"]
         self.exclude_data_run = []
@@ -243,7 +244,9 @@ class WebUntis:
         self.subjects = []
 
         self.event_list = []
+        self.unfiltered_event_list = []
         self.event_list_old = []
+        self.unfiltered_event_list_old = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -779,8 +782,10 @@ class WebUntis:
 
         event_list = []
         self.event_list = []
+        self.unfiltered_event_list = []
 
         for lesson in table:
+            self.unfiltered_event_list.append(self.get_lesson_for_notify(lesson))
             if self.check_lesson(lesson, ignor_cancelled=True):
                 self.event_list.append(self.get_lesson_for_notify(lesson))
 
@@ -1162,9 +1167,14 @@ class WebUntis:
 
         blacklist = get_notify_blacklist(self.event_list)
 
-        updated_items = compare_list(
-            self.event_list_old, self.event_list, blacklist=blacklist
-        )
+        if self.exclude_filter_comparison:
+            updated_items = compare_timetables(
+                self.unfiltered_event_list_old, self.unfiltered_event_list, blacklist=blacklist
+            )
+        else:
+            updated_items = compare_timetables(
+                self.event_list_old, self.event_list, blacklist=blacklist
+            )
 
         if updated_items:
             _LOGGER.debug("Timetable has chaged!")
@@ -1212,6 +1222,7 @@ class WebUntis:
                         _LOGGER.info(updated_items)
 
         self.event_list_old = self.event_list
+        self.unfiltered_event_list_old = self.unfiltered_event_list
 
 
 class WebUntisEntity(Entity):

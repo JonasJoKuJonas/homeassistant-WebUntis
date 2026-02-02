@@ -3,84 +3,13 @@ from .const import TEMPLATE_OPTIONS
 from .utils.web_untis import get_lesson_name_str, get_lesson_name
 
 
-def compare_list(old_list, new_list, blacklist=[]):
-    updated_items = []
-
-    for new_item in new_list:
-        for old_item in old_list:
-            if (
-                new_item["subject_id"] == old_item["subject_id"]
-                and new_item["start"] == old_item["start"]
-                and not (
-                    new_item["code"] == "irregular" and old_item["code"] == "cancelled"
-                )
-            ):
-                # if lesson is on blacklist to prevent spaming notifications
-                if any(
-                    item["subject_id"] == new_item["subject_id"]
-                    and item["start"] == new_item["start"]
-                    for item in blacklist
-                ):
-                    break
-
-                if new_item["code"] != old_item["code"]:
-                    if old_item["code"] == "None" and new_item["code"] == "cancelled":
-                        matching_item = next(
-                            (
-                                item
-                                for item in new_list
-                                if item["start"] == new_item["start"]
-                                and item["subject_id"] != new_item["subject_id"]
-                                and item["code"] == "irregular"
-                            ),
-                            None,
-                        )
-
-                        if matching_item is not None:
-                            updated_items.append(
-                                ["lesson_change", matching_item, old_item]
-                            )
-                        else:
-                            updated_items.append(["cancelled", new_item, old_item])
-                    else:
-                        updated_items.append(["code", new_item, old_item])
-
-                if (
-                    "rooms" in new_item
-                    and "rooms" in old_item
-                    and new_item["rooms"]
-                    and old_item["rooms"]
-                    and new_item["rooms"] != old_item["rooms"]
-                    and new_item["code"] != "cancelled"
-                ):
-                    updated_items.append(["rooms", new_item, old_item])
-
-                if (
-                    "teachers" in new_item
-                    and "teachers" in old_item
-                    and new_item["teachers"]
-                    and old_item["teachers"]
-                    and new_item["teachers"] != old_item["teachers"]
-                    and new_item["code"] != "cancelled"
-                    or "teachers" not in new_item
-                    and "teachers" in old_item
-                    and old_item["teachers"]
-                    and new_item["code"] != "cancelled"
-                ):
-                    updated_items.append(["teachers", new_item, old_item])
-
-                break
-
-    return updated_items
-
-
 def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
     if old_timetable == new_timetable:
         # The timetable has not changed.
         return []
     else:
         # The timetable has changed. -> Specify the change:
-        changes = []
+        updated_items = []
         for new_lesson in new_timetable:
             for old_lesson in old_timetable:
                 # if compared lessons are the same
@@ -88,12 +17,7 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                     new_lesson["lsnumber"] == old_lesson["lsnumber"]
                     and new_lesson["start"] == old_lesson["start"]
                 ):
-                    # if the lesson has not changed
-                    if new_lesson == old_lesson:
-                        break
-                    else:
-                        changes.append(["change", new_lesson, old_lesson])
-
+                    
                     # ignore if lesson is on blacklist 
                     if any(
                         item["subject_id"] == new_lesson["subject_id"]
@@ -101,15 +25,6 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                         for item in blacklist
                     ):
                         break
-
-                    # compare lesson code
-                    if new_lesson["code"] != old_lesson["code"]:
-                        if old_lesson["code"] == "None" and new_lesson["code"] == "cancelled":
-                            changes.append(["cancelled", new_lesson, old_lesson])
-                        elif old_lesson["code"] == "None" and new_lesson["code"] == "irregular":
-                            changes.append(["irregular", new_lesson, old_lesson])
-                        else:
-                            changes.append(["code", new_lesson, old_lesson])
 
                     # compare lesson rooms
                     if (
@@ -122,7 +37,7 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                         and "rooms" in old_lesson
                         and old_lesson["rooms"]
                     ):
-                        changes.append(["rooms", new_lesson, old_lesson])
+                        updated_items.append(["rooms", new_lesson, old_lesson])
 
                     # compare lesson teachers
                     if (
@@ -135,8 +50,7 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                         and "teachers" in old_lesson
                         and old_lesson["teachers"]
                     ):
-                        changes.append(["teachers", new_lesson, old_lesson])
-
+                        updated_items.append(["teachers", new_lesson, old_lesson])
 
                     # compare lesson text
                     if (
@@ -149,17 +63,25 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                         and "lstext" not in old_lesson
                         and new_lesson["teachers"]
                     ):
-                        changes.append(["lstext", new_lesson, old_lesson])
+                        updated_items.append(["lstext", new_lesson, old_lesson])
                     
+                    # compare lesson code
+                    if new_lesson["code"] != old_lesson["code"]:
+                        if old_lesson["code"] == "None" and new_lesson["code"] == "cancelled":
+                            updated_items.append(["cancelled", new_lesson, old_lesson])
+                        elif old_lesson["code"] == "None" and new_lesson["code"] == "irregular":
+                            updated_items.append(["irregular", new_lesson, old_lesson])
+                        else:
+                            updated_items.append(["code", new_lesson, old_lesson])
                     break
         
-        return changes
+        return updated_items
 
 
 def get_notify_blacklist(current_list):
     blacklist = []
 
-    for item in compare_list(current_list, current_list):
+    for item in compare_timetables(current_list, current_list):
         blacklist.append(
             {"subject_id": item[1]["subject_id"], "start": item[1]["start"]}
         )
