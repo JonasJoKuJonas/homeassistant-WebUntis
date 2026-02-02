@@ -84,12 +84,12 @@
           "filter_subjects": "Filter mode - subjects",
           "filter_description": "Filter mode - Description",
           "invalid_subjects": "No Subjects",
-          "exclude_filter_comparison": "Exclude filter in comparison"
+          "exclude_filter_comparison": "Exclude filters from notifications and events"
         },
         "data_description": {
           "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list) \nNot affected by blacklist/whitelist.",
           "invalid_subjects": "Allow lessons with no subjects",
-          "exclude_filter_comparison": "Exclude filtered lessons from notifications or events. Useful when you want to update the event entity for a lesson even if it’s filtered out."
+          "exclude_filter_comparison": "Don't filter the lessons for notifying timetable changes."
         }
       },
       "lesson": {
