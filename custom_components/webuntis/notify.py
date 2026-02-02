@@ -3,7 +3,7 @@ from .const import TEMPLATE_OPTIONS
 from .utils.web_untis import get_lesson_name_str, get_lesson_name
 
 
-def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
+def compare_timetables(old_timetable, new_timetable) -> list:
     if old_timetable == new_timetable:
         # The timetable has not changed.
         return []
@@ -18,14 +18,6 @@ def compare_timetables(old_timetable, new_timetable, blacklist) -> list:
                     and new_lesson["start"] == old_lesson["start"]
                 ):
                     
-                    # ignore if lesson is on blacklist 
-                    if any(
-                        item["subject_id"] == new_lesson["subject_id"]
-                        and item["start"] == new_lesson["start"]
-                        for item in blacklist
-                    ):
-                        break
-
                     # compare lesson rooms
                     if (
                         "rooms" in new_lesson

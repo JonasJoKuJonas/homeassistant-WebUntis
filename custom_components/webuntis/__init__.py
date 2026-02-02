@@ -1169,11 +1169,11 @@ class WebUntis:
 
         if self.exclude_filter_comparison:
             updated_items = compare_timetables(
-                self.unfiltered_event_list_old, self.unfiltered_event_list, blacklist=blacklist
+                self.unfiltered_event_list_old, self.unfiltered_event_list
             )
         else:
             updated_items = compare_timetables(
-                self.event_list_old, self.event_list, blacklist=blacklist
+                self.event_list_old, self.event_list
             )
 
         if updated_items:
