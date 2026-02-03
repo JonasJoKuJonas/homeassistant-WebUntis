@@ -84,12 +84,12 @@
           "filter_subjects": "Fächer Filter - Fächer",
           "filter_description": "Fächer Filter - Beschreibung",
           "invalid_subjects": "Kein Fach",
-          "exclude_filter_comparison": "Filter von Benachrichtigungen und Ereignissen ausschließen"
+          "exclude_filter_comparison": "Stunden für Benachrichtigungen und Events nicht filtern"
         },
         "data_description": {
           "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste) \nWird nicht von Black/Whitelist beeinflusst.",
           "invalid_subjects": "Erlaube Stunden ohne Fach",
-          "exclude_filter_comparison": "Stunden für die Änderungsbenachrichtigung nicht filtern."
+          "exclude_filter_comparison": "Dadurch können Events und Benarichtigungen auch bei Änderungenen von gefilterten Stunden ausgelöst werden."
         }
       },
       "lesson": {
