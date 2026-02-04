@@ -18,6 +18,10 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                     and new_lesson["start"] == old_lesson["start"]
                 ):
                     
+                    if new_lesson == old_lesson:
+                        break
+
+
                     # compare lesson rooms
                     if (
                         "rooms" in new_lesson
@@ -65,8 +69,10 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                             updated_items.append(["irregular", new_lesson, old_lesson])
                         else:
                             updated_items.append(["code", new_lesson, old_lesson])
+                    
+                    updated_items.append(["lesson_change", new_lesson, old_lesson])
                     break
-        
+
         return updated_items
 
 
