@@ -322,11 +322,13 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "code": "Stunden-Status geändert",
+              "code": "Stunden-Status Änderung",
               "rooms": "Raum Änderung",
               "teachers": "Lehrer Änderung",
-              "cancelled": "Stunde fällt aus",
-              "lesson_change": "Stunde ausgetauscht"
+              "cancelled": "Stundenausfall",
+              "lesson_change": "Stundenänderung",
+              "lstext": "Stundentext Änderung",
+              "subject": "Fach Änderung"
             }
           }
         }

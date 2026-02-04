@@ -71,7 +71,7 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
             server=server,
             name=NAME_EVENT_LESSON_CHANGE,
             icon=ICON_EVENT_LESSNON_CHANGE,
-            event_types=["lesson_change", "rooms", "teachers", "cancelled", "code", "lstext"],
+            event_types=["lesson_change", "rooms", "teachers", "cancelled", "code", "lstext", "subject"],
         )
 
 

@@ -35,6 +35,16 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                     ):
                         updated_items.append(["rooms", new_lesson, old_lesson])
 
+                    # compare lesson subject
+                    if (
+                        "subject_id" in new_lesson
+                        and "subject_id" in old_lesson
+                        and new_lesson["subject_id"]
+                        and old_lesson["subject_id"]
+                        and new_lesson["subject_id"] != old_lesson["subject_id"]
+                    ):
+                        updated_items.append(["subject", new_lesson, old_lesson])
+
                     # compare lesson teachers
                     if (
                         "teachers" in new_lesson

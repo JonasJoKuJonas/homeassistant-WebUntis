@@ -327,7 +327,9 @@
               "rooms": "Room changed",
               "teachers": "Teacher changed",
               "cancelled": "Lesson cancelled",
-              "lesson_change": "Lesson swapped"
+              "lesson_change": "Lesson change",
+              "lstext": "Lesson text changed",
+              "subject": "Subject changed"
             }
           }
         }
