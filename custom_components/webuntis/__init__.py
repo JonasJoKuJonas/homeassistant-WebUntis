@@ -193,7 +193,7 @@ class WebUntis:
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
-        self.exclude_filter_comparison = config.options["exclude_filter_comparison"]
+        self.exclude_filter_comparison = config.options.get("exclude_filter_comparison", False)
 
         self.exclude_data = config.options["exclude_data"]
         self.exclude_data_run = []
