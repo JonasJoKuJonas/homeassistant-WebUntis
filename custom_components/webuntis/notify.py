@@ -287,15 +287,30 @@ def get_changes(change, lesson, lesson_old, server):
     changes["old"] = None
     changes["new"] = None
 
-    if change == "cancelled":
-        pass
-    elif change == "lesson_change":
-        changes.update(
-            {
-                "old": lesson_old.get("subjects", [{}])[0].get("long_name", ""),
-                "new": lesson.get("subjects", [{}])[0].get("long_name", ""),
-            }
-        )
+    if change == "lesson_change":
+        # lesson_change can include dynamic fields
+        fields = lesson.get("other_fields_changed")
+        if not fields:
+            checked = ["rooms", "subject_id", "teachers", "lstext", "code"]
+            fields = [
+                key
+                for key in lesson
+                if key not in checked and lesson.get(key) != lesson_old.get(key)
+            ]
+
+        if fields:
+            changes["old"] = ", ".join(str(lesson_old.get(f, "")) for f in fields)
+            changes["new"] = ", ".join(str(lesson.get(f, "")) for f in fields)
+        else:
+            changes["old"] = ""
+            changes["new"] = ""
+
+    elif change == "subject":
+        changes["old"] = lesson_old.get("subjects", [{}])[0].get("long_name", "")
+        changes["new"] = lesson.get("subjects", [{}])[0].get("long_name", "")
+    elif change == "lstext":
+        changes["old"] = lesson_old.get("lstext", "")
+        changes["new"] = lesson.get("lstext", "")
     elif change == "rooms":
         changes.update(
             {
