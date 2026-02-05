@@ -13,14 +13,20 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         for new_lesson in new_timetable:
             for old_lesson in old_timetable:
                 # if compared lessons are the same
-                if ( 
+                if (
                     new_lesson["lsnumber"] == old_lesson["lsnumber"]
                     and new_lesson["start"] == old_lesson["start"]
                 ):
-                    
                     if new_lesson == old_lesson:
                         break
 
+                    checked_fields = [
+                        "rooms",
+                        "subject_id",
+                        "teachers",
+                        "lstext",
+                        "code",
+                    ]
 
                     # compare lesson rooms
                     if (
@@ -62,7 +68,7 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                     if (
                         "lstext" in new_lesson
                         and "lstext" in old_lesson
-                        and new_lesson["lstext"] # could be "Vtr. ohne Lehrer"
+                        and new_lesson["lstext"]  # could be "Vtr. ohne Lehrer"
                         and old_lesson["lstext"]
                         and new_lesson["lstext"] != old_lesson["lstext"]
                         or "lstext" in new_lesson
@@ -70,17 +76,33 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                         and new_lesson["teachers"]
                     ):
                         updated_items.append(["lstext", new_lesson, old_lesson])
-                    
+
                     # compare lesson code
                     if new_lesson["code"] != old_lesson["code"]:
-                        if old_lesson["code"] == "None" and new_lesson["code"] == "cancelled":
+                        if (
+                            old_lesson["code"] == "None"
+                            and new_lesson["code"] == "cancelled"
+                        ):
                             updated_items.append(["cancelled", new_lesson, old_lesson])
-                        elif old_lesson["code"] == "None" and new_lesson["code"] == "irregular":
+                        elif (
+                            old_lesson["code"] == "None"
+                            and new_lesson["code"] == "irregular"
+                        ):
                             updated_items.append(["irregular", new_lesson, old_lesson])
                         else:
                             updated_items.append(["code", new_lesson, old_lesson])
-                    
-                    updated_items.append(["lesson_change", new_lesson, old_lesson])
+
+                    # Check if other keys (that are not in checked_fields) has changed
+                    other_fields_changed = [
+                        key
+                        for key in new_lesson
+                        if key not in checked_fields
+                        and new_lesson.get(key) != old_lesson.get(key)
+                    ]
+
+                    if other_fields_changed:
+                        updated_items.append(["lesson_change", new_lesson, old_lesson])
+
                     break
 
         return updated_items
@@ -125,7 +147,7 @@ New: {changes["new"]}"""
 
     if template == "telegram":
         message = f"""
-<b>WebUntis ({entry_title}) - {changes['title']}</b>
+<b>WebUntis ({entry_title}) - {changes["title"]}</b>
 <b>Subject:</b> {changes["subject"]}
 <b>Date:</b> {changes["date"]}
 <b>Time:</b> {changes["time_start"]} - {changes["time_end"]}"""
