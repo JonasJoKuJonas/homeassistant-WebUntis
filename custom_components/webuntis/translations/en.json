@@ -84,7 +84,7 @@
           "filter_subjects": "Filter mode - subjects",
           "filter_description": "Filter mode - Description",
           "invalid_subjects": "No Subjects",
-          "exclude_filter_comparison": "Not filter lessons for notifications and events"
+          "exclude_filter_comparison": "Do not filter lessons for notifications and events"
         },
         "data_description": {
           "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list) \nNot affected by blacklist/whitelist.",

@@ -89,7 +89,7 @@
         "data_description": {
           "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste) \nWird nicht von Black/Whitelist beeinflusst.",
           "invalid_subjects": "Erlaube Stunden ohne Fach",
-          "exclude_filter_comparison": "Dadurch können Events und Benarichtigungen auch bei Änderungenen von gefilterten Stunden ausgelöst werden."
+          "exclude_filter_comparison": "Dadurch können Events und Benachrichtigungen auch bei Änderungenen von gefilterten Stunden ausgelöst werden."
         }
       },
       "lesson": {

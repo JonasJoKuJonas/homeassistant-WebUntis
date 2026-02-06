@@ -1163,6 +1163,7 @@ class WebUntis:
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
+            self.unfiltered_event_list_old = self.unfiltered_event_list
             return
 
         if self.exclude_filter_comparison:
