@@ -169,11 +169,13 @@
     "notify_options": {
       "options": {
         "homework": "Hausaufgaben hinzugefügt",
-        "code": "Stunden-Status ändert sich",
+        "code": "Stunden-Status Änderung",
         "rooms": "Raum Änderung",
         "teachers": "Lehrer Änderung",
         "cancelled": "Stunde ausfällt",
-        "lesson_change": "Stunde ausgetauscht"
+        "lesson_change": "Stunde ausgetauscht",
+        "lstext": "Stundentext Änderung",
+        "subject": "Fach Änderung"
       }
     },
     "timetable_source": {

@@ -173,7 +173,9 @@
         "rooms": "Room changed",
         "teachers": "Teacher changed",
         "cancelled": "Lesson is cancelled",
-        "lesson_change": "Lesson was swapped"
+        "lesson_change": "Lesson was swapped",
+        "lstext": "Lesson text changed",
+        "subject": "Subject changed"
       }
     },
     "timetable_source": {
