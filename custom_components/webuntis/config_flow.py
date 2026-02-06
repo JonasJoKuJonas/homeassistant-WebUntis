@@ -496,6 +496,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "invalid_subjects",
                         default=self._config_entry.options.get("invalid_subjects"),
                     ): selector.BooleanSelector(),
+                    vol.Optional(
+                        "exclude_filter_comparison",
+                        default=self._config_entry.options.get("exclude_filter_comparison"),
+                    ): selector.BooleanSelector(),
                 }
             ),
         )

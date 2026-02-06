@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 18
+CONFIG_ENTRY_VERSION = 19
 
 DEFAULT_OPTIONS = {
     "lesson_long_name": True,
@@ -18,9 +18,19 @@ DEFAULT_OPTIONS = {
     "calendar_show_room_change": False,
     "notify_config": {},
     "invalid_subjects": False,
+    "exclude_filter_comparison": False
 }
 
-NOTIFY_OPTIONS = ["homework", "cancelled", "rooms", "lesson_change", "teachers", "code"]
+NOTIFY_OPTIONS = [
+    "homework",
+    "cancelled",
+    "rooms",
+    "lesson_change",
+    "teachers",
+    "code",
+    "lstext",
+    "subject",
+]
 
 TEMPLATE_OPTIONS = ["message_title", "message", "discord", "telegram"]
 

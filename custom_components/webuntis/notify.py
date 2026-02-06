@@ -3,86 +3,122 @@ from .const import TEMPLATE_OPTIONS
 from .utils.web_untis import get_lesson_name_str, get_lesson_name
 
 
-def compare_list(old_list, new_list, blacklist=[]):
+def compare_timetables(old_timetable, new_timetable) -> list:
     updated_items = []
+    
+    # Create a dictionary for lookup of old lessons
+    # Using (lsnumber, start) as the key for matching
+    old_lessons_map = {
+        (lesson["lsnumber"], lesson["start"]): lesson 
+        for lesson in old_timetable
+    }
+    
+    for new_lesson in new_timetable:
+        # Look up the corresponding old lesson using the key
+        key = (new_lesson["lsnumber"], new_lesson["start"])
+        
+        if key not in old_lessons_map:
+            continue
+        
+        old_lesson = old_lessons_map[key]
+        
+        # if compared lessons are the same
+        if new_lesson == old_lesson:
+            continue
 
-    for new_item in new_list:
-        for old_item in old_list:
+        checked_fields = [
+            "rooms",
+            "subject_id",
+            "teachers",
+            "lstext",
+            "code",
+        ]
+
+        # compare lesson rooms
+        if (
+            (
+                "rooms" in new_lesson
+                and "rooms" in old_lesson
+                and new_lesson["rooms"]
+                and old_lesson["rooms"]
+                and new_lesson["rooms"] != old_lesson["rooms"] 
+            ) or (
+                "rooms" not in new_lesson
+                and "rooms" in old_lesson
+                and old_lesson["rooms"]
+            )
+        ):
+            updated_items.append(["rooms", new_lesson, old_lesson])
+
+        # compare lesson subject
+        if (
+            "subject_id" in new_lesson
+            and "subject_id" in old_lesson
+            and new_lesson["subject_id"]
+            and old_lesson["subject_id"]
+            and new_lesson["subject_id"] != old_lesson["subject_id"]
+        ):
+            updated_items.append(["subject", new_lesson, old_lesson])
+
+        # compare lesson teachers
+        if (
+            (
+                "teachers" in new_lesson
+                and "teachers" in old_lesson
+                and new_lesson["teachers"]
+                and old_lesson["teachers"]
+                and new_lesson["teachers"] != old_lesson["teachers"]
+            ) or (
+                "teachers" not in new_lesson
+                and "teachers" in old_lesson
+                and old_lesson["teachers"]
+            )
+        ):
+            updated_items.append(["teachers", new_lesson, old_lesson])
+
+        # compare lesson text
+        if (
+            (
+                "lstext" in new_lesson
+                and "lstext" in old_lesson
+                and new_lesson["lstext"]  # could be "Vtr. ohne Lehrer"
+                and old_lesson["lstext"]
+                and new_lesson["lstext"] != old_lesson["lstext"]
+            ) or (
+                "lstext" in new_lesson
+                and "lstext" not in old_lesson
+                and new_lesson["lstext"]
+            )
+        ):
+            updated_items.append(["lstext", new_lesson, old_lesson])
+
+        # compare lesson code
+        if new_lesson["code"] != old_lesson["code"]:
             if (
-                new_item["subject_id"] == old_item["subject_id"]
-                and new_item["start"] == old_item["start"]
-                and not (
-                    new_item["code"] == "irregular" and old_item["code"] == "cancelled"
-                )
+                old_lesson["code"] == "None"
+                and new_lesson["code"] == "cancelled"
             ):
-                # if lesson is on blacklist to prevent spaming notifications
-                if any(
-                    item["subject_id"] == new_item["subject_id"]
-                    and item["start"] == new_item["start"]
-                    for item in blacklist
-                ):
-                    break
+                updated_items.append(["cancelled", new_lesson, old_lesson])
+            elif (
+                old_lesson["code"] == "None"
+                and new_lesson["code"] == "irregular"
+            ):
+                updated_items.append(["lesson_change", new_lesson, old_lesson])
+            else:
+                updated_items.append(["code", new_lesson, old_lesson])
 
-                if new_item["code"] != old_item["code"]:
-                    if old_item["code"] == "None" and new_item["code"] == "cancelled":
-                        matching_item = next(
-                            (
-                                item
-                                for item in new_list
-                                if item["start"] == new_item["start"]
-                                and item["subject_id"] != new_item["subject_id"]
-                                and item["code"] == "irregular"
-                            ),
-                            None,
-                        )
+        # Check if other keys (that are not in checked_fields) have changed
+        other_fields_changed = [
+            key
+            for key in new_lesson
+            if key not in checked_fields
+            and new_lesson.get(key) != old_lesson.get(key)
+        ]
 
-                        if matching_item is not None:
-                            updated_items.append(
-                                ["lesson_change", matching_item, old_item]
-                            )
-                        else:
-                            updated_items.append(["cancelled", new_item, old_item])
-                    else:
-                        updated_items.append(["code", new_item, old_item])
-
-                if (
-                    "rooms" in new_item
-                    and "rooms" in old_item
-                    and new_item["rooms"]
-                    and old_item["rooms"]
-                    and new_item["rooms"] != old_item["rooms"]
-                    and new_item["code"] != "cancelled"
-                ):
-                    updated_items.append(["rooms", new_item, old_item])
-
-                if (
-                    "teachers" in new_item
-                    and "teachers" in old_item
-                    and new_item["teachers"]
-                    and old_item["teachers"]
-                    and new_item["teachers"] != old_item["teachers"]
-                    and new_item["code"] != "cancelled"
-                    or "teachers" not in new_item
-                    and "teachers" in old_item
-                    and old_item["teachers"]
-                    and new_item["code"] != "cancelled"
-                ):
-                    updated_items.append(["teachers", new_item, old_item])
-
-                break
+        if other_fields_changed:
+            updated_items.append(["lesson_change", new_lesson, old_lesson])
 
     return updated_items
-
-
-def get_notify_blacklist(current_list):
-    blacklist = []
-
-    for item in compare_list(current_list, current_list):
-        blacklist.append(
-            {"subject_id": item[1]["subject_id"], "start": item[1]["start"]}
-        )
-
-    return blacklist
 
 
 def get_notification_data(changes, service, entry_title):
@@ -113,7 +149,7 @@ New: {changes["new"]}"""
 
     if template == "telegram":
         message = f"""
-<b>WebUntis ({entry_title}) - {changes['title']}</b>
+<b>WebUntis ({entry_title}) - {changes["title"]}</b>
 <b>Subject:</b> {changes["subject"]}
 <b>Date:</b> {changes["date"]}
 <b>Time:</b> {changes["time_start"]} - {changes["time_end"]}"""
@@ -253,15 +289,30 @@ def get_changes(change, lesson, lesson_old, server):
     changes["old"] = None
     changes["new"] = None
 
-    if change == "cancelled":
-        pass
-    elif change == "lesson_change":
-        changes.update(
-            {
-                "old": lesson_old.get("subjects", [{}])[0].get("long_name", ""),
-                "new": lesson.get("subjects", [{}])[0].get("long_name", ""),
-            }
-        )
+    if change == "lesson_change":
+        # lesson_change can include dynamic fields
+        fields = lesson.get("other_fields_changed")
+        if not fields:
+            checked = ["rooms", "subject_id", "teachers", "lstext", "code"]
+            fields = [
+                key
+                for key in lesson
+                if key not in checked and lesson.get(key) != lesson_old.get(key)
+            ]
+
+        if fields:
+            changes["old"] = ", ".join(str(lesson_old.get(f, "")) for f in fields)
+            changes["new"] = ", ".join(str(lesson.get(f, "")) for f in fields)
+        else:
+            changes["old"] = ""
+            changes["new"] = ""
+
+    elif change == "subject":
+        changes["old"] = lesson_old.get("subjects", [{}])[0].get("long_name", "")
+        changes["new"] = lesson.get("subjects", [{}])[0].get("long_name", "")
+    elif change == "lstext":
+        changes["old"] = lesson_old.get("lstext", "")
+        changes["new"] = lesson.get("lstext", "")
     elif change == "rooms":
         changes.update(
             {
