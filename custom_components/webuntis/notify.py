@@ -108,17 +108,6 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         return updated_items
 
 
-def get_notify_blacklist(current_list):
-    blacklist = []
-
-    for item in compare_timetables(current_list, current_list):
-        blacklist.append(
-            {"subject_id": item[1]["subject_id"], "start": item[1]["start"]}
-        )
-
-    return blacklist
-
-
 def get_notification_data(changes, service, entry_title):
 
     message = ""
