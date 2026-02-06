@@ -21,7 +21,16 @@ DEFAULT_OPTIONS = {
     "exclude_filter_comparison": False
 }
 
-NOTIFY_OPTIONS = ["homework", "cancelled", "rooms", "lesson_change", "teachers", "code"]
+NOTIFY_OPTIONS = [
+    "homework",
+    "cancelled",
+    "rooms",
+    "lesson_change",
+    "teachers",
+    "code",
+    "lstext",
+    "subject",
+]
 
 TEMPLATE_OPTIONS = ["message_title", "message", "discord", "telegram"]
 
