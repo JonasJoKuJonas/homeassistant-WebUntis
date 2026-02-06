@@ -66,14 +66,18 @@ def compare_timetables(old_timetable, new_timetable) -> list:
 
                     # compare lesson text
                     if (
-                        "lstext" in new_lesson
-                        and "lstext" in old_lesson
-                        and new_lesson["lstext"]  # could be "Vtr. ohne Lehrer"
-                        and old_lesson["lstext"]
-                        and new_lesson["lstext"] != old_lesson["lstext"]
-                        or "lstext" in new_lesson
-                        and "lstext" not in old_lesson
-                        and new_lesson["teachers"]
+                        (
+                            "lstext" in new_lesson
+                            and "lstext" in old_lesson
+                            and new_lesson["lstext"]  # could be "Vtr. ohne Lehrer"
+                            and old_lesson["lstext"]
+                            and new_lesson["lstext"] != old_lesson["lstext"]
+                        )
+                        or (
+                            "lstext" in new_lesson
+                            and "lstext" not in old_lesson
+                            and new_lesson["lstext"]
+                        )
                     ):
                         updated_items.append(["lstext", new_lesson, old_lesson])
 
