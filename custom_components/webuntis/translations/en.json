@@ -174,14 +174,9 @@
         "teachers": "Teacher changed",
         "cancelled": "Lesson is cancelled",
         "lesson_change": "Lesson was swapped",
-<<<<<<< HEAD
         "subject": "Subject changed",
         "lstext": "Lesson text changed",
         "info":"Info text changed"
-=======
-        "lstext": "Lesson text changed",
-        "subject": "Subject changed"
->>>>>>> f22ec88bad15ec2461f03db08bda2883fde826ac
       }
     },
     "timetable_source": {
