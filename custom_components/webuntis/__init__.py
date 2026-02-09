@@ -825,7 +825,7 @@ class WebUntis:
                         event["description"] = " ".join(description)
                     elif self.calendar_description == "class_name_short":
                         event["description"] = ", ".join(k.name for k in lesson.klassen)
-                    elif self.calendar_description == "class_ame_long":
+                    elif self.calendar_description == "class_name_long":
                         event["description"] = ", ".join(
                             k.long_name for k in lesson.klassen
                         )
