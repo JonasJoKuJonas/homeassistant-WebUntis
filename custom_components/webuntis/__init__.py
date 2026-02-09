@@ -815,7 +815,14 @@ class WebUntis:
                     if self.calendar_description == "json":
                         event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "lesson_info":
-                        event["description"] = str(lesson.lstext or lesson.substText)
+                        description = []
+                        if lesson.info:
+                            description.append(str(lesson.info))
+                        if lesson.lstext:
+                            description.append(str(lesson.lstext))
+                        if lesson.substText:
+                            description.append(str(lesson.substText))
+                        event["description"] = " ".join(description)
                     elif self.calendar_description == "class_name_short":
                         event["description"] = ", ".join(k.name for k in lesson.klassen)
                     elif self.calendar_description == "class_ame_long":
@@ -990,7 +997,7 @@ class WebUntis:
         except:
             pass
         try:
-            dic["info"] = int(lesson.info)
+            dic["info"] = str(lesson.info)
         except:
             pass
         try:
