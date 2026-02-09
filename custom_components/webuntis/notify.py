@@ -333,9 +333,6 @@ def get_changes(change, lesson, lesson_old, server):
     elif change == "lstext":
         changes["old"] = lesson_old.get("lstext", "")
         changes["new"] = lesson.get("lstext", "")
-    elif change == "subject":
-        changes["old"] = lesson_old.get("subject", "")
-        changes["new"] = lesson.get("subject", "")
     elif change == "info":
         changes["old"] = lesson_old.get("info", "")
         changes["new"] = lesson.get("info", "")
