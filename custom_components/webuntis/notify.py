@@ -321,8 +321,8 @@ def get_changes(change, lesson, lesson_old, server):
             ]
 
         if fields:
-            changes["old"] = ", ".join(str(lesson_old.get(f, "")) for f in fields)
-            changes["new"] = ", ".join(str(lesson.get(f, "")) for f in fields)
+            changes["old"] = ", ".join(f"{f}={lesson_old.get(f, '')}" for f in fields)
+            changes["new"] = ", ".join(f"{f}={lesson.get(f, '')}" for f in fields)
         else:
             changes["old"] = ""
             changes["new"] = ""
