@@ -32,6 +32,7 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             "teachers",
             "lstext",
             "code",
+            "info",
         ]
 
         # compare lesson rooms
@@ -91,6 +92,22 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             )
         ):
             updated_items.append(["lstext", new_lesson, old_lesson])
+        
+        # compare lesson info (text that the teacher wrote for students)
+        if (
+            (
+                "info" in new_lesson
+                and "info" in old_lesson
+                and new_lesson["info"]
+                and old_lesson["info"]
+                and new_lesson["info"] != old_lesson["info"]
+            ) or (
+                "info" in new_lesson
+                and "info" not in old_lesson
+                and new_lesson["info"]
+            )
+        ):
+            updated_items.append(["info", new_lesson, old_lesson])
 
         # compare lesson code
         if new_lesson["code"] != old_lesson["code"]:
@@ -278,6 +295,9 @@ def get_changes(change, lesson, lesson_old, server):
         "cancelled": "Lesson cancelled",
         "lesson_change": "Lesson changed",
         "teachers": "Teacher changed",
+        "lstext": "Lesson text changed",
+        "subject": "Subject changed",
+        "info": "Info text changed"
     }[change]
 
     changes["subject"] = get_lesson_name(server, lesson)
@@ -313,6 +333,12 @@ def get_changes(change, lesson, lesson_old, server):
     elif change == "lstext":
         changes["old"] = lesson_old.get("lstext", "")
         changes["new"] = lesson.get("lstext", "")
+    elif change == "subject":
+        changes["old"] = lesson_old.get("subject", "")
+        changes["new"] = lesson.get("subject", "")
+    elif change == "info":
+        changes["old"] = lesson_old.get("info", "")
+        changes["new"] = lesson.get("info", "")
     elif change == "rooms":
         changes.update(
             {
