@@ -172,8 +172,11 @@
         "code": "Stunden-Status ändert sich",
         "rooms": "Raum Änderung",
         "teachers": "Lehrer Änderung",
-        "cancelled": "Stunde ausfällt",
-        "lesson_change": "Stunde ausgetauscht"
+        "cancelled": "Stunde fällt aus",
+        "lesson_change": "Stunde ausgetauscht",
+        "subject": "Fach Änderung",
+        "lstext": "Stundentext Änderung",
+        "info": "Stundeninfo Änderung"
       }
     },
     "timetable_source": {
@@ -328,7 +331,8 @@
               "cancelled": "Stundenausfall",
               "lesson_change": "Stundenänderung",
               "lstext": "Stundentext Änderung",
-              "subject": "Fach Änderung"
+              "subject": "Fach Änderung",
+              "info": "Info-Text Änderung"
             }
           }
         }

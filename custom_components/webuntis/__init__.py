@@ -974,7 +974,7 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson, force=False, output_str=True) -> str:
+    def get_lesson_json(self, lesson, force=False, output_str=True) -> str | dict:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
@@ -987,6 +987,10 @@ class WebUntis:
             dic["end"] = lesson.end.astimezone()
         try:
             dic["id"] = int(lesson.id)
+        except:
+            pass
+        try:
+            dic["info"] = int(lesson.info)
         except:
             pass
         try:
@@ -1072,7 +1076,7 @@ class WebUntis:
             return str(json.dumps(dic))
         return dic
 
-    def get_lesson_for_notify(self, lesson) -> str:
+    def get_lesson_for_notify(self, lesson) -> dict:
         """returns info about for notify test"""
         dic = {}
 
@@ -1092,6 +1096,14 @@ class WebUntis:
 
         try:
             dic["code"] = str(lesson.code)
+        except:
+            pass
+        try:
+            dic["info"] = str(lesson.info)
+        except:
+            pass
+        try:
+            dic["lstext"] = str(lesson.lstext)
         except:
             pass
         try:
