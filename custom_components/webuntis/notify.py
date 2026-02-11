@@ -344,8 +344,16 @@ def get_changes(change, lesson, lesson_old, server):
             changes["new"] = ""
 
     elif change == "subject":
-        changes["old"] = lesson_old.get("subjects", [{}])[0].get("long_name", "")
-        changes["new"] = lesson.get("subjects", [{}])[0].get("long_name", "")
+        old_subjects = lesson_old.get("subjects")
+        if old_subjects and len(old_subjects) > 0:
+            changes["old"] = old_subjects[0].get("long_name", "")
+        else:
+            changes["old"] = ""
+        new_subjects = lesson.get("subjects")
+        if new_subjects and len(new_subjects) > 0:
+            changes["new"] = new_subjects[0].get("long_name", "")
+        else:
+            changes["new"] = ""
     elif change == "lstext":
         changes["old"] = lesson_old.get("lstext", "")
         changes["new"] = lesson.get("lstext", "")
