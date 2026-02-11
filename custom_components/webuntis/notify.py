@@ -89,6 +89,10 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                 "lstext" in new_lesson
                 and "lstext" not in old_lesson
                 and new_lesson["lstext"]
+            ) or (
+                "lstext" not in new_lesson
+                and "lstext" in old_lesson
+                and old_lesson["lstext"]
             )
         ):
             updated_items.append(["lstext", new_lesson, old_lesson])
@@ -105,6 +109,15 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                 "info" in new_lesson
                 and "info" not in old_lesson
                 and new_lesson["info"]
+            ) or (
+                "info" not in new_lesson
+                and "info" in old_lesson
+                and old_lesson["info"]
+            ) or (
+                "info" in new_lesson
+                and "info" in old_lesson
+                and not new_lesson["info"]
+                and old_lesson["info"]
             )
         ):
             updated_items.append(["info", new_lesson, old_lesson])
