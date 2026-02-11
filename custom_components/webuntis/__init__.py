@@ -994,19 +994,19 @@ class WebUntis:
             dic["end"] = lesson.end.astimezone()
         try:
             dic["id"] = int(lesson.id)
-        except:
+        except Exception:
             pass
         try:
             dic["info"] = str(lesson.info)
-        except:
+        except Exception:
             pass
         try:
             dic["code"] = str(lesson.code)
-        except:
+        except Exception:
             pass
         try:
             dic["type"] = str(lesson.type)
-        except:
+        except Exception:
             pass
         try:
             dic["subjects"] = [
@@ -1017,20 +1017,20 @@ class WebUntis:
                 }
                 for subject in lesson.subjects
             ]
-        except:
+        except Exception:
             pass
 
         try:
             dic["lstext"] = str(lesson.lstext)
-        except:
+        except Exception:
             pass
         try:
             dic["substText"] = str(lesson.substText)
-        except:
+        except Exception:
             pass
         try:
             dic["lsnumber"] = str(lesson.lsnumber)
-        except:
+        except Exception:
             pass
 
         try:
@@ -1038,21 +1038,21 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except:
+        except Exception:
             pass
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except:
+        except Exception:
             pass
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except:
+        except Exception:
             pass
 
         if "teachers" not in self.exclude_data:
@@ -1095,7 +1095,7 @@ class WebUntis:
             subjects = getattr(lesson, "subjects", [])
             if subjects:  # nur wenn nicht leer
                 dic["subject_id"] = subjects[0].id
-        except:
+        except Exception:
             pass
 
         dic["id"] = int(lesson.id)
@@ -1103,26 +1103,26 @@ class WebUntis:
 
         try:
             dic["code"] = str(lesson.code)
-        except:
+        except Exception:
             pass
         try:
             dic["info"] = str(lesson.info)
-        except:
+        except Exception:
             pass
         try:
             dic["lstext"] = str(lesson.lstext)
-        except:
+        except Exception:
             pass
         try:
             dic["type"] = str(lesson.type)
-        except:
+        except Exception:
             pass
         try:
             dic["subjects"] = [
                 {"name": str(subject.name), "long_name": str(subject.long_name)}
                 for subject in lesson.subjects
             ]
-        except:
+        except Exception:
             pass
 
         try:
@@ -1130,7 +1130,7 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except:
+        except Exception:
             pass
 
         try:
@@ -1138,7 +1138,7 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except:
+        except Exception:
             pass
 
         if "teachers" not in self.exclude_data:
