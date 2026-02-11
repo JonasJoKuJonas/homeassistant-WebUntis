@@ -1,5 +1,6 @@
 """Miscellaneous support functions for webuntis"""
 
+import copy
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,7 +52,9 @@ def compact_list(list, type=None):
                     last_item[2]["end"] = item[2]["end"]
                     i += 1
                     continue
-            compacted_list.append(item)
+            compacted_list.append(
+                [item[0], copy.deepcopy(item[1]), copy.deepcopy(item[2])]
+            )
             i += 1
 
     elif type == "dict":
@@ -70,7 +73,7 @@ def compact_list(list, type=None):
 
                     i += 1
                     continue
-            compacted_list.append(item)
+            compacted_list.append(copy.deepcopy(item))
             i += 1
 
     else:  # calendar
@@ -85,7 +88,7 @@ def compact_list(list, type=None):
 
                     i += 1
                     continue
-            compacted_list.append(item)
+            compacted_list.append(copy.deepcopy(item))
             i += 1
 
     return compacted_list
