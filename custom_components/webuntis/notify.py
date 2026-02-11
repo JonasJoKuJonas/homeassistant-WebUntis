@@ -29,6 +29,7 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         checked_fields = [
             "rooms",
             "subject_id",
+            "subjects",
             "teachers",
             "lstext",
             "code",
@@ -36,20 +37,21 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         ]
 
         # compare lesson rooms
-        if (
-            (
-                "rooms" in new_lesson
-                and "rooms" in old_lesson
-                and new_lesson["rooms"]
-                and old_lesson["rooms"]
-                and new_lesson["rooms"] != old_lesson["rooms"] 
-            ) or (
-                "rooms" not in new_lesson
-                and "rooms" in old_lesson
-                and old_lesson["rooms"]
-            )
-        ):
-            updated_items.append(["rooms", new_lesson, old_lesson])
+        if new_lesson.get("code", "None") != "cancelled":
+            if (
+                (
+                    "rooms" in new_lesson
+                    and "rooms" in old_lesson
+                    and new_lesson["rooms"]
+                    and old_lesson["rooms"]
+                    and new_lesson["rooms"] != old_lesson["rooms"] 
+                ) or (
+                    "rooms" not in new_lesson
+                    and "rooms" in old_lesson
+                    and old_lesson["rooms"]
+                )
+            ):
+                updated_items.append(["rooms", new_lesson, old_lesson])
 
         # compare lesson subject
         if (
@@ -62,20 +64,21 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             updated_items.append(["subject", new_lesson, old_lesson])
 
         # compare lesson teachers
-        if (
-            (
-                "teachers" in new_lesson
-                and "teachers" in old_lesson
-                and new_lesson["teachers"]
-                and old_lesson["teachers"]
-                and new_lesson["teachers"] != old_lesson["teachers"]
-            ) or (
-                "teachers" not in new_lesson
-                and "teachers" in old_lesson
-                and old_lesson["teachers"]
-            )
-        ):
-            updated_items.append(["teachers", new_lesson, old_lesson])
+        if new_lesson.get("code", "None") != "cancelled":
+            if (
+                (
+                    "teachers" in new_lesson
+                    and "teachers" in old_lesson
+                    and new_lesson["teachers"]
+                    and old_lesson["teachers"]
+                    and new_lesson["teachers"] != old_lesson["teachers"]
+                ) or (
+                    "teachers" not in new_lesson
+                    and "teachers" in old_lesson
+                    and old_lesson["teachers"]
+                )
+            ):
+                updated_items.append(["teachers", new_lesson, old_lesson])
 
         # compare lesson text
         if (
@@ -123,7 +126,7 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             updated_items.append(["info", new_lesson, old_lesson])
 
         # compare lesson code
-        if new_lesson["code"] != old_lesson["code"]:
+        if new_lesson.get("code", "None") != old_lesson.get("code", "None"):
             if (
                 old_lesson["code"] == "None"
                 and new_lesson["code"] == "cancelled"
