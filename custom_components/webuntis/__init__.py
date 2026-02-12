@@ -1046,8 +1046,8 @@ class WebUntis:
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except Exception:
-            pass
+        except Exception as err:
+            _LOGGER.debug("Unable to populate 'klassen' for lesson %s: %s", lesson, err)
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}

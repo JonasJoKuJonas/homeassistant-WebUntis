@@ -126,16 +126,13 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             updated_items.append(["info", new_lesson, old_lesson])
 
         # compare lesson code
-        if new_lesson.get("code", "None") != old_lesson.get("code", "None"):
-            if (
-                old_lesson["code"] == "None"
-                and new_lesson["code"] == "cancelled"
-            ):
+        old_code = old_lesson.get("code", "None")
+        new_code = new_lesson.get("code", "None")
+
+        if new_code != old_code:
+            if old_code == "None" and new_code == "cancelled":
                 updated_items.append(["cancelled", new_lesson, old_lesson])
-            elif (
-                old_lesson["code"] == "None"
-                and new_lesson["code"] == "irregular"
-            ):
+            elif old_code == "None" and new_code == "irregular":
                 updated_items.append(["lesson_change", new_lesson, old_lesson])
             else:
                 updated_items.append(["code", new_lesson, old_lesson])
