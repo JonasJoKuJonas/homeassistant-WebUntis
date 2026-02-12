@@ -785,9 +785,10 @@ class WebUntis:
         self.unfiltered_event_list = []
 
         for lesson in table:
-            self.unfiltered_event_list.append(self.get_lesson_for_notify(lesson))
+            notify_dict = self.get_lesson_for_notify(lesson)
+            self.unfiltered_event_list.append(notify_dict)
             if self.check_lesson(lesson, ignor_cancelled=True):
-                self.event_list.append(self.get_lesson_for_notify(lesson))
+                self.event_list.append(notify_dict)
 
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
