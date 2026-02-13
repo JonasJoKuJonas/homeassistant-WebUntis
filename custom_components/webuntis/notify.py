@@ -81,48 +81,15 @@ def compare_timetables(old_timetable, new_timetable) -> list:
                 updated_items.append(["teachers", new_lesson, old_lesson])
 
         # compare lesson text
-        if (
-            (
-                "lstext" in new_lesson
-                and "lstext" in old_lesson
-                and new_lesson["lstext"]  # could be "Vtr. ohne Lehrer"
-                and old_lesson["lstext"]
-                and new_lesson["lstext"] != old_lesson["lstext"]
-            ) or (
-                "lstext" in new_lesson
-                and "lstext" not in old_lesson
-                and new_lesson["lstext"]
-            ) or (
-                "lstext" not in new_lesson
-                and "lstext" in old_lesson
-                and old_lesson["lstext"]
-            )
-        ):
+        old_lstext = old_lesson.get("lstext", "") or ""
+        new_lstext = new_lesson.get("lstext", "") or ""
+        if new_lstext != old_lstext:
             updated_items.append(["lstext", new_lesson, old_lesson])
         
         # compare lesson info (text that the teacher wrote for students)
-        if (
-            (
-                "info" in new_lesson
-                and "info" in old_lesson
-                and new_lesson["info"]
-                and old_lesson["info"]
-                and new_lesson["info"] != old_lesson["info"]
-            ) or (
-                "info" in new_lesson
-                and "info" not in old_lesson
-                and new_lesson["info"]
-            ) or (
-                "info" not in new_lesson
-                and "info" in old_lesson
-                and old_lesson["info"]
-            ) or (
-                "info" in new_lesson
-                and "info" in old_lesson
-                and not new_lesson["info"]
-                and old_lesson["info"]
-            )
-        ):
+        old_info = old_lesson.get("info", "") or ""
+        new_info = new_lesson.get("info", "") or ""
+        if new_info != old_info:
             updated_items.append(["info", new_lesson, old_lesson])
 
         # compare lesson code
