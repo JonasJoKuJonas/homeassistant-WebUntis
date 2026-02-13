@@ -83,11 +83,13 @@
           "filter_mode": "Fächer Filter",
           "filter_subjects": "Fächer Filter - Fächer",
           "filter_description": "Fächer Filter - Beschreibung",
-          "invalid_subjects": "Kein Fach"
+          "invalid_subjects": "Kein Fach",
+          "exclude_filter_comparison": "Stunden für Benachrichtigungen und Events nicht filtern"
         },
         "data_description": {
           "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste) \nWird nicht von Black/Whitelist beeinflusst.",
-          "invalid_subjects": "Erlaube Stunden ohne Fach"
+          "invalid_subjects": "Erlaube Stunden ohne Fach",
+          "exclude_filter_comparison": "Dadurch können Events und Benachrichtigungen auch bei Änderungen von gefilterten Stunden ausgelöst werden."
         }
       },
       "lesson": {
@@ -167,11 +169,14 @@
     "notify_options": {
       "options": {
         "homework": "Hausaufgaben hinzugefügt",
-        "code": "Stunden-Status ändert sich",
+        "code": "Stunden-Status Änderung",
         "rooms": "Raum Änderung",
         "teachers": "Lehrer Änderung",
-        "cancelled": "Stunde ausfällt",
-        "lesson_change": "Stunde ausgetauscht"
+        "cancelled": "Stunde fällt aus",
+        "lesson_change": "Stunde ausgetauscht",
+        "subject": "Fach Änderung",
+        "lstext": "Stundentext Änderung",
+        "info": "Stundeninfo Änderung"
       }
     },
     "timetable_source": {
@@ -320,11 +325,14 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "code": "Stunden-Status geändert",
+              "code": "Stunden-Status Änderung",
               "rooms": "Raum Änderung",
               "teachers": "Lehrer Änderung",
-              "cancelled": "Stunde fällt aus",
-              "lesson_change": "Stunde ausgetauscht"
+              "cancelled": "Stundenausfall",
+              "lesson_change": "Stundenänderung",
+              "lstext": "Stundentext Änderung",
+              "subject": "Fach Änderung",
+              "info": "Info-Text Änderung"
             }
           }
         }

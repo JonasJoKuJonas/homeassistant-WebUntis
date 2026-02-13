@@ -193,6 +193,7 @@ class WebUntis:
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
+        self.exclude_filter_comparison = config.options["exclude_filter_comparison"]
 
         self.exclude_data = config.options["exclude_data"]
         self.exclude_data_run = []
@@ -243,7 +244,9 @@ class WebUntis:
         self.subjects = []
 
         self.event_list = []
+        self.unfiltered_event_list = []
         self.event_list_old = []
+        self.unfiltered_event_list_old = []
 
         # Dispatcher signal name
         self.signal_name = f"{SIGNAL_NAME_PREFIX}_{self.unique_id}"
@@ -779,10 +782,13 @@ class WebUntis:
 
         event_list = []
         self.event_list = []
+        self.unfiltered_event_list = []
 
         for lesson in table:
+            notify_dict = self.get_lesson_for_notify(lesson)
+            self.unfiltered_event_list.append(notify_dict)
             if self.check_lesson(lesson, ignor_cancelled=True):
-                self.event_list.append(self.get_lesson_for_notify(lesson))
+                self.event_list.append(notify_dict)
 
             if self.check_lesson(
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
@@ -810,10 +816,17 @@ class WebUntis:
                     if self.calendar_description == "json":
                         event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "lesson_info":
-                        event["description"] = str(lesson.lstext or lesson.substText)
+                        description = []
+                        if lesson.info:
+                            description.append(str(lesson.info))
+                        if lesson.lstext:
+                            description.append(str(lesson.lstext))
+                        if lesson.substText:
+                            description.append(str(lesson.substText))
+                        event["description"] = " ".join(description)
                     elif self.calendar_description == "class_name_short":
                         event["description"] = ", ".join(k.name for k in lesson.klassen)
-                    elif self.calendar_description == "class_ame_long":
+                    elif self.calendar_description == "class_name_long":
                         event["description"] = ", ".join(
                             k.long_name for k in lesson.klassen
                         )
@@ -969,7 +982,7 @@ class WebUntis:
         return True
 
     # pylint: disable=bare-except
-    def get_lesson_json(self, lesson, force=False, output_str=True) -> str:
+    def get_lesson_json(self, lesson, force=False, output_str=True) -> str | dict:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):
             return "JSON data is disabled - activate it in the options"
@@ -982,15 +995,19 @@ class WebUntis:
             dic["end"] = lesson.end.astimezone()
         try:
             dic["id"] = int(lesson.id)
-        except:
+        except Exception:
+            pass
+        try:
+            dic["info"] = str(lesson.info)
+        except Exception:
             pass
         try:
             dic["code"] = str(lesson.code)
-        except:
+        except Exception:
             pass
         try:
             dic["type"] = str(lesson.type)
-        except:
+        except Exception:
             pass
         try:
             dic["subjects"] = [
@@ -1001,20 +1018,20 @@ class WebUntis:
                 }
                 for subject in lesson.subjects
             ]
-        except:
+        except Exception:
             pass
 
         try:
             dic["lstext"] = str(lesson.lstext)
-        except:
+        except Exception:
             pass
         try:
             dic["substText"] = str(lesson.substText)
-        except:
+        except Exception:
             pass
         try:
             dic["lsnumber"] = str(lesson.lsnumber)
-        except:
+        except Exception:
             pass
 
         try:
@@ -1022,21 +1039,21 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except:
+        except Exception:
             pass
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except:
-            pass
+        except Exception as err:
+            _LOGGER.debug("Unable to populate 'klassen' for lesson %s: %s", lesson, err)
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except:
+        except Exception:
             pass
 
         if "teachers" not in self.exclude_data:
@@ -1067,7 +1084,7 @@ class WebUntis:
             return str(json.dumps(dic))
         return dic
 
-    def get_lesson_for_notify(self, lesson) -> str:
+    def get_lesson_for_notify(self, lesson) -> dict:
         """returns info about for notify test"""
         dic = {}
 
@@ -1079,7 +1096,7 @@ class WebUntis:
             subjects = getattr(lesson, "subjects", [])
             if subjects:  # nur wenn nicht leer
                 dic["subject_id"] = subjects[0].id
-        except:
+        except Exception:
             pass
 
         dic["id"] = int(lesson.id)
@@ -1087,18 +1104,26 @@ class WebUntis:
 
         try:
             dic["code"] = str(lesson.code)
-        except:
+        except Exception:
+            pass
+        try:
+            dic["info"] = str(lesson.info)
+        except Exception:
+            pass
+        try:
+            dic["lstext"] = str(lesson.lstext)
+        except Exception:
             pass
         try:
             dic["type"] = str(lesson.type)
-        except:
+        except Exception:
             pass
         try:
             dic["subjects"] = [
                 {"name": str(subject.name), "long_name": str(subject.long_name)}
                 for subject in lesson.subjects
             ]
-        except:
+        except Exception:
             pass
 
         try:
@@ -1106,7 +1131,7 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except:
+        except Exception:
             pass
 
         try:
@@ -1114,7 +1139,7 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except:
+        except Exception:
             pass
 
         if "teachers" not in self.exclude_data:
@@ -1158,16 +1183,20 @@ class WebUntis:
 
         if not self.event_list_old:
             self.event_list_old = self.event_list
+            self.unfiltered_event_list_old = self.unfiltered_event_list
             return
 
-        blacklist = get_notify_blacklist(self.event_list)
-
-        updated_items = compare_list(
-            self.event_list_old, self.event_list, blacklist=blacklist
-        )
+        if self.exclude_filter_comparison:
+            updated_items = compare_timetables(
+                self.unfiltered_event_list_old, self.unfiltered_event_list
+            )
+        else:
+            updated_items = compare_timetables(
+                self.event_list_old, self.event_list
+            )
 
         if updated_items:
-            _LOGGER.debug("Timetable has chaged!")
+            _LOGGER.debug("Timetable has changed!")
             _LOGGER.debug(updated_items)
 
             for change, lesson, lesson_old in updated_items:
@@ -1212,6 +1241,7 @@ class WebUntis:
                         _LOGGER.info(updated_items)
 
         self.event_list_old = self.event_list
+        self.unfiltered_event_list_old = self.unfiltered_event_list
 
 
 class WebUntisEntity(Entity):
