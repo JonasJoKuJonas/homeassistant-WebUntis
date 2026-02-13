@@ -104,12 +104,11 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             else:
                 updated_items.append(["code", new_lesson, old_lesson])
 
-        # Check if other keys (that are not in checked_fields) have changed
+        # Check if other keys (that are not in checked_fields) have changed, including removed fields
+        all_keys = set(new_lesson) | set(old_lesson)
         other_fields_changed = [
-            key
-            for key in new_lesson
-            if key not in checked_fields
-            and new_lesson.get(key) != old_lesson.get(key)
+            key for key in all_keys
+            if key not in checked_fields and new_lesson.get(key) != old_lesson.get(key)
         ]
 
         if other_fields_changed:
