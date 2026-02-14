@@ -75,7 +75,7 @@ class HomeworkEventsFetcher:
             date_assigned = datetime.strptime(str(date_assigned_int), "%Y%m%d").date()
             due_date = datetime.strptime(
                 str(due_date_int), "%Y%m%d"
-            ).date() + timedelta(days=1)
+            ).date()
 
             # Find the corresponding record to get the teacher ID
             record = next((rec for rec in records if rec["homeworkId"] == hw_id), None)
