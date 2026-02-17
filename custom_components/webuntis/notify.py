@@ -100,19 +100,9 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             if old_code == "None" and new_code == "cancelled":
                 updated_items.append(["cancelled", new_lesson, old_lesson])
             elif old_code == "None" and new_code == "irregular":
-                updated_items.append(["lesson_change", new_lesson, old_lesson])
+                updated_items.append(["code", new_lesson, old_lesson])
             else:
                 updated_items.append(["code", new_lesson, old_lesson])
-
-        # Check if other keys (that are not in checked_fields) have changed, including removed fields
-        all_keys = set(new_lesson) | set(old_lesson)
-        other_fields_changed = [
-            key for key in all_keys
-            if key not in checked_fields and new_lesson.get(key) != old_lesson.get(key)
-        ]
-
-        if other_fields_changed:
-            updated_items.append(["lesson_change", new_lesson, old_lesson])
 
     return updated_items
 
@@ -272,7 +262,6 @@ def get_changes(change, lesson, lesson_old, server):
         "code": "Status changed",
         "rooms": "Room changed",
         "cancelled": "Lesson cancelled",
-        "lesson_change": "Lesson changed",
         "teachers": "Teacher changed",
         "lstext": "Lesson text changed",
         "subject": "Subject changed",
@@ -288,25 +277,7 @@ def get_changes(change, lesson, lesson_old, server):
     changes["old"] = None
     changes["new"] = None
 
-    if change == "lesson_change":
-        # lesson_change can include dynamic fields
-        fields = lesson.get("other_fields_changed")
-        if not fields:
-            checked = ["rooms", "subject_id", "teachers", "lstext", "code"]
-            fields = [
-                key
-                for key in lesson
-                if key not in checked and lesson.get(key) != lesson_old.get(key)
-            ]
-
-        if fields:
-            changes["old"] = ", ".join(f"{f}={lesson_old.get(f, '')}" for f in fields)
-            changes["new"] = ", ".join(f"{f}={lesson.get(f, '')}" for f in fields)
-        else:
-            changes["old"] = ""
-            changes["new"] = ""
-
-    elif change == "subject":
+    if change == "subject":
         old_subjects = lesson_old.get("subjects")
         if old_subjects and len(old_subjects) > 0:
             changes["old"] = old_subjects[0].get("long_name", "")
