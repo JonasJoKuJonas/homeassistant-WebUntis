@@ -118,7 +118,7 @@ There can be different event_type's
 - info
 - lstext
 
-Available lesson chage Attributes
+Available lesson change Attributes
 
 ```yaml
 to_state:
