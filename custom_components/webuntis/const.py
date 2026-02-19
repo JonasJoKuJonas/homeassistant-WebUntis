@@ -25,7 +25,6 @@ NOTIFY_OPTIONS = [
     "homework",
     "cancelled",
     "rooms",
-    "lesson_change",
     "teachers",
     "code",
     "lstext",

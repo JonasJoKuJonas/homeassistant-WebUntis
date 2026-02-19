@@ -166,8 +166,7 @@
         "code": "Lesson status changed",
         "rooms": "Room changed",
         "teachers": "Teacher changed",
-        "cancelled": "Lesson is cancelled",
-        "lesson_change": "Lesson was swapped"
+        "cancelled": "Lesson is cancelled"
       }
     },
     "timetable_source": {
