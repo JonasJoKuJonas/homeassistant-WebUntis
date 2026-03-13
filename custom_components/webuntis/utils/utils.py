@@ -132,7 +132,13 @@ async def async_notify(hass, service_id, data):
     )
 
     try:
-        await hass.services.async_call(domain, service, service_data=data,  target=target_arg, blocking=True)
+        await hass.services.async_call(
+            domain,
+            service,
+            service_data=data,
+            target=target_arg,
+            blocking=True,
+        )
     except Exception as error:
         _LOGGER.warning(
             "Sending notification to %s failed - %s",
