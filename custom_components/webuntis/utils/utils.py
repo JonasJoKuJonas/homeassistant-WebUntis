@@ -106,15 +106,17 @@ async def async_notify(hass, service_id, data):
         del data["target"]
 
     if not isinstance(service_id, str) or "." not in service_id:
-        _LOGGER.warning(
-            "Invalid service_id %r; expected 'domain.service'", service_id
-        )
+        _LOGGER.warning("Invalid service_id %r; expected 'domain.service'", service_id)
         return False
 
     domain, service = service_id.split(".", 1)
 
     target_arg = None
     if domain == "notify" and service == "send_message":
+        nested = data.pop("data", None)
+        if isinstance(nested, dict):
+            for k, v in nested.items():
+                data.setdefault(k, v)
         # Move target out of the data payload and into the service target (required for notify.send_message)
         if "target" in data:
             raw_target = data.pop("target")
