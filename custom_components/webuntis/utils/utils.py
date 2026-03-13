@@ -105,6 +105,12 @@ async def async_notify(hass, service_id, data):
     if "target" in data and not data["target"]:
         del data["target"]
 
+    if not isinstance(service_id, str) or "." not in service_id:
+        _LOGGER.warning(
+            "Invalid service_id %r; expected 'domain.service'", service_id
+        )
+        return False
+
     domain, service = service_id.split(".", 1)
 
     target_arg = None
