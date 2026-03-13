@@ -23,7 +23,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
     async def async_call_webuntis_service(service_call: ServiceCall) -> None:
         """Call correct WebUntis service."""
 
-        entry_id = await async_extract_config_entry_ids(hass, service_call)
+        entry_id = await async_extract_config_entry_ids(service_call)
         config_entry = hass.config_entries.async_get_entry(list(entry_id)[0])
         webuntis_object = hass.data[DOMAIN][config_entry.unique_id]
 
@@ -34,7 +34,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             end_date = datetime.strptime(data["end"], "%Y-%m-%d")
 
             if end_date < start_date:
-                raise HomeAssistantError(f"Start date has to be bevor end date")
+                raise HomeAssistantError(f"Start date has to be before end date")
 
         await hass.async_add_executor_job(webuntis_object.webuntis_login)
 
