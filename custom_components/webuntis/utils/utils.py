@@ -109,13 +109,12 @@ async def async_notify(hass, service_id, data):
 
     target_arg = None
     if domain == "notify" and service == "send_message":
-        # Flatten nested `data` payloads that some automations may create.
         nested = data.pop("data", None)
         if isinstance(nested, dict):
             for k, v in nested.items():
                 data.setdefault(k, v)
 
-        # Move target out of the payload and into the service target argument.
+        # Move target out of the data payload and into the service target
         if "target" in data:
             raw_target = data.pop("target")
             if isinstance(raw_target, str):
@@ -133,13 +132,7 @@ async def async_notify(hass, service_id, data):
     )
 
     try:
-        await hass.services.async_call(
-            domain,
-            service,
-            service_data=data,
-            target=target_arg,
-            blocking=True,
-        )
+        await hass.services.async_call(domain, service, service_data=data,  target=target_arg, blocking=True)
     except Exception as error:
         _LOGGER.warning(
             "Sending notification to %s failed - %s",
