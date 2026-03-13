@@ -95,18 +95,51 @@ def compact_list(list, type=None):
 
 
 async def async_notify(hass, service_id, data):
-    """Show a notification"""
+    """Show a notification."""
+
+    if not isinstance(data, dict):
+        data = {}
+
+    data = copy.deepcopy(data)
 
     if "target" in data and not data["target"]:
         del data["target"]
 
-    _LOGGER.debug("Send notification(%s): %s", service_id, data)
+    if not isinstance(service_id, str) or "." not in service_id:
+        _LOGGER.warning(
+            "Invalid service_id %r; expected 'domain.service'", service_id
+        )
+        return False
 
-    domain = service_id.split(".")[0]
-    service = service_id.split(".")[1]
+    domain, service = service_id.split(".", 1)
+
+    target_arg = None
+    if domain == "notify" and service == "send_message":
+        # Move target out of the data payload and into the service target (required for notify.send_message)
+        if "target" in data:
+            raw_target = data.pop("target")
+            if isinstance(raw_target, str):
+                target_arg = {"entity_id": [raw_target]}
+            elif isinstance(raw_target, (list, tuple)):
+                target_arg = {"entity_id": list(raw_target)}
+            else:
+                target_arg = raw_target
+
+    _LOGGER.debug(
+        "Send notification(%s): service_data=%s target=%s",
+        service_id,
+        data,
+        target_arg if target_arg is not None else data.get("target"),
+    )
 
     try:
-        await hass.services.async_call(domain, service, data, blocking=True)
+        await hass.services.async_call(
+            domain,
+            service,
+            service_data=data,
+            target=target_arg,
+            blocking=True,
+        )
     except Exception as error:
         _LOGGER.warning(
             "Sending notification to %s failed - %s",
