@@ -127,6 +127,9 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         options["calendar_replace_name"] = {}
         options["lesson_long_name"] = options["calendar_long_name"]
         options.pop("calendar_long_name")
+    
+    if config_entry.version < 20:
+        options["calendar_compacting_tolerance"] = 0
 
     hass.config_entries.async_update_entry(
         entry=config_entry, options=options, version=CONFIG_ENTRY_VERSION
@@ -184,7 +187,7 @@ class WebUntis:
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
         self.calendar_replace_name = config.options.get("calendar_replace_name", {})
-
+        self.calendar_compacting_tolerance = config.options.get("calendar_compacting_tolerance", 0)
         self.lesson_long_name = config.options["lesson_long_name"]
         self.lesson_replace_name = config.options.get("lesson_replace_name", {})
         self.lesson_add_teacher = config.options.get("lesson_add_teacher", [])
@@ -446,7 +449,7 @@ class WebUntis:
             self.calendar_events = await self._hass.async_add_executor_job(
                 self._get_events
             )
-            self.calendar_events = compact_list(self.calendar_events, "calendar")
+            self.calendar_events = compact_list(self.calendar_events, "calendar", timedelta(minutes=self.calendar_compacting_tolerance))
         except OSError as error:
             self.calendar_events = []
 
@@ -858,7 +861,7 @@ class WebUntis:
         return event_list
 
     def _get_events_in_timerange(
-        self, start, end, filter_on, show_cancelled=True, compact_result=True
+        self, start, end, filter_on, show_cancelled=True, compact_result=True, compact_tolerance_minutes=0
     ):
         table = self.get_timetable(start=start.date(), end=end.date())
 
@@ -875,7 +878,7 @@ class WebUntis:
         events = sorted(events, key=lambda x: x["start"])
 
         if compact_result:
-            events = compact_list(events, type="dict")
+            events = compact_list(events, "dict", timedelta(minutes=compact_tolerance_minutes))
 
         return events
 
@@ -1208,8 +1211,7 @@ class WebUntis:
                     change,
                     {"old_lesson": lesson_old, "new_lesson": lesson},
                 )
-
-            updated_items = compact_list(updated_items, "notify")
+            updated_items = compact_list(updated_items, "notify",timedelta(minutes=self.calendar_compacting_tolerance))
 
             for service in self.notify_config.values():
 

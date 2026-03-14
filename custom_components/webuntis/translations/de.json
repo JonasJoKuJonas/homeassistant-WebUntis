@@ -113,7 +113,8 @@
           "calendar_description": "Kalender - Beschreibung",
           "calendar_room": "Kalender - Ort",
           "calendar_show_room_change": "Kalender - Zimmerwechsel",
-          "calendar_replace_name": "Ereignisnamen ersetzen"
+          "calendar_replace_name": "Ereignisnamen ersetzen",
+          "calendar_compacting_tolerance": "Maximale Pausenzeit zwischen Schulstunden, um sie als Doppelstunde zusammenzufassen (Minuten)"
         },
         "data_description": {
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
@@ -254,6 +255,10 @@
         "compact_result": {
           "name": "Vereinfachte Ergebnisse",
           "description": "Fasse doppel Stunden im Ergebnis zusammen"
+        },
+        "compact_tolerance_minutes": {
+          "name": "Toleranz für das Zusammenfassen (Minuten)",
+          "description": "Zeitliche Toleranz, um Stunden als Doppelstunden zusammenzufassen. (Nur relevant, wenn 'Vereinfachte Ergebnisse' aktiviert ist)"
         }
       },
       "name": "Stundenplan abrufen"

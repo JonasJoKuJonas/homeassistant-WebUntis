@@ -107,7 +107,8 @@
           "calendar_description": "Calendar - description",
           "calendar_room": "Calendar - Location",
           "calendar_show_room_change": "Calendar - Room change",
-          "calendar_replace_name": "Replace event name"
+          "calendar_replace_name": "Replace event name",
+          "calendar_compacting_tolerance": "Maximum break time between lessons to combine them as a double lesson (minutes)"
         },
         "data_description": {
           "calendar_show_cancelled_lessons": "Toon geannuleerde lessen in de kalender.",
@@ -236,6 +237,10 @@
         "compact_result": {
           "name": "Simplify Results",
           "description": "Combine double lessons in the result"
+        },
+        "compact_tolerance_minutes": {
+          "name": "Tolerance for combining (minutes)",
+          "description": "Time tolerance to combine lessons as double lessons. (Only relevant if 'Simplify Results' is activated)"
         }
       },
       "name": "Get Timetable"

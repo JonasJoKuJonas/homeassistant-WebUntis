@@ -44,6 +44,7 @@ The result includes all lessons within the range, depending on your filter setti
 - `apply_filter` (default: `true`) – Apply filters defined in the integration (e.g., subject or teacher filters).
 - `show_cancelled` (default: `true`) – Include cancelled lessons.
 - `compact_result` (default: `true`) – Return a compact result format.
+- `compact_tolerance_minutes` (degault: 0) - maximum break in minutes between lessons for compacting
 
 ---
 

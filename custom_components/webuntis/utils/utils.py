@@ -2,6 +2,7 @@
 
 import copy
 import logging
+from datetime import date, datetime, timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,16 +37,18 @@ def is_different(arr1, arr2):
     return False
 
 
-def compact_list(list, type=None):
-    if type == "notify":
+def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=0)):
+    if list_type == "notify":
         compacted_list = []
         i = 0
-        while i < len(list):
-            item = list[i]
+        while i < len(item_list):
+            item = item_list[i]
             if compacted_list:
                 last_item = compacted_list[-1]
+                start = item[2]["start"]
+                end = last_item[2]["end"]
                 if (
-                    last_item[2]["end"] == item[2]["start"]
+                    start - end <= compact_tolerance
                     and last_item[2]["code"] == item[2]["code"]
                 ):
                     last_item[1]["end"] = item[1]["end"]
@@ -57,15 +60,17 @@ def compact_list(list, type=None):
             )
             i += 1
 
-    elif type == "dict":
+    elif list_type == "dict":
         compacted_list = []
         i = 0
-        while i < len(list):
-            item = list[i]
+        while i < len(item_list):
+            item = item_list[i]
             if compacted_list:
                 last_item = compacted_list[-1]
+                start = item["start"]
+                end = last_item["end"]
                 if (
-                    last_item["end"] == item["start"]
+                    start - end <= compact_tolerance 
                     and last_item["lsnumber"] == item["lsnumber"]
                     and last_item["code"] == item["code"]
                 ):
@@ -79,11 +84,16 @@ def compact_list(list, type=None):
     else:  # calendar
         compacted_list = []
         i = 0
-        while i < len(list):
-            item = list[i]
+        while i < len(item_list):
+            item = item_list[i]
             if compacted_list:
                 last_item = compacted_list[-1]
-                if last_item.end == item.start and last_item.summary == item.summary:
+                start = item.start
+                end = last_item.end
+                if (
+                    start - end <= compact_tolerance
+                    and last_item.summary == item.summary
+                ):
                     last_item.end = item.end
 
                     i += 1

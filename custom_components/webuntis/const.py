@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 19
+CONFIG_ENTRY_VERSION = 20
 
 DEFAULT_OPTIONS = {
     "lesson_long_name": True,
@@ -13,6 +13,7 @@ DEFAULT_OPTIONS = {
     "generate_json": False,
     "exclude_data": [],
     "filter_description": [],
+    "calendar_compacting_tolerance": 0,
     "calendar_description": "none",
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,
