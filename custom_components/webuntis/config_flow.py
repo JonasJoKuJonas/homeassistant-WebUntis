@@ -498,7 +498,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.BooleanSelector(),
                     vol.Optional(
                         "exclude_filter_comparison",
-                        default=self._config_entry.options.get("exclude_filter_comparison", False),
+                        default=self._config_entry.options.get(
+                            "exclude_filter_comparison", False
+                        ),
                     ): selector.BooleanSelector(),
                 }
             ),

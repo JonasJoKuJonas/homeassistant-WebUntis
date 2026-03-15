@@ -114,14 +114,15 @@
           "calendar_room": "Calendar - Location",
           "calendar_show_room_change": "Calendar - Room change",
           "calendar_replace_name": "Replace event name",
-          "calendar_compacting_tolerance": "Maximum break time between lessons to combine them as a double lesson (minutes)"
+          "calendar_compacting_tolerance": "Max. break time between double lessons"
         },
         "data_description": {
           "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
           "calendar_description": "Determine what should be in the description of a calendar event.",
           "calendar_room": "Specify what to display for location.",
           "calendar_show_room_change": "Show room changes in the calendar.",
-          "calendar_replace_name": "e.g.,\nCancelled: ❌"
+          "calendar_replace_name": "e.g.,\nCancelled: ❌",
+          "calendar_compacting_tolerance": "Identical consecutive lessons will be combined to double lessons if the break time is shorter than this value."
         }
       },
       "backend": {
@@ -176,7 +177,7 @@
         "cancelled": "Lesson is cancelled",
         "subject": "Subject changed",
         "lstext": "Lesson text changed",
-        "info":"Info text changed"
+        "info": "Info text changed"
       }
     },
     "timetable_source": {

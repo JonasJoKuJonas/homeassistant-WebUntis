@@ -2,7 +2,7 @@
 
 import copy
 import logging
-from datetime import date, datetime, timedelta
+from datetime import timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 end = last_item[2]["end"]
                 if (
                     start - end <= compact_tolerance
+                    and start >= end
                     and last_item[2]["code"] == item[2]["code"]
                 ):
                     last_item[1]["end"] = item[1]["end"]
@@ -70,7 +71,8 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 start = item["start"]
                 end = last_item["end"]
                 if (
-                    start - end <= compact_tolerance 
+                    start - end <= compact_tolerance
+                    and start >= end
                     and last_item["lsnumber"] == item["lsnumber"]
                     and last_item["code"] == item["code"]
                 ):
@@ -92,6 +94,7 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 end = last_item.end
                 if (
                     start - end <= compact_tolerance
+                    and start >= end
                     and last_item.summary == item.summary
                 ):
                     last_item.end = item.end
