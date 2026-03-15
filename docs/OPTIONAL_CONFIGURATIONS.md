@@ -15,14 +15,14 @@ Control which lessons or subjects are included or excluded.
 
 Customize what is shown in calendar entities.
 
-| Option                          | Description                           | Default          |
-| :------------------------------ | :------------------------------------ | :--------------- |
-| calendar_show_cancelled_lessons | Show cancelled lessons in calendar.   | `False`          |
-| calendar_description            | Display format for event description. | `JSON`           |
-| calendar_room                   | Specify location display.             | `Room long name` |
-| calendar_show_room_change       | Show room changes in calendar.        | `False`          |
-| calendar_replace_name           | Replace words in event name.          | `None`           |
-| calendar_compacting_tolerance   | Break between lessons for merge.      | `None`           |
+| Option                          | Description                                  | Default          |
+| :------------------------------ | :------------------------------------------- | :--------------- |
+| calendar_show_cancelled_lessons | Show cancelled lessons in calendar.          | `False`          |
+| calendar_description            | Display format for event description.        | `JSON`           |
+| calendar_room                   | Specify location display.                    | `Room long name` |
+| calendar_show_room_change       | Show room changes in calendar.               | `False`          |
+| calendar_replace_name           | Replace words in event name.                 | `None`           |
+| calendar_compacting_tolerance   | Break (in minutes) between lessons for merge.|`0`               |
 
 ### Lesson Options
 
