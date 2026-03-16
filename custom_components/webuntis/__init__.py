@@ -128,9 +128,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         options["lesson_long_name"] = options["calendar_long_name"]
         options.pop("calendar_long_name")
 
-    if config_entry.version < 20 and "lesson_compacting_tolerance" not in options:
-        options["lesson_compacting_tolerance"] = 0
-
     hass.config_entries.async_update_entry(
         entry=config_entry, options=options, version=CONFIG_ENTRY_VERSION
     )

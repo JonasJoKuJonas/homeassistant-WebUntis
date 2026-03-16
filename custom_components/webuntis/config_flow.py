@@ -637,11 +637,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Optional(
                         "lesson_compacting_tolerance",
-                        description={
-                            "suggested_value": self._config_entry.options.get(
-                                "lesson_compacting_tolerance"
-                            )
-                        },
+                        default=self._config_entry.options.get(
+                            "lesson_compacting_tolerance", 0
+                        ),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=0,
