@@ -582,21 +582,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             )
                         },
                     ): selector.ObjectSelector(),
-                    vol.Optional(
-                        "calendar_compacting_tolerance",
-                        description={
-                            "suggested_value": self._config_entry.options.get(
-                                "calendar_compacting_tolerance"
-                            )
-                        },
-                    ): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0,
-                            step=1,
-                            unit_of_measurement="minutes",
-                            translation_key="calendar_compacting_tolerance",
-                        )
-                    ),
                 }
             ),
         )
@@ -649,6 +634,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             multiple=True,
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
+                    ),
+                    vol.Optional(
+                        "lesson_compacting_tolerance",
+                        description={
+                            "suggested_value": self._config_entry.options.get(
+                                "lesson_compacting_tolerance"
+                            )
+                        },
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            step=1,
+                            unit_of_measurement="minutes",
+                            translation_key="lesson_compacting_tolerance",
+                        )
                     ),
                 }
             ),

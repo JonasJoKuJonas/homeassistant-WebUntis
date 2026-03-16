@@ -22,17 +22,18 @@ Customize what is shown in calendar entities.
 | calendar_room                   | Specify location display.                    | `Room long name` |
 | calendar_show_room_change       | Show room changes in calendar.               | `False`          |
 | calendar_replace_name           | Replace words in event name.                 | `None`           |
-| calendar_compacting_tolerance   | Break (in minutes) between lessons for merge.|`0`               |
+
 
 ### Lesson Options
 
 Control how the lesson name is displayed.
 
-| Option              | Description                                    | Default |
-| :------------------ | :--------------------------------------------- | :------ |
-| lesson_long_name    | Show the full lesson name.                     | `True`  |
-| lesson_replace_name | Replace lesson names based on mapping.         | `None`  |
-| lesson_add_teacher  | Show the teacher's name for selected subjects. | `None`  |
+| Option                        | Description                                    | Default |
+| :---------------------------- | :--------------------------------------------- | :------ |
+| lesson_long_name              | Show the full lesson name.                     | `True`  |
+| lesson_replace_name           | Replace lesson names based on mapping.         | `None`  |
+| lesson_add_teacher            | Show the teacher's name for selected subjects. | `None`  |
+| lesson_compacting_tolerance   | Break (in minutes) between lessons for merge.  |  `0`    |
 
 ### Notification Options
 

@@ -71,7 +71,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Kalender",
-          "lesson": "Stunden Name",
+          "lesson": "Stunden-Darstellung",
           "backend": "Backend",
           "notify_menu": "Notify Menü"
         }
@@ -93,16 +93,18 @@
         }
       },
       "lesson": {
-        "title": "Stunden Name Einstellungen",
-        "description": "Einstellungen, wie der Stunden-Name angezeigt wird.\n\\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
+        "title": "Stunden-Darstellungs-Einstellungen",
+        "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
         "data": {
           "lesson_long_name": "Langer Name",
           "lesson_replace_name": "Stunden-Name ersetzen",
-          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu"
+          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu",
+          "lesson_compacting_tolerance": "Max. Pausenzeit für Doppelstunde"
         },
         "data_description": {
           "lesson_replace_name": "Bsp:\nM: Mathe",
-          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen."
+          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen.",
+          "lesson_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst"
         }
       },
       "calendar": {
@@ -113,16 +115,14 @@
           "calendar_description": "Kalender - Beschreibung",
           "calendar_room": "Kalender - Ort",
           "calendar_show_room_change": "Kalender - Zimmerwechsel",
-          "calendar_replace_name": "Ereignisnamen ersetzen",
-          "calendar_compacting_tolerance": "Max. Pausenzeit für Doppelstunde"
+          "calendar_replace_name": "Ereignisnamen ersetzen"
         },
         "data_description": {
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
           "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
           "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
           "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an.",
-          "calendar_replace_name": "Bsp:\nCancelled: ❌",
-          "calendar_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst"
+          "calendar_replace_name": "Bsp:\nCancelled: ❌"
         }
       },
       "backend": {

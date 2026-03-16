@@ -13,13 +13,13 @@ DEFAULT_OPTIONS = {
     "generate_json": False,
     "exclude_data": [],
     "filter_description": [],
-    "calendar_compacting_tolerance": 0,
+    "lesson_compacting_tolerance": 0,
     "calendar_description": "none",
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,
     "notify_config": {},
     "invalid_subjects": False,
-    "exclude_filter_comparison": False
+    "exclude_filter_comparison": False,
 }
 
 NOTIFY_OPTIONS = [

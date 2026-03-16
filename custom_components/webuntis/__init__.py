@@ -128,8 +128,8 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         options["lesson_long_name"] = options["calendar_long_name"]
         options.pop("calendar_long_name")
 
-    if config_entry.version < 20 and "calendar_compacting_tolerance" not in options:
-        options["calendar_compacting_tolerance"] = 0
+    if config_entry.version < 20 and "lesson_compacting_tolerance" not in options:
+        options["lesson_compacting_tolerance"] = 0
 
     hass.config_entries.async_update_entry(
         entry=config_entry, options=options, version=CONFIG_ENTRY_VERSION
@@ -187,8 +187,8 @@ class WebUntis:
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
         self.calendar_replace_name = config.options.get("calendar_replace_name", {})
-        self.calendar_compacting_tolerance = config.options.get(
-            "calendar_compacting_tolerance", 0
+        self.lesson_compacting_tolerance = config.options.get(
+            "lesson_compacting_tolerance", 0
         )
         self.lesson_long_name = config.options["lesson_long_name"]
         self.lesson_replace_name = config.options.get("lesson_replace_name", {})
@@ -454,7 +454,7 @@ class WebUntis:
             self.calendar_events = compact_list(
                 self.calendar_events,
                 "calendar",
-                timedelta(minutes=self.calendar_compacting_tolerance),
+                timedelta(minutes=self.lesson_compacting_tolerance),
             )
         except OSError as error:
             self.calendar_events = []
@@ -1224,7 +1224,7 @@ class WebUntis:
             updated_items = compact_list(
                 updated_items,
                 "notify",
-                timedelta(minutes=self.calendar_compacting_tolerance),
+                timedelta(minutes=self.lesson_compacting_tolerance),
             )
 
             for service in self.notify_config.values():
