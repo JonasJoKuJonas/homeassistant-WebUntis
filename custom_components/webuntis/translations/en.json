@@ -78,7 +78,7 @@
       },
       "filter": {
         "title": "Filter Settings",
-        "description": "Settings to filter out unwanted subjects.",
+        "description": "Settings to filter out unwanted lessons.",
         "data": {
           "filter_mode": "Filter mode",
           "filter_subjects": "Filter mode - subjects",

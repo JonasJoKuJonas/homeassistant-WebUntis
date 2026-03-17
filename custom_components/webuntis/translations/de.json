@@ -78,7 +78,7 @@
       },
       "filter": {
         "title": "Filter-Einstellungen",
-        "description": "Einstellungen zum Herausfiltern unerwünschter Fächer.",
+        "description": "Einstellungen zum Herausfiltern unerwünschter Stunden.",
         "data": {
           "filter_mode": "Fächer Filter",
           "filter_subjects": "Fächer Filter - Fächer",
