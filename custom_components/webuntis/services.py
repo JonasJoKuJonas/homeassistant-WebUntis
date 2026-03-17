@@ -48,6 +48,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 data["apply_filter"],
                 data["show_cancelled"],
                 data["compact_result"],
+                data.get("compact_tolerance_minutes", 0),
             )
             result = {"lessons": lesson_list}
 

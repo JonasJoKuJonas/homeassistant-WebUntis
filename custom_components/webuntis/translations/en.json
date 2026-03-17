@@ -71,7 +71,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Calendar",
-          "lesson": "Lesson Name",
+          "lesson": "Lesson Display",
           "backend": "Backend",
           "notify_menu": "Notify Menu"
         }
@@ -93,16 +93,18 @@
         }
       },
       "lesson": {
-        "title": "Lesson Name Settings",
+        "title": "Lesson Display Settings",
         "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
         "data": {
           "lesson_long_name": "Long name",
           "lesson_replace_name": "Replace Lesson name",
-          "lesson_add_teacher": "Add Teacher to subject"
+          "lesson_add_teacher": "Add Teacher to subject",
+          "lesson_compacting_tolerance": "Max. break time between double lessons"
         },
         "data_description": {
           "lesson_replace_name": "e.g.,\nM: Math",
-          "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name."
+          "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name.",
+          "lesson_compacting_tolerance": "Identical consecutive lessons will be combined to double lessons if the break time is shorter than this value."
         }
       },
       "calendar": {
@@ -175,7 +177,7 @@
         "cancelled": "Lesson is cancelled",
         "subject": "Subject changed",
         "lstext": "Lesson text changed",
-        "info":"Info text changed"
+        "info": "Info text changed"
       }
     },
     "timetable_source": {
@@ -255,6 +257,10 @@
         "compact_result": {
           "name": "Simplify Results",
           "description": "Combine double lessons in the result"
+        },
+        "compact_tolerance_minutes": {
+          "name": "Tolerance for combining (minutes)",
+          "description": "Time tolerance to combine lessons as double lessons. (Only relevant if 'Simplify Results' is activated)"
         }
       },
       "name": "Get Timetable"

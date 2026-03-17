@@ -71,7 +71,7 @@
         "menu_options": {
           "filter": "Filter",
           "calendar": "Kalender",
-          "lesson": "Stunden Name",
+          "lesson": "Stunden-Darstellung",
           "backend": "Backend",
           "notify_menu": "Notify Menü"
         }
@@ -93,16 +93,18 @@
         }
       },
       "lesson": {
-        "title": "Stunden Name Einstellungen",
-        "description": "Einstellungen, wie der Stunden-Name angezeigt wird.\n\\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
+        "title": "Stunden-Darstellungs-Einstellungen",
+        "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
         "data": {
           "lesson_long_name": "Langer Name",
           "lesson_replace_name": "Stunden-Name ersetzen",
-          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu"
+          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu",
+          "lesson_compacting_tolerance": "Max. Pausenzeit für Doppelstunde"
         },
         "data_description": {
           "lesson_replace_name": "Bsp:\nM: Mathe",
-          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen."
+          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen.",
+          "lesson_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst"
         }
       },
       "calendar": {
@@ -253,7 +255,11 @@
         },
         "compact_result": {
           "name": "Vereinfachte Ergebnisse",
-          "description": "Fasse doppel Stunden im Ergebnis zusammen"
+          "description": "Fasse Doppelstunden im Ergebnis zusammen"
+        },
+        "compact_tolerance_minutes": {
+          "name": "Toleranz für das Zusammenfassen (Minuten)",
+          "description": "Zeitliche Toleranz, um Stunden als Doppelstunden zusammenzufassen. (Nur relevant, wenn 'Vereinfachte Ergebnisse' aktiviert ist)"
         }
       },
       "name": "Stundenplan abrufen"

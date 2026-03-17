@@ -498,7 +498,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.BooleanSelector(),
                     vol.Optional(
                         "exclude_filter_comparison",
-                        default=self._config_entry.options.get("exclude_filter_comparison", False),
+                        default=self._config_entry.options.get(
+                            "exclude_filter_comparison", False
+                        ),
                     ): selector.BooleanSelector(),
                 }
             ),
@@ -632,6 +634,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             multiple=True,
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
+                    ),
+                    vol.Optional(
+                        "lesson_compacting_tolerance",
+                        default=self._config_entry.options.get(
+                            "lesson_compacting_tolerance", 0
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            step=1,
+                            unit_of_measurement="minutes",
+                            translation_key="lesson_compacting_tolerance",
+                        )
                     ),
                 }
             ),

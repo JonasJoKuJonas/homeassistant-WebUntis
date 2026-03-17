@@ -37,7 +37,7 @@ from .const import (
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
     NAME_EVENT_LESSON_CHANGE,
-    NAME_EVENT_HOMEWORK
+    NAME_EVENT_HOMEWORK,
 )
 from .notify import *
 from .services import async_setup_services
@@ -184,7 +184,9 @@ class WebUntis:
         self.calendar_description = config.options["calendar_description"]
         self.calendar_room = config.options["calendar_room"]
         self.calendar_replace_name = config.options.get("calendar_replace_name", {})
-
+        self.lesson_compacting_tolerance = config.options.get(
+            "lesson_compacting_tolerance", 0
+        )
         self.lesson_long_name = config.options["lesson_long_name"]
         self.lesson_replace_name = config.options.get("lesson_replace_name", {})
         self.lesson_add_teacher = config.options.get("lesson_add_teacher", [])
@@ -446,7 +448,11 @@ class WebUntis:
             self.calendar_events = await self._hass.async_add_executor_job(
                 self._get_events
             )
-            self.calendar_events = compact_list(self.calendar_events, "calendar")
+            self.calendar_events = compact_list(
+                self.calendar_events,
+                "calendar",
+                timedelta(minutes=self.lesson_compacting_tolerance),
+            )
         except OSError as error:
             self.calendar_events = []
 
@@ -458,7 +464,6 @@ class WebUntis:
             )
 
         if self.timetable_source != "teacher":
-
             try:
                 self.calendar_exams = await self._hass.async_add_executor_job(
                     return_exam_events, self
@@ -474,10 +479,11 @@ class WebUntis:
                 )
 
             try:
-                self.calendar_homework, param_list = (
-                    await self._hass.async_add_executor_job(
-                        return_homework_events, self
-                    )
+                (
+                    self.calendar_homework,
+                    param_list,
+                ) = await self._hass.async_add_executor_job(
+                    return_homework_events, self
                 )
             except OSError as error:
                 self.calendar_homework = []
@@ -500,7 +506,6 @@ class WebUntis:
 
                         for service in self.notify_config.values():
                             if "homework" in service.get("options", []):
-
                                 data = {
                                     "data": service.get("data", {}),
                                     "target": service.get("target", {}),
@@ -672,7 +677,7 @@ class WebUntis:
             if lesson.start > now and self.check_lesson(lesson):
                 lesson_list.append(lesson)
 
-        lesson_list.sort(key=lambda e: (e.start))
+        lesson_list.sort(key=lambda e: e.start)
 
         try:
             lesson = lesson_list[0]
@@ -858,7 +863,13 @@ class WebUntis:
         return event_list
 
     def _get_events_in_timerange(
-        self, start, end, filter_on, show_cancelled=True, compact_result=True
+        self,
+        start,
+        end,
+        filter_on,
+        show_cancelled=True,
+        compact_result=True,
+        compact_tolerance_minutes=0,
     ):
         table = self.get_timetable(start=start.date(), end=end.date())
 
@@ -875,7 +886,9 @@ class WebUntis:
         events = sorted(events, key=lambda x: x["start"])
 
         if compact_result:
-            events = compact_list(events, type="dict")
+            events = compact_list(
+                events, "dict", timedelta(minutes=compact_tolerance_minutes)
+            )
 
         return events
 
@@ -1191,16 +1204,13 @@ class WebUntis:
                 self.unfiltered_event_list_old, self.unfiltered_event_list
             )
         else:
-            updated_items = compare_timetables(
-                self.event_list_old, self.event_list
-            )
+            updated_items = compare_timetables(self.event_list_old, self.event_list)
 
         if updated_items:
             _LOGGER.debug("Timetable has changed!")
             _LOGGER.debug(updated_items)
 
             for change, lesson, lesson_old in updated_items:
-
                 lesson_old["name"] = get_lesson_name(self, lesson_old)
                 lesson["name"] = get_lesson_name(self, lesson)
 
@@ -1208,14 +1218,15 @@ class WebUntis:
                     change,
                     {"old_lesson": lesson_old, "new_lesson": lesson},
                 )
-
-            updated_items = compact_list(updated_items, "notify")
+            updated_items = compact_list(
+                updated_items,
+                "notify",
+                timedelta(minutes=self.lesson_compacting_tolerance),
+            )
 
             for service in self.notify_config.values():
-
                 for change, lesson, lesson_old in updated_items:
                     if change in service.get("options", []):
-
                         data = {
                             "data": service.get("data", {}),
                             "target": service.get("target", {}),

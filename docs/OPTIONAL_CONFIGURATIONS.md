@@ -15,23 +15,25 @@ Control which lessons or subjects are included or excluded.
 
 Customize what is shown in calendar entities.
 
-| Option                          | Description                           | Default          |
-| :------------------------------ | :------------------------------------ | :--------------- |
-| calendar_show_cancelled_lessons | Show cancelled lessons in calendar.   | `False`          |
-| calendar_description            | Display format for event description. | `JSON`           |
-| calendar_room                   | Specify location display.             | `Room long name` |
-| calendar_show_room_change       | Show room changes in calendar.        | `False`          |
-| calendar_replace_name           | Replace words in event name.          | `None`           |
+| Option                          | Description                                  | Default          |
+| :------------------------------ | :------------------------------------------- | :--------------- |
+| calendar_show_cancelled_lessons | Show cancelled lessons in calendar.          | `False`          |
+| calendar_description            | Display format for event description.        | `JSON`           |
+| calendar_room                   | Specify location display.                    | `Room long name` |
+| calendar_show_room_change       | Show room changes in calendar.               | `False`          |
+| calendar_replace_name           | Replace words in event name.                 | `None`           |
+
 
 ### Lesson Options
 
 Control how the lesson name is displayed.
 
-| Option              | Description                                    | Default |
-| :------------------ | :--------------------------------------------- | :------ |
-| lesson_long_name    | Show the full lesson name.                     | `True`  |
-| lesson_replace_name | Replace lesson names based on mapping.         | `None`  |
-| lesson_add_teacher  | Show the teacher's name for selected subjects. | `None`  |
+| Option                        | Description                                    | Default |
+| :---------------------------- | :--------------------------------------------- | :------ |
+| lesson_long_name              | Show the full lesson name.                     | `True`  |
+| lesson_replace_name           | Replace lesson names based on mapping.         | `None`  |
+| lesson_add_teacher            | Show the teacher's name for selected subjects. | `None`  |
+| lesson_compacting_tolerance   | Break (in minutes) between lessons for merge.  |  `0`    |
 
 ### Notification Options
 
