@@ -439,8 +439,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             if not "filter_description" in user_input:
                 user_input["filter_description"] = []
+            if not "filter_klassen" in user_input:
+                user_input["filter_klassen"] = []
 
-            if user_input["filter_mode"] and not user_input["filter_subjects"]:
+            # Only disable filter mode if no filter criteria are selected.
+            if (
+                user_input["filter_mode"]
+                and not user_input.get("filter_subjects")
+                and not user_input.get("filter_klassen")
+            ):
                 user_input["filter_mode"] = "None"
 
             if user_input["filter_description"]:
@@ -470,14 +477,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                                 "Whitelist",
                             ],
                             mode="dropdown",
-                        )
+                        ),
                     ),
                     vol.Required(
                         "filter_subjects",
-                        default=self._config_entry.options.get("filter_subjects"),
+                        default=self._config_entry.options.get("filter_subjects", []),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),
+                            multiple=True,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        ),
+                    ),
+                    vol.Required(
+                        "filter_klassen",
+                        default=self._config_entry.options.get("filter_klassen", []),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=_create_klasse_list(server),
                             multiple=True,
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
@@ -910,3 +927,13 @@ def _create_subject_list(server):
     subjects = server.subjects
 
     return [subject.name for subject in subjects]
+
+
+def _create_klasse_list(server):
+    """Create a list of classes/ klassen"""
+    try:
+        klassen = server.klassen
+    except Exception:
+        return []
+
+    return [klasse.name for klasse in klassen]
