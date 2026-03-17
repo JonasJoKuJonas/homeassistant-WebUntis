@@ -195,6 +195,7 @@ class WebUntis:
 
         self.filter_mode = config.options["filter_mode"]  # Blacklist, Whitelist, None
         self.filter_subjects = config.options["filter_subjects"]
+        self.filter_klassen = config.options.get("filter_klassen", [])
         self.exclude_filter_comparison = config.options["exclude_filter_comparison"]
 
         self.exclude_data = config.options["exclude_data"]
@@ -244,6 +245,7 @@ class WebUntis:
         self.today = [None, None]
 
         self.subjects = []
+        self.klassen = []
 
         self.event_list = []
         self.unfiltered_event_list = []
@@ -373,6 +375,20 @@ class WebUntis:
 
             _LOGGER.warning(
                 "Updating the subjects of '%s@%s' failed - OSError: %s",
+                self.school,
+                self.username,
+                error,
+            )
+
+        try:
+            self.klassen = await self._hass.async_add_executor_job(
+                self.session.klassen
+            )
+        except OSError as error:
+            self.klassen = []
+
+            _LOGGER.warning(
+                "Updating the classes (klassen) of '%s@%s' failed - OSError: %s",
                 self.school,
                 self.username,
                 error,
@@ -977,6 +993,30 @@ class WebUntis:
                 or filter_description in lesson.substText  # Informationen zur Stunde
             ):
                 return False
+
+        if self.filter_klassen and self.filter_mode != "None":
+            try:
+                lesson_klassen = [k.name for k in lesson.klassen]
+                lesson_klassen_long = [k.long_name for k in lesson.klassen]
+            except Exception:
+                lesson_klassen = []
+                lesson_klassen_long = []
+
+            if self.filter_mode == "Blacklist":
+                if any(
+                    filter_klasse in lesson_klassen
+                    or filter_klasse in lesson_klassen_long
+                    for filter_klasse in self.filter_klassen
+                ):
+                    return False
+
+            if self.filter_mode == "Whitelist":
+                if not any(
+                    filter_klasse in lesson_klassen
+                    or filter_klasse in lesson_klassen_long
+                    for filter_klasse in self.filter_klassen
+                ):
+                    return False
 
         try:
             if self.filter_mode == "Blacklist":

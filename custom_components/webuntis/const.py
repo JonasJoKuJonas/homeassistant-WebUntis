@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 20
+CONFIG_ENTRY_VERSION = 21
 
 DEFAULT_OPTIONS = {
     "lesson_long_name": True,
@@ -10,6 +10,7 @@ DEFAULT_OPTIONS = {
     "keep_loged_in": False,
     "filter_mode": "None",
     "filter_subjects": [],
+    "filter_klassen": [],
     "generate_json": False,
     "exclude_data": [],
     "filter_description": [],
