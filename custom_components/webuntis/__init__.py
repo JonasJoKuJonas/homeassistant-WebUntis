@@ -381,9 +381,7 @@ class WebUntis:
             )
 
         try:
-            self.klassen = await self._hass.async_add_executor_job(
-                self.session.klassen
-            )
+            self.klassen = await self._hass.async_add_executor_job(self.session.klassen)
         except OSError as error:
             self.klassen = []
 
@@ -1092,8 +1090,8 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except Exception:
-            pass
+        except Exception as err:
+            _LOGGER.debug("Unable to populate 'rooms' for lesson %s: %s", lesson, err)
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
@@ -1106,8 +1104,10 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except Exception:
-            pass
+        except Exception as err:
+            _LOGGER.debug(
+                "Unable to populate 'original_rooms' for lesson %s: %s", lesson, err
+            )
 
         if "teachers" not in self.exclude_data:
             try:
@@ -1117,19 +1117,32 @@ class WebUntis:
                 ]
             except (OSError, errors.RemoteError) as error:
                 if "no right for getTeachers()" in str(error):
+                    _LOGGER.debug(
+                        "Unable to populate 'teachers' for lesson %s: %s, excluding teachers from now on",
+                        lesson,
+                        error,
+                    )
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
-
-            except:
-                pass
+            except Exception as error:
+                _LOGGER.debug(
+                    "Unable to populate 'teachers' for lesson %s: %s",
+                    lesson,
+                    error,
+                )
 
             try:
                 dic["original_teachers"] = [
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.original_teachers
                 ]
-            except:
-                pass
+            except Exception as err:
+                _LOGGER.debug(
+                    "Unable to populate 'original_teachers' for lesson %s: %s",
+                    lesson,
+                    err,
+                )
+                _LOGGER.debug("Teacher map: %s", getattr(self.session, "teacher_map", None))
 
         dic["name"] = get_lesson_name(self, lesson)
 
@@ -1205,9 +1218,24 @@ class WebUntis:
                 if "no right for getTeachers()" in str(error):
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
+            except Exception as error:
+                _LOGGER.debug(
+                    "Unable to populate 'teachers' for lesson %s: %s",
+                    lesson,
+                    error,
+                )
 
-            except:
-                pass
+            try:
+                dic["original_teachers"] = [
+                    {"name": str(teacher.name), "long_name": str(teacher.long_name)}
+                    for teacher in lesson.original_teachers
+                ]
+            except Exception as err:
+                _LOGGER.debug(
+                    "Unable to populate 'original_teachers' for lesson %s: %s",
+                    lesson,
+                    err,
+                )
 
         return dic
 
