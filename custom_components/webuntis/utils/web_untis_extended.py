@@ -166,8 +166,10 @@ class ExtendedSession(WebUntisSession):
                 result = super().teachers(**kw_args)
                 self.teachers_forbidden = False
             except Exception as e:
-                if (
-                    getattr(e, "code", None) == -8509
+                if getattr(
+                    e, "code", None
+                ) == -8509 or "no right for getTeachers()" in str(
+                    e
                 ):  # -8509 is the error code for "fetching teachers is forbidden"
                     log(
                         "debug",
