@@ -1142,7 +1142,10 @@ class WebUntis:
                     lesson,
                     err,
                 )
-                _LOGGER.debug("Teacher map: %s", getattr(self.session, "teacher_map", None))
+                _LOGGER.debug(
+                    "Teacher map has %s entries",
+                    len(getattr(self.session, "teacher_map", {})),
+                )
 
         dic["name"] = get_lesson_name(self, lesson)
 
