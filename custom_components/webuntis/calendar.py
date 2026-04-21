@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-
+from homeassistant.util import dt as dt_util
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -68,7 +68,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         """Return calendar events within a datetime range."""
         events_in_range = []
         # Use the timezone of the start_date (or Home Assistant timezone)
-        timezone = start_date.tzinfo or datetime.timezone.utc
+        timezone = start_date.tzinfo or dt_util.DEFAULT_TIME_ZONE
 
         for event in self.events:
             # Convert event.start and event.end to datetime if they are date objects
