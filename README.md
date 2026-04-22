@@ -5,6 +5,7 @@
 [![HACS Badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ![Version](https://img.shields.io/github/v/release/JonasJoKuJonas/homeassistant-WebUntis)
 [![Downloads](https://img.shields.io/github/downloads/JonasJoKuJonas/homeassistant-WebUntis/total)](https://tooomm.github.io/github-release-stats/?username=JonasJoKuJonas&repository=HomeAssistant-WebUntis)
+![HACS Install Badge](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=integration%20installations&suffix=%20installs&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.webuntis.total)
 [![Latest Release](https://img.shields.io/github/release-date/JonasJoKuJonas/homeassistant-WebUntis?style=flat&label=Latest%20Release)](https://github.com/JonasJoKuJonas/homeassistant-WebUntis/releases)
 [![Open Issues](https://img.shields.io/github/issues/JonasJoKuJonas/homeassistant-WebUntis?style=flat&label=Open%20Issues)](https://github.com/JonasJoKuJonas/homeassistant-WebUntis/issues)
 [![Discord](https://img.shields.io/discord/1090218586565509170?style=flat&logo=discord&logoColor=white&label=Discord&color=7289da)](https://discord.gg/34EHnHQaPm)
