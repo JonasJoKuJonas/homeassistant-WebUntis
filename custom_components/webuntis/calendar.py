@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+
 from homeassistant.util import dt as dt_util
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
