@@ -69,7 +69,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         """Return calendar events within a datetime range."""
         events_in_range = []
         # Use the timezone of the start_date (or Home Assistant timezone)
-        timezone = start_date.tzinfo or dt_util.DEFAULT_TIME_ZONE
+        timezone = start_date.tzinfo or dt_util.get_default_time_zone()
 
         for event in self.events:
             # Convert event.start and event.end to datetime if they are date objects
