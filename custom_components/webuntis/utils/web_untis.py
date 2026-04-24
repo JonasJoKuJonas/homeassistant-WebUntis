@@ -4,13 +4,19 @@ def get_timetable_object(timetable_source_id, timetable_source, session):
     source = None
 
     if timetable_source == "student":
-        source = session.get_student(timetable_source_id[1], timetable_source_id[0])
+        if isinstance(timetable_source_id, (int, str)) and str(timetable_source_id).isdigit():
+            source = session.students().filter(id=int(timetable_source_id))[0]
+        else:
+            source = session.get_student(timetable_source_id[1], timetable_source_id[0])
     elif timetable_source == "klasse":
         klassen = session.klassen()
 
         source = klassen.filter(name=timetable_source_id)[0]
     elif timetable_source == "teacher":
-        source = session.get_teacher(timetable_source_id[1], timetable_source_id[0])
+        if isinstance(timetable_source_id, (int, str)) and str(timetable_source_id).isdigit():
+            source = session.teachers().filter(id=int(timetable_source_id))[0]
+        else:
+            source = session.get_teacher(timetable_source_id[1], timetable_source_id[0])
     elif timetable_source == "subject":
         pass
     elif timetable_source == "room":

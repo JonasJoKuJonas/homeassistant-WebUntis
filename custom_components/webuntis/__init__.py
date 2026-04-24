@@ -638,6 +638,11 @@ class WebUntis:
 
     def get_student_id(self):
         if self.timetable_source == "student":
+            if isinstance(self.timetable_source_id, (int, str)) and str(
+                self.timetable_source_id
+            ).isdigit():
+                return int(self.timetable_source_id)
+
             student = self.session.get_student(
                 self.timetable_source_id[1], self.timetable_source_id[0]
             )
