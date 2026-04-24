@@ -124,8 +124,11 @@ class ExtendedSession(WebUntisSession):
         }
 
         result = self._request(method="getTimetable", params=params)
+        self._merge_teacher_mapping(result)
 
-        # Build teacher ID -> name mapping
+    def _merge_teacher_mapping(self, result):
+        """Build or extend the teacher mapping from timetable results."""
+
         teacher_map = {}
         for period in result:
             for t in period.get("te", []):
@@ -143,6 +146,9 @@ class ExtendedSession(WebUntisSession):
                         teacher_map[t["orgid"]] = (
                             f"{t['orgid']}"  # no orgname given, use orgid as name to prevent errors
                         )
+
+        if not teacher_map:
+            return
 
         if not hasattr(self, "teacher_map"):
             self.teacher_map = teacher_map
@@ -181,12 +187,16 @@ class ExtendedSession(WebUntisSession):
 
         if getattr(self, "teachers_forbidden", False):
             if not hasattr(self, "teacher_map"):
-                self._update_teacher_mapping(
-                    start=datetime.now(),
-                    end=datetime.now() + timedelta(days=1),
-                    element_type_num=self.login_result["personType"],
-                    element_id=self.login_result["personId"],
-                )
+                person_type = self.login_result.get("personType")
+                if person_type not in self._ELEMENT_TYPE_TABLE.values():
+                    self.teacher_map = {}
+                else:
+                    self._update_teacher_mapping(
+                        start=datetime.now(),
+                        end=datetime.now() + timedelta(days=1),
+                        element_type_num=person_type,
+                        element_id=self.login_result["personId"],
+                    )
             # apply the mapping to build a list of teachers in the same format as the original function would return it, so that the rest of the code can work with it without needing to know about the fallback mechanism
             data = [
                 {
@@ -222,9 +232,10 @@ class ExtendedSession(WebUntisSession):
 
     def _ensure_teacher_mapping(self, result, start, end, element_type_num, element_id):
         """Ensure teacher mapping is up-to-date if teachers are forbidden."""
+        self._merge_teacher_mapping(result)
         if not hasattr(self, "teachers_forbidden"):
             self.teachers()  # call teachers to set teachers_forbidden attribute
-        if getattr(self, "teachers_forbidden", False):
+        if getattr(self, "teachers_forbidden", False) and element_type_num in self._ELEMENT_TYPE_TABLE.values() and element_id is not None:
             teidlist = self._collect_teacher_ids(result)
             if not set(teidlist).issubset(set(getattr(self, "teacher_map", {}).keys())):
                 self._update_teacher_mapping(

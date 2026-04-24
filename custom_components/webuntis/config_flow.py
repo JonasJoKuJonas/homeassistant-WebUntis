@@ -154,10 +154,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._user_input_temp.update(
                 {
                     "timetable_source": "student",
-                    "timetable_source_id": [
-                        user_input["fore_name"],
-                        user_input["surname"],
-                    ],
+                    "timetable_source_id": self._source_id,
                 }
             )
 
@@ -192,10 +189,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._user_input_temp.update(
                 {
                     "timetable_source": "teacher",
-                    "timetable_source_id": [
-                        user_input.get("fore_name"),
-                        user_input.get("surname"),
-                    ],
+                    "timetable_source_id": self._source_id,
                 }
             )
             errors = await self.hass.async_add_executor_job(self.test_timetable)
