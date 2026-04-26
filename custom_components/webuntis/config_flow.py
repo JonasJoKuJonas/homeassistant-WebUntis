@@ -98,7 +98,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             if user_input["timetable_source"] == "personal":
                 self._user_input_temp.update(user_input)
-                self._user_input_temp.update({"timetable_source_id": "personal"})
+                self._user_input_temp.update(
+                    {"timetable_source_id": "personal"})
                 errors = await self.hass.async_add_executor_job(self.test_timetable)
                 if not errors:
                     return await self.create_entry()
@@ -331,7 +332,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             socket.gethostbyname(hostname)
         except Exception as exc:
-            _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
+            _LOGGER.error("Cannot resolve hostname(%s): %s",
+                          credentials["server"], exc)
             errors["server"] = "cannot_connect"
             return errors, None
 
@@ -385,7 +387,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     end=day,
                     **timetable_object,
                 )
-                self._source_id = timetable_object[user_input["timetable_source"]].id
+                obj = timetable_object.get(user_input["timetable_source"])
+                if obj and hasattr(obj, 'id'):
+                    self._source_id = obj.id
+                elif isinstance(obj, dict):
+                    self._source_id = obj.get('id')
+
+                if not self._source_id:
+                    _LOGGER.error(
+                        "WEBUNTIS | Could not find ID for source: %s", user_input["timetable_source"])
+                    return {"base": "source_id_not_found"}
 
         except Exception as exc:
             if str(exc) == "'Student not found'":
@@ -421,7 +432,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(
         self,
-        user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
+        user_input: dict[str,
+                         Any] | None = None,  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
         return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
@@ -468,7 +480,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "filter_mode",
-                        default=str(self._config_entry.options.get("filter_mode")),
+                        default=str(
+                            self._config_entry.options.get("filter_mode")),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -481,7 +494,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "filter_subjects",
-                        default=self._config_entry.options.get("filter_subjects", []),
+                        default=self._config_entry.options.get(
+                            "filter_subjects", []),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_subject_list(server),
@@ -491,7 +505,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "filter_klassen",
-                        default=self._config_entry.options.get("filter_klassen", []),
+                        default=self._config_entry.options.get(
+                            "filter_klassen", []),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=_create_klasse_list(server),
@@ -503,7 +518,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "filter_description",
                         description={
                             "suggested_value": ", ".join(
-                                self._config_entry.options.get("filter_description")
+                                self._config_entry.options.get(
+                                    "filter_description")
                             )
                         },
                     ): selector.TextSelector(
@@ -511,7 +527,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "invalid_subjects",
-                        default=self._config_entry.options.get("invalid_subjects"),
+                        default=self._config_entry.options.get(
+                            "invalid_subjects"),
                     ): selector.BooleanSelector(),
                     vol.Optional(
                         "exclude_filter_comparison",
@@ -562,7 +579,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Required(
                         "calendar_description",
                         default=str(
-                            self._config_entry.options.get("calendar_description")
+                            self._config_entry.options.get(
+                                "calendar_description")
                         ),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
@@ -579,7 +597,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Required(
                         "calendar_room",
-                        default=str(self._config_entry.options.get("calendar_room")),
+                        default=str(
+                            self._config_entry.options.get("calendar_room")),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -630,7 +649,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "lesson_long_name",
-                        default=self._config_entry.options.get("lesson_long_name"),
+                        default=self._config_entry.options.get(
+                            "lesson_long_name"),
                     ): selector.BooleanSelector(),
                     vol.Optional(
                         "lesson_replace_name",
@@ -683,11 +703,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required(
                         "keep_loged_in",
-                        default=self._config_entry.options.get("keep_loged_in"),
+                        default=self._config_entry.options.get(
+                            "keep_loged_in"),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "generate_json",
-                        default=self._config_entry.options.get("generate_json"),
+                        default=self._config_entry.options.get(
+                            "generate_json"),
                     ): selector.BooleanSelector(),
                     vol.Required(
                         "exclude_data",
