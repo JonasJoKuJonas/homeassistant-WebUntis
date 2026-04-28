@@ -362,7 +362,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def test_timetable(self):
         """test if timetable is allowed to be fetched"""
-
+        
+        self._source_id = None
         session: webuntis.Session = self._session_temp
         user_input = self._user_input_temp
 
@@ -388,15 +389,27 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     **timetable_object,
                 )
                 obj = timetable_object.get(user_input["timetable_source"])
-                if obj and hasattr(obj, 'id'):
-                    self._source_id = obj.id
-                elif isinstance(obj, dict):
-                    self._source_id = obj.get('id')
+                source_id = None
+                if isinstance(obj, dict):
+                    source_id = obj.get("id")
+                elif obj is not None:
+                    try:
+                        source_id = getattr(obj, "id", None)
+                    except Exception as err:
+                        _LOGGER.error(
+                            "Failed to access id for source %s on object %r: %s",
+                            user_input["timetable_source"],
+                            obj,
+                            err,
+                            exc_info=True,
+                        )
+                self._source_id = source_id
 
                 if not self._source_id:
                     _LOGGER.error(
-                        "WEBUNTIS | Could not find ID for source: %s", user_input["timetable_source"])
-                    return {"base": "source_id_not_found"}
+                        "Could not find ID for source: %s", user_input["timetable_source"])
+                    # return {"base": "source_id_not_found"}
+                    return {"base": "unknown"}
 
         except Exception as exc:
             if str(exc) == "'Student not found'":
