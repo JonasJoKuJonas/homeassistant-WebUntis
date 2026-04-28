@@ -1,7 +1,7 @@
 import requests
 import json
 from webuntis import errors, objects
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
 
@@ -101,7 +101,11 @@ class ExtendedSession(WebUntisSession):
         return self._send_custom_request(endpoint, params)
 
     def _update_teacher_mapping(
-        self, start: datetime, end: datetime, element_type_num: int, element_id: int
+        self,
+        start: date | datetime | int,
+        end: date | datetime | int,
+        element_type_num: int,
+        element_id: int,
     ):
         """
         Fetches all teachers and builds a mapping of teacher ID to teacher name.
@@ -117,8 +121,12 @@ class ExtendedSession(WebUntisSession):
         params = {
             "options": {
                 "element": {"id": str(element_id), "type": str(element_type_num)},
-                "startDate": int(start.strftime("%Y%m%d")),
-                "endDate": int(end.strftime("%Y%m%d")),
+                "startDate": int(start.strftime("%Y%m%d"))
+                if isinstance(start, (date, datetime))
+                else start,
+                "endDate": int(end.strftime("%Y%m%d"))
+                if isinstance(end, (date, datetime))
+                else end,
                 "teacherFields": ["id", "name"],
             }
         }
@@ -227,14 +235,25 @@ class ExtendedSession(WebUntisSession):
         if getattr(self, "teachers_forbidden", False):
             teidlist = self._collect_teacher_ids(result)
             if not set(teidlist).issubset(set(getattr(self, "teacher_map", {}).keys())):
-                self._update_teacher_mapping(
-                    start=start,
-                    end=end,
-                    element_type_num=element_type_num,
-                    element_id=int(
-                        element_id
-                    ),  # int() is needed, as sometimes not the id but the object is given, int() extracts the id from the object
-                )
+                try:
+                    self._update_teacher_mapping(
+                        start=start,
+                        end=end,
+                        element_type_num=element_type_num,
+                        element_id=int(
+                            element_id
+                        ),  # int() is needed, as sometimes not the id but the object is given, int() extracts the id from the object
+                    )
+                except (OSError, errors.RemoteError) as e:
+                    log(
+                        "warning",
+                        f"Teacher mapping update failed: {e}. Timetable retrieval will continue.",
+                    )
+                except Exception as e:
+                    log(
+                        "error",
+                        f"Unexpected error during teacher mapping update: {e}. Timetable retrieval will continue.",
+                    )
 
     # def _timetable_extended_raw(self, end, start, element_id, element_type_num):
     def my_timetable(self, end, start):
