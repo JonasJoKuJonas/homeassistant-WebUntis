@@ -130,28 +130,43 @@ class ExtendedSession(WebUntisSession):
                 "teacherFields": ["id", "name"],
             }
         }
-
-        result = self._request(method="getTimetable", params=params)
-
-        # Build teacher ID -> name mapping
         teacher_map = {}
-        for period in result:
-            for t in period.get("te", []):
-                if "id" in t:
-                    if "name" in t:
-                        teacher_map[t["id"]] = t["name"]
-                    else:
-                        teacher_map[t["id"]] = (
-                            f"{t['id']}"  # no name given, use id as name to prevent errors
-                        )
-                if "orgid" in t:
-                    if "orgname" in t:
-                        teacher_map[t["orgid"]] = t["orgname"]
-                    else:
-                        teacher_map[t["orgid"]] = (
-                            f"{t['orgid']}"  # no orgname given, use orgid as name to prevent errors
-                        )
+        try:
+            result = self._request(method="getTimetable", params=params)
 
+            # Build teacher ID -> name mapping
+
+            for period in result:
+                for t in period.get("te", []):
+                    if "id" in t:
+                        if "name" in t:
+                            teacher_map[t["id"]] = t["name"]
+                        else:
+                            teacher_map[t["id"]] = (
+                                f"{t['id']}"  # no name given, use id as name to prevent errors
+                            )
+                    if "orgid" in t:
+                        if "orgname" in t:
+                            teacher_map[t["orgid"]] = t["orgname"]
+                        else:
+                            teacher_map[t["orgid"]] = (
+                                f"{t['orgid']}"  # no orgname given, use orgid as name to prevent errors
+                            )
+        except (
+            requests.RequestException,
+            errors.RemoteError,
+            errors.NotLoggedInError,
+        ) as e:
+            log(
+                "warning",
+                f"Teacher mapping update failed: {e}. This may lead to missing teacher names in the timetable.",
+            )
+        except Exception as e:
+            log(
+                "error",
+                f"Unexpected error while updating teacher mapping: {e}",
+            )
+            raise
         if not hasattr(self, "teacher_map"):
             self.teacher_map = teacher_map
         else:
@@ -189,11 +204,22 @@ class ExtendedSession(WebUntisSession):
 
         if getattr(self, "teachers_forbidden", False):
             if not hasattr(self, "teacher_map"):
+                if not hasattr(self, "_last_used_timetable_source"):
+                    self._last_used_timetable_source = (
+                        self.login_result["personType"],
+                        self.login_result["personId"],
+                    )
+                log(
+                    "debug",
+                    f"Teacher map not found. Fetching teacher mapping using fallback mechanism for element type {self._last_used_timetable_source[0]} and element id {self._last_used_timetable_source[1]}.",
+                )
+                # map not existing yet, call update function to create it; use the current day as the start date and fetch a 7-day window
+                # so the fallback mechanism can discover teachers from upcoming timetable entries when direct teacher retrieval is forbidden
                 self._update_teacher_mapping(
                     start=datetime.now(),
-                    end=datetime.now() + timedelta(days=1),
-                    element_type_num=self.login_result["personType"],
-                    element_id=self.login_result["personId"],
+                    end=datetime.now() + timedelta(days=7),
+                    element_type_num=self._last_used_timetable_source[0],
+                    element_id=self._last_used_timetable_source[1],
                 )
             # apply the mapping to build a list of teachers in the same format as the original function would return it, so that the rest of the code can work with it without needing to know about the fallback mechanism
             data = [
@@ -230,6 +256,11 @@ class ExtendedSession(WebUntisSession):
 
     def _ensure_teacher_mapping(self, result, start, end, element_type_num, element_id):
         """Ensure teacher mapping is up-to-date if teachers are forbidden."""
+        # self._last_used_timetable_source caches the most recently used timetable
+        # source to use for teacher mapping updates. This way access rights issues can be avoided.
+        # The tuple is (element_type_num, element_id), where element_type_num is
+        # the numeric WebUntis element type and element_id is the normalized int ID.
+        self._last_used_timetable_source = (element_type_num, int(element_id))
         if not hasattr(self, "teachers_forbidden"):
             self.teachers()  # call teachers to set teachers_forbidden attribute
         if getattr(self, "teachers_forbidden", False):
@@ -255,7 +286,6 @@ class ExtendedSession(WebUntisSession):
                         f"Unexpected error during teacher mapping update: {e}. Timetable retrieval will continue.",
                     )
 
-    # def _timetable_extended_raw(self, end, start, element_id, element_type_num):
     def my_timetable(self, end, start):
         result = super().my_timetable(end=end, start=start)
         self._ensure_teacher_mapping(
