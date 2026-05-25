@@ -32,8 +32,8 @@ from .notify import get_notification_data
 from .utils.errors import *
 from .utils.utils import async_notify, is_service
 from .utils.web_untis import get_timetable_object
+from .utils.web_untis_extended import ExtendedSession
 
-# import webuntis.session
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,17 +61,45 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
+        """Handle the initial step - choose auth method."""
+        if user_input is not None:
+            if user_input["auth_method"] == "password":
+                return await self.async_step_password()
+            elif user_input["auth_method"] == "qr":
+                return await self.async_step_qr_login()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("auth_method"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=["password", "qr"],
+                            translation_key="auth_method",
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_password(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
         if user_input is not None:
             errors, self._session_temp = await self.validate_login(user_input)
 
             if not errors:
                 self._user_input_temp = user_input
+                self._user_input_temp["auth_type"] = "password"
                 return await self.async_step_timetable_source()
 
         user_input = user_input or {}
 
         return self.async_show_form(
-            step_id="user",
+            step_id="password",
             data_schema=vol.Schema(
                 {
                     vol.Required("server", default=user_input.get("server", "")): str,
@@ -85,6 +113,39 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
+        )
+
+    async def async_step_qr_login(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        if user_input is not None:
+            errors, self._session_temp = await self.validate_qr_login(
+                user_input["qr_uri"]
+            )
+
+            if not errors:
+                self._user_input_temp["auth_type"] = "qr"
+                self._user_input_temp["key"] = user_input.get("qr_key")
+                return await self.async_step_timetable_source()
+
+        return self.async_show_form(
+            step_id="qr_login",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("qr_uri", default=user_input.get("qr_uri", "")): str,
+                }
+            ),
+            errors=errors,
+            description_placeholders={
+                "qr_instructions": (
+                    "1. Go to WebUntis web interface and log in\n"
+                    "2. Navigate to Profile -> Data access -> Display QR code\n"
+                    "3. Copy the QR code URI (the URL behind the QR code)\n"
+                    "4. Paste it below"
+                ),
+            },
         )
 
     async def async_step_timetable_source(
@@ -355,6 +416,56 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except Exception as exc:
             _LOGGER.error("webuntis.Session unknown error: %s", exc)
             errors["base"] = "unknown"
+
+        return errors, session
+
+    async def validate_qr_login(self, qr_uri: str) -> dict[str, Any]:
+        hass: HomeAssistant = self.hass
+        errors = {}
+
+        try:
+            parsed = ExtendedSession.parse_qr_uri(qr_uri)
+        except (ValueError, Exception) as exc:
+            _LOGGER.error("Failed to parse QR URI: %s", exc)
+            errors["qr_uri"] = "invalid_qr_uri"
+            return errors, None
+
+        server = parsed["server"]
+        school = parsed["school"]
+        username = parsed["username"]
+        key = parsed["key"]
+
+        try:
+            parsed_url = urlparse(server)
+            socket.gethostbyname(parsed_url.hostname)
+        except Exception as exc:
+            _LOGGER.error("Cannot resolve QR hostname(%s): %s", server, exc)
+            errors["qr_uri"] = "cannot_connect"
+            return errors, None
+
+        try:
+            session = ExtendedSession(
+                server=server,
+                school=school,
+                username=username,
+                password="",
+                useragent="home-assistant",
+            )
+            await hass.async_add_executor_job(session.login_with_otp, key)
+        except Exception as exc:
+            _LOGGER.error("webuntis QR login error: %s", exc)
+            errors["qr_uri"] = "qr_login_failed"
+            return errors, None
+
+        self._user_input_temp.update(
+            {
+                "server": server,
+                "school": school,
+                "username": username,
+                "key": key,
+                "password": "",
+            }
+        )
 
         return errors, session
 

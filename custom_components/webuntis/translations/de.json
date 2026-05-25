@@ -15,10 +15,19 @@
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
       "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
-      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
+      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen.",
+      "invalid_qr_uri": "Ungültige QR-Code-URI. Bitte überprüfen und erneut versuchen.",
+      "qr_login_failed": "QR-Login fehlgeschlagen. Der QR-Code ist möglicherweise abgelaufen. Erzeugen Sie einen neuen."
     },
     "step": {
       "user": {
+        "description": "Wählen Sie, wie Sie sich bei WebUntis authentifizieren möchten.",
+        "data": {
+          "auth_method": "Authentifizierungsmethode"
+        }
+      },
+      "password": {
+        "description": "Geben Sie Ihre WebUntis-Serverdaten und Zugangsdaten ein.",
         "data": {
           "server": "Server",
           "school": "Schule",
@@ -29,6 +38,12 @@
         },
         "data_description": {
           "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
+        }
+      },
+      "qr_login": {
+        "description": "Geben Sie die QR-Code-URI aus der WebUntis-Weboberfläche ein.\n\nSo erhalten Sie den QR-Code:\n1. Melden Sie sich bei der WebUntis-Weboberfläche an\n2. Gehen Sie zu Profil (oben rechts) \u2192 Datenzugriff \u2192 QR-Code anzeigen\n3. Kopieren Sie die QR-Code-URI (Rechtsklick auf den QR-Code \u2192 Link kopieren)\n4. Fügen Sie ihn unten ein",
+        "data": {
+          "qr_uri": "QR-Code-URI"
         }
       },
       "timetable_source": {
@@ -207,6 +222,12 @@
         "class_name_short": "Klassen Name (kurz)",
         "class_name_long": "Klassen Name (lang)"
       }
+    },
+    "auth_method": {
+      "options": {
+        "password": "Passwort-Login",
+        "qr": "QR-Code-Login"
+      }
     }
   },
   "issues": {
@@ -216,7 +237,8 @@
           "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
           "invalid_auth": "Ungültige Authentifizierung",
           "bad_credentials": "Ungültiges Passwort",
-          "unknown": "Unerwarteter Fehler"
+          "unknown": "Unerwarteter Fehler",
+          "qr_login_failed": "QR-Login fehlgeschlagen. Bitte versuchen Sie es mit einem neuen QR-Code."
         },
         "step": {
           "confirm": {
@@ -224,6 +246,13 @@
             "title": "Das Passwort wurde geändert",
             "data": {
               "password": "Passwort"
+            }
+          },
+          "confirm_qr": {
+            "description": "Bitte geben Sie die QR-Code-URI aus der WebUntis-Weboberfläche erneut ein.",
+            "title": "QR-Login-Zugangsdaten haben sich geändert",
+            "data": {
+              "qr_uri": "QR-Code-URI"
             }
           }
         }

@@ -172,10 +172,12 @@ class WebUntis:
         self.server = config.data["server"]
         self.school = config.data["school"]
         self.username = config.data["username"]
-        self.password = config.data["password"]
+        self.password = config.data.get("password", "")
         self.timetable_source = config.data["timetable_source"]
         self.timetable_source_id = config.data["timetable_source_id"]
         self.title = config.title
+        self.auth_type = config.data.get("auth_type", "password")
+        self.otp_key = config.data.get("key", "")
 
         self.calendar_show_cancelled_lessons = config.options[
             "calendar_show_cancelled_lessons"
@@ -593,7 +595,10 @@ class WebUntis:
             # _LOGGER.debug("logging in")
 
             try:
-                self.session.login()
+                if self.auth_type == "qr":
+                    self.session.login_with_otp(self.otp_key)
+                else:
+                    self.session.login()
                 # _LOGGER.debug("Login successful")
                 self._loged_in = True
                 self.updating += 1

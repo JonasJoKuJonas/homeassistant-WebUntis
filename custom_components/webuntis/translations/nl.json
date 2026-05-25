@@ -14,10 +14,19 @@
       "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
-      "unknown": "Unexpected error. View Logs for more infos."
+      "unknown": "Unexpected error. View Logs for more infos.",
+      "invalid_qr_uri": "Ongeldige QR-code-URI. Controleer en probeer opnieuw.",
+      "qr_login_failed": "QR-login mislukt. De QR-code is mogelijk verlopen. Genereer een nieuwe."
     },
     "step": {
       "user": {
+        "description": "Kies hoe u wilt authenticeren bij WebUntis.",
+        "data": {
+          "auth_method": "Authenticatiemethode"
+        }
+      },
+      "password": {
+        "description": "Voer uw WebUntis-servergegevens en inloggegevens in.",
         "data": {
           "server": "Server",
           "school": "School",
@@ -28,6 +37,12 @@
         },
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+        }
+      },
+      "qr_login": {
+        "description": "Voer de QR-code-URI in van de WebUntis webinterface.\n\nOm de QR-code te krijgen:\n1. Log in op de WebUntis webinterface\n2. Ga naar Profiel (rechtsboven) \u2192 Gegevenstoegang \u2192 QR-code weergeven\n3. Kopieer de QR-code-URI (rechtsklik op de QR-code \u2192 Link kopi\u00ebren)\n4. Plak deze hieronder",
+        "data": {
+          "qr_uri": "QR-Code-URI"
         }
       },
       "timetable_source": {
@@ -189,6 +204,12 @@
         "message": "Message",
         "discord": "Discord"
       }
+    },
+    "auth_method": {
+      "options": {
+        "password": "Wachtwoord Login",
+        "qr": "QR-Code Login"
+      }
     }
   },
   "issues": {
@@ -198,7 +219,8 @@
           "cannot_connect": "Failed to connect. Please check the host.",
           "invalid_auth": "Invalid authentication",
           "bad_credentials": "Invalid password",
-          "unknown": "Unexpected error"
+          "unknown": "Unexpected error",
+          "qr_login_failed": "QR-login mislukt. Probeer opnieuw met een nieuwe QR-code."
         },
         "step": {
           "confirm": {
@@ -206,6 +228,13 @@
             "title": "Password has been changed",
             "data": {
               "password": "Password"
+            }
+          },
+          "confirm_qr": {
+            "description": "Voer de QR-code-URI opnieuw in van de WebUntis webinterface.",
+            "title": "QR-Login referenties zijn gewijzigd",
+            "data": {
+              "qr_uri": "QR-Code-URI"
             }
           }
         }

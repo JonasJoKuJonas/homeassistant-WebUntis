@@ -15,10 +15,19 @@
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "Configuration via class only possible during an active school year.",
       "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
-      "unknown": "Unexpected error. View logs for more information."
+      "unknown": "Unexpected error. View logs for more information.",
+      "invalid_qr_uri": "Invalid QR code URI. Please check and try again.",
+      "qr_login_failed": "QR login failed. The QR code may have expired. Generate a new one."
     },
     "step": {
       "user": {
+        "description": "Choose how you want to authenticate with WebUntis.",
+        "data": {
+          "auth_method": "Authentication method"
+        }
+      },
+      "password": {
+        "description": "Enter your WebUntis server details and credentials.",
         "data": {
           "server": "Server",
           "school": "School",
@@ -29,6 +38,12 @@
         },
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+        }
+      },
+      "qr_login": {
+        "description": "Enter the QR code URI from the WebUntis web interface.\n\nTo get the QR code:\n1. Log in to the WebUntis web interface\n2. Go to Profile (top right) \u2192 Data access \u2192 Display QR code\n3. Copy the QR code URI (right-click the QR code \u2192 Copy link)\n4. Paste it below",
+        "data": {
+          "qr_uri": "QR Code URI"
         }
       },
       "timetable_source": {
@@ -124,7 +139,7 @@
           "calendar_description": "Determine what should be in the description of a calendar event.",
           "calendar_room": "Specify what to display for location.",
           "calendar_show_room_change": "Show room changes in the calendar.",
-          "calendar_replace_name": "e.g.,\nCancelled: ❌"
+          "calendar_replace_name": "e.g.,\nCancelled: \u274c"
         }
       },
       "backend": {
@@ -208,6 +223,12 @@
         "class_name_short": "Class Name (short)",
         "class_name_long": "Class Name (long)"
       }
+    },
+    "auth_method": {
+      "options": {
+        "password": "Password Login",
+        "qr": "QR Code Login"
+      }
     }
   },
   "issues": {
@@ -217,7 +238,8 @@
           "cannot_connect": "Failed to connect. Please check the host.",
           "invalid_auth": "Invalid authentication",
           "bad_credentials": "Invalid password",
-          "unknown": "Unexpected error"
+          "unknown": "Unexpected error",
+          "qr_login_failed": "QR login failed. Please try again with a new QR code."
         },
         "step": {
           "confirm": {
@@ -225,6 +247,13 @@
             "title": "Password has been changed",
             "data": {
               "password": "Password"
+            }
+          },
+          "confirm_qr": {
+            "description": "Please re-enter the QR code URI from the WebUntis web interface.",
+            "title": "QR Login credentials have changed",
+            "data": {
+              "qr_uri": "QR Code URI"
             }
           }
         }
