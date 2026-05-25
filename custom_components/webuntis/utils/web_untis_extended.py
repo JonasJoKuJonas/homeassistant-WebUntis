@@ -38,32 +38,36 @@ class ExtendedSession(WebUntisSession):
         token = pyotp.TOTP(otp_secret).now()
         client_time = int(time.time() * 1000)
 
-        response = requests.post(
-            f"{base_url}/WebUntis/jsonrpc_intern.do",
-            params={
-                "m": "getUserData2017",
-                "school": school,
-                "v": "i2.2",
-            },
-            data=json.dumps({
-                "id": useragent,
-                "method": "getUserData2017",
-                "params": [
-                    {
-                        "auth": {
-                            "clientTime": client_time,
-                            "user": username,
-                            "otp": int(token),
+        try:
+            response = requests.post(
+                f"{base_url}/WebUntis/jsonrpc_intern.do",
+                params={
+                    "m": "getUserData2017",
+                    "school": school,
+                    "v": "i2.2",
+                },
+                data=json.dumps({
+                    "id": useragent,
+                    "method": "getUserData2017",
+                    "params": [
+                        {
+                            "auth": {
+                                "clientTime": client_time,
+                                "user": username,
+                                "otp": int(token),
+                            },
                         },
-                    },
-                ],
-                "jsonrpc": "2.0",
-            }),
-            headers={
-                "User-Agent": useragent,
-                "Content-Type": "application/json",
-            },
-        )
+                    ],
+                    "jsonrpc": "2.0",
+                }),
+                headers={
+                    "User-Agent": useragent,
+                    "Content-Type": "application/json",
+                },
+                timeout=10,
+            )
+        except requests.RequestException as err:
+            raise errors.AuthError(f"OTP login request failed: {err}") from err
 
         if response.status_code != 200:
             raise errors.AuthError(
