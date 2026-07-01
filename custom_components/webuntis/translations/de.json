@@ -7,7 +7,7 @@
       "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
       "invalid_auth": "Ungültige Authentifizierung",
       "bad_credentials": "Ungültiger Benutzername und/oder Passwort",
-      "school_not_found": "Ungültiger Schulname/-ID",
+      "school_not_found": "Es wurden keine Schulen gefunden. Versuche es mit einem anderen Suchbegriff.",
       "name_split_error": "Ungültiger Name. Versuche \"Vorname, Nachname\".",
       "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
       "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
@@ -20,19 +20,27 @@
     "step": {
       "user": {
         "data": {
-          "server": "Server",
-          "school": "Schule",
-          "username": "Benutzername",
-          "password": "Passwort",
+          "school": "Schulname oder Suchbegriff",
           "timetable_source": "Stundenplan-Quelle",
-          "timetable_source_id": "Voller Name/Klasse"
+          "timetable_source_id": "Voller Name/Klasse",
+          "school_choice": "Wähle deine Schule:"
         },
         "data_description": {
-          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
+          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein",
+          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen."
+        }
+      },
+      "auth": {
+        "description": "Bitte gib deine Untis Zugangsdaten für **{school_name}** ein.",
+        "data": {
+          "username": "Benutzername",
+          "password": "Passwort"
         }
       },
       "timetable_source": {
-        "description": "Wähle die Quelle"
+        "data": {
+          "timetable_source": "Wähle die Datenquelle für den Stundenplan:"
+        }
       },
       "pick_student": {
         "description": "Name eines Schülers eingeben",
@@ -55,6 +63,11 @@
         "data": {
           "klasse": "Klasse",
           "back": "Zurück"
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Passwort"
         }
       }
     }

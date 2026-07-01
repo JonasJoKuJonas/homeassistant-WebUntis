@@ -7,7 +7,7 @@
       "cannot_connect": "Failed to connect. Please check the host.",
       "invalid_auth": "Invalid authentication",
       "bad_credentials": "Invalid username and/or password",
-      "school_not_found": "Invalid school name/id",
+      "school_not_found": "There are no schools matching your input. Please check the name or try a different search term.",
       "name_split_error": "Invalid name. Try \"first_name, last_name\".",
       "student_not_found": "Student not found. Check the name or choose another source.",
       "teacher_not_found": "Teacher not found. Check the name or choose another source.",
@@ -20,19 +20,27 @@
     "step": {
       "user": {
         "data": {
-          "server": "Server",
-          "school": "School",
-          "username": "Username",
-          "password": "Password",
+          "school": "School name or search term",
           "timetable_source": "Timetable source",
-          "timetable_source_id": "Full name/Class"
+          "timetable_source_id": "Full name/Class",
+          "school_choice": "Choose your school:"
         },
         "data_description": {
-          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name",
+          "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input."
+        }
+      },
+      "auth": {
+        "description": "Please enter your Untis credentials for **{school_name}**.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
         }
       },
       "timetable_source": {
-        "description": "Select the data source"
+        "data": {
+          "timetable_source": "Select the timetable data source:"
+        }
       },
       "pick_student": {
         "description": "Enter a Student Name",
@@ -55,6 +63,11 @@
         "data": {
           "klasse": "Class",
           "back": "Back"
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Password"
         }
       }
     }

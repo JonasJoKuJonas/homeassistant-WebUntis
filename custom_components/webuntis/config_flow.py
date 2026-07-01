@@ -19,6 +19,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from homeassistant.data_entry_flow import section as data_entry_flow_section
 from homeassistant.helpers import selector
 
 from .const import (
@@ -32,6 +33,7 @@ from .notify import get_notification_data
 from .utils.errors import *
 from .utils.utils import async_notify, is_service
 from .utils.web_untis import get_timetable_object
+from .utils.search_schools import search_schools
 
 # import webuntis.session
 
@@ -47,6 +49,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _session_temp = None
     _user_input_temp = {}
     _source_id = None
+    _reconfigure = False
+    _search_results = []
+    _selected_school = None
 
     @staticmethod
     @callback
@@ -56,32 +61,133 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Create the options flow."""
         return OptionsFlowHandler(config_entry)
 
+    async def async_step_reconfigure(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult | FlowResult:
+        """Handle reconfiguration of an existing entry."""
+        self._reconfigure = True
+        # During reconfigure only allow changing password and timetable source (otherwise the entity id is deprecated)
+        entry = self._get_reconfigure_entry()
+        current = entry.data if entry else {}
+        errors = errors or {}
+
+        if user_input:
+            # Merge submitted fields with existing fixed fields so validate_login has server, school and username
+            merged = {**current, **user_input}
+            errors, self._session_temp = await self.validate_login(merged)
+
+            if not errors:
+                merged["school"] = current.get("school")
+                merged["username"] = current.get("username")
+                self._user_input_temp = merged
+                return await self.async_step_timetable_source()
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    "password": str,
+                }
+            ),
+            errors=errors,
+        )
+
     async def async_step_user(
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
-        if user_input is not None:
-            errors, self._session_temp = await self.validate_login(user_input)
+    ) -> FlowResult | config_entries.ConfigFlowResult:
+        # First step: accept a school name or search query
+        errors = errors or {}
 
+        if user_input is not None:
+            self._user_input_temp.update(user_input)
+
+            query = user_input.get("school", "").strip()
+
+            # School is selected
+            selected = user_input.get("school_choice")
+            if selected:
+                selected_school = next(
+                    (school for school in self._search_results if school["login_name"] == selected),
+                    None,
+                )
+                if selected_school:
+                    self._selected_school = selected_school
+                    self._user_input_temp["school"] = selected_school["login_name"]
+                    self._user_input_temp["server"] = selected_school["server"]
+
+                    return await self.async_step_auth()
+
+            # Do search
+            results = await self.hass.async_add_executor_job(search_schools, query)
+            self._search_results = results.get("schools", [])
+            if not self._search_results:
+                # no results -> show error
+                _LOGGER.debug("No schools found for query: %s", query)
+                errors["school"] = "school_not_found"
+
+            elif len(self._search_results) == 1:
+                _LOGGER.debug("One school found: %s", self._search_results[0].get("name"))
+                if self._search_results[0].get("login_name").lower() == query.lower():
+                    _LOGGER.debug("Name matches query, skipping choose_school step")
+                    self._selected_school = self._search_results[0]
+                    self._user_input_temp["school"] = self._search_results[0].get("login_name")
+                    self._user_input_temp["server"] = self._search_results[0].get("server")
+                    return await self.async_step_auth()
+
+        user_input = user_input or {}
+
+        schema = {
+            vol.Required("school", default=user_input.get("school", "")): str
+        }
+
+        # Show dropdown if there are search results
+        if getattr(self, "_search_results", None):
+            schema[vol.Optional("school_choice")] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=[
+                        selector.SelectOptionDict(
+                            label=f'{school["name"]} ({school["address"]})',
+                            value=school["login_name"],
+                        )
+                        for school in self._search_results
+                    ]
+                )
+            )
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(schema),
+            errors=errors,
+        )
+
+    async def async_step_auth(self, user_input: dict[str, Any] | None = None, errors: dict[str, Any] | None = None) -> FlowResult | config_entries.ConfigFlowResult:
+        """Authenticate with username/password after school is chosen."""
+        errors = errors or {}
+
+        if user_input is not None:
+            # merge stored inputs (school, server) with username/password
+            merged = {**self._user_input_temp, **user_input}
+            errors, self._session_temp = await self.validate_login(merged)
             if not errors:
-                self._user_input_temp = user_input
+                # save final data and create entry
+                self._user_input_temp.update(user_input)
                 return await self.async_step_timetable_source()
 
         user_input = user_input or {}
 
         return self.async_show_form(
-            step_id="user",
+            step_id="auth",
+                description_placeholders={
+                    "school_name": self._selected_school["name"],
+                },
             data_schema=vol.Schema(
                 {
-                    vol.Required("server", default=user_input.get("server", "")): str,
-                    vol.Required("school", default=user_input.get("school", "")): str,
-                    vol.Required(
-                        "username", default=user_input.get("username", "")
-                    ): str,
-                    vol.Required(
-                        "password", default=user_input.get("password", "")
-                    ): str,
+                    vol.Required("username", default=user_input.get("username", "")): str,
+                    vol.Required("password", default=user_input.get("password", "")): str,
                 }
             ),
             errors=errors,
@@ -89,7 +195,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_timetable_source(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -145,7 +251,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_student(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -183,7 +289,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_teacher(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -220,7 +326,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_klasse(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -266,6 +372,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             f"{self._source_id}@{user_input['school']}".lower().replace(" ", "-")
         )
         self._abort_if_unique_id_configured()
+        # If the flow was started as a reconfigure, update and reload the existing entry instead of creating a new one.
+        if self._reconfigure:
+            return self.async_update_reload_and_abort(
+                entry=self._get_reconfigure_entry(), data=user_input
+            )
+
         return self.async_create_entry(
             title=user_input["username"],
             data=user_input,
@@ -276,7 +388,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         if user_input is None:
             user_input = {}
 
@@ -314,25 +426,51 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def validate_login(self, credentials: dict[str, Any]) -> dict[str, Any]:
+    async def validate_login(
+        self, credentials: dict[str, Any]
+    ) -> dict[str, Any] | tuple[dict[Any, Any], Any]:
         hass: HomeAssistant = self.hass
 
         errors = {}
+        session = None
+        server =  credentials.get("server") or credentials.get("advanced_options", {}).get("server") # keep fallback for advanced_options for backward compatibility
 
-        server = credentials["server"].strip()
+        if not server:
+            # use server from selected school (provided by the untis search)
+            school_obj = self._selected_school or {}
+            server = school_obj.get("server")
+
+        if not server:
+            errors["base"] = "cannot_connect"
+            return errors, None
+
+        server = server.strip()
 
         if not server.lower().startswith(("http://", "https://")):
             server = "https://" + server
 
         parsed = urlparse(server)
         hostname = parsed.hostname
+
+        if not hostname:
+            _LOGGER.error("Invalid server URL: %s", server)
+            errors["base"] = "cannot_connect"
+            return errors, None
+
         credentials["server"] = f"{parsed.scheme}://{parsed.netloc}"
+
+        if hostname is None:
+            _LOGGER.error(
+                "Cannot resolve hostname(%s): invalid hostname", credentials["server"]
+            )
+            errors["base"] = "cannot_connect"
+            return errors, None
 
         try:
             socket.gethostbyname(hostname)
         except Exception as exc:
             _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
-            errors["server"] = "cannot_connect"
+            errors["base"] = "cannot_connect"
             return errors, None
 
         try:
@@ -345,13 +483,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             await hass.async_add_executor_job(session.login)
         except webuntis.errors.BadCredentialsError:
-            errors["username"] = "bad_credentials"
+            errors["base"] = "bad_credentials"
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.error("webuntis.Session connection error: %s", exc)
-            errors["server"] = "cannot_connect"
+            errors["base"] = "cannot_connect"
         except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
             errors["school"] = "school_not_found"
-            raise (exc)
         except Exception as exc:
             _LOGGER.error("webuntis.Session unknown error: %s", exc)
             errors["base"] = "unknown"

@@ -7,7 +7,7 @@
       "cannot_connect": "Kan geen verbinding maken. Controleer de host.",
       "invalid_auth": "Ongeldige verificatie",
       "bad_credentials": "Ongeldige gebruikersnaam en/of wachtwoord",
-      "school_not_found": "Invalid school name/id",
+      "school_not_found": "Er zijn geen scholen gevonden die overeenkomen met je invoer. Controleer de naam of probeer een andere zoekterm.",
       "name_split_error": "Ongeldige naam. Probeer \"voornaam, achternaam\".",
       "student_not_found": "Student niet gevonden. Controleer de naam of kies een andere bron.",
       "teacher_not_found": "Leraar niet gevonden. Controleer de naam of kies een andere bron.",
@@ -19,19 +19,27 @@
     "step": {
       "user": {
         "data": {
-          "server": "Server",
-          "school": "School",
-          "username": "Gebruikersnaam",
-          "password": "Wachtwoord",
+          "school": "Schoolnaam of zoekterm",
           "timetable_source": "Tijdschema bron",
-          "timetable_source_id": "Full name/Class"
+          "timetable_source_id": "Full name/Class",
+          "school_choice": "Kies je school:"
         },
         "data_description": {
-          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name",
+          "school": "Je hoeft niet de volledige naam van de school in te voeren. De integratie zoekt naar scholen die overeenkomen met je invoer."
+        }
+      },
+      "auth": {
+        "description": "Voer je Untis-gegevens in voor **{school_name}**.",
+        "data": {
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord"
         }
       },
       "timetable_source": {
-        "description": "Select the data source"
+        "data": {
+          "timetable_source": "Selecteer de bron van het rooster:"
+        }
       },
       "pick_student": {
         "description": "Enter a Student Name",
@@ -51,6 +59,11 @@
         "description": "Enter class Name",
         "data": {
           "klasse": "Class"
+        }
+      },
+      "reconfigure": {
+        "data": {
+          "password": "Wachtwoord"
         }
       }
     }

@@ -34,25 +34,9 @@ volumes:
 TZ=Europe/Berlin
 
 ## Configuration via UI
+Just follow the config flow. The integration uses the untis school search to search your school details based on a search term. You only need your username and your password.
 
-### Server & School
-
-Visit https://webuntis.com and click on your school.
-
-In the URL you should find the information you need:
-
-```
-https://demo.webuntis.com/WebUntis/?school=Demo-School#/basic/login
-        ^^^^^^^^^^^^^^^^^                  ^^^^^^^^^^^
-              Server                          School
-```
-
-If your school has the new address pattern, similar to this:
-
-```
-https://demo-school.webuntis.com/today
-```
-then the server is `https://demo-school.webuntis.com` and the school is `demo-school`.
+---
 
 ### Username and Password
 

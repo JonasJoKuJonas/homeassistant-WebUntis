@@ -54,6 +54,14 @@ We use Crowdin to simplify translations. If you’re fluent in another language 
 
 ---
 
+## Dashboard card for timetable
+There is an inofficial dashboard card for displaying timetables in Home Assistant. 
+The card is not related to this project, but it is compatible with the timetable provided by this integration
+
+Check it out here: https://github.com/KingDando8430/HA-Timetable-Card
+
+---
+
 ## [![Join our Discord](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner2)](https://discord.gg/34EHnHQaPm)
 
 
