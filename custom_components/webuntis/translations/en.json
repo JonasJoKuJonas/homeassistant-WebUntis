@@ -6,6 +6,7 @@
     "error": {
       "cannot_connect": "Failed to connect. Please check the host.",
       "invalid_auth": "Invalid authentication",
+      "invalid_qr_format": "Invalid QR code payload",
       "bad_credentials": "Invalid username and/or password",
       "school_not_found": "There are no schools matching your input. Please check the name or try a different search term.",
       "name_split_error": "Invalid name. Try \"first_name, last_name\".",
@@ -19,6 +20,11 @@
     },
     "step": {
       "user": {
+        "menu_options": {
+          "manual_login": "Manual login",
+          "qr_login": "Login with QRCode"
+        },
+        "description": "Choose how you want to sign in.",
         "data": {
           "school": "School name or search term",
           "timetable_source": "Timetable source",
@@ -28,6 +34,28 @@
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name",
           "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input."
+        }
+      },
+      "manual_login": {
+        "data": {
+          "school": "School name or search term",
+          "timetable_source": "Timetable source",
+          "timetable_source_id": "Full name/Class",
+          "school_choice": "Choose your school:"
+        },
+        "data_description": {
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name",
+          "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input."
+        },
+        "description": "Search for your school or select it from the search results."
+      },
+      "qr_login": {
+        "description": "Paste the QR payload from the WebUntis app.",
+        "data": {
+          "qr_payload": "QRCode payload"
+        },
+        "data_description": {
+          "qr_payload": "The payload usually starts with `untis://`."
         }
       },
       "auth": {

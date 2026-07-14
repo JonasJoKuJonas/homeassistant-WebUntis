@@ -14,7 +14,8 @@
       "class_not_found": "Klasse niet gevonden. Controleer de klasse of kies een andere bron.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "You can only configurate via Class if there is a active schoolyear.",
-      "unknown": "Unexpected error. View Logs for more infos."
+      "unknown": "Unexpected error. View Logs for more infos.",
+      "invalid_qr_format": "Ongeldige QR-code payload"
     },
     "step": {
       "user": {
@@ -27,7 +28,12 @@
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name",
           "school": "Je hoeft niet de volledige naam van de school in te voeren. De integratie zoekt naar scholen die overeenkomen met je invoer."
-        }
+        },
+        "menu_options": {
+          "manual_login": "Handmatig inloggen",
+          "qr_login": "Inloggen met QR-code"
+        },
+        "description": "Kies hoe je wilt inloggen."
       },
       "auth": {
         "description": "Voer je Untis-gegevens in voor **{school_name}**.",
@@ -64,6 +70,28 @@
       "reconfigure": {
         "data": {
           "password": "Wachtwoord"
+        }
+      },
+      "manual_login": {
+        "description": "Zoek je school of selecteer deze uit de zoekresultaten.",
+        "data": {
+          "school": "Schoolnaam of zoekterm",
+          "timetable_source": "Tijdschema bron",
+          "timetable_source_id": "Full name/Class",
+          "school_choice": "Kies je school:"
+        },
+        "data_description": {
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name",
+          "school": "Je hoeft niet de volledige naam van de school in te voeren. De integratie zoekt naar scholen die overeenkomen met je invoer."
+        }
+      },
+      "qr_login": {
+        "description": "Plak de QR-payload uit de WebUntis-app.",
+        "data": {
+          "qr_payload": "QR-code payload"
+        },
+        "data_description": {
+          "qr_payload": "De payload begint meestal met `untis://`."
         }
       }
     }

@@ -172,7 +172,7 @@ class WebUntis:
         self.server = config.data["server"]
         self.school = config.data["school"]
         self.username = config.data["username"]
-        self.password = config.data["password"]
+        self.password = config.data.get("password", "")
         self.timetable_source = config.data["timetable_source"]
         self.timetable_source_id = config.data["timetable_source_id"]
         self.title = config.title
@@ -213,13 +213,17 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
-        self.session = ExtendedSession(
-            username=self.username,
-            password=self.password,
-            server=self.server,
-            useragent="foo",
-            school=self.school,
-        )
+        session_kwargs = {
+            "username": self.username,
+            "password": self.password,
+            "server": self.server,
+            "useragent": "foo",
+            "school": self.school,
+        }
+        if config.data.get("jsessionid"):
+            session_kwargs["jsessionid"] = config.data["jsessionid"]
+
+        self.session = ExtendedSession(**session_kwargs)
         self._loged_in = False
         self._last_status_request_failed = False
         self._no_lessons = False

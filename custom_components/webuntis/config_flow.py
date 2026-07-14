@@ -19,8 +19,10 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
-from homeassistant.data_entry_flow import section as data_entry_flow_section
 from homeassistant.helpers import selector
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .utils.qrLogin import WebUntisQrClient, parse_qr_payload
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -47,6 +49,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = CONFIG_ENTRY_VERSION
 
     _session_temp = None
+    _qr_session_temp = None
     _user_input_temp = {}
     _source_id = None
     _reconfigure = False
@@ -99,7 +102,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult | config_entries.ConfigFlowResult:
-        # First step: accept a school name or search query
+        """Show the initial login method menu."""
+        return self.async_show_menu(
+            step_id="user",
+            menu_options=["manual_login", "qr_login"],
+        )
+
+    async def async_step_manual_login(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult | config_entries.ConfigFlowResult:
+        """Handle the school search and username/password login flow."""
         errors = errors or {}
 
         if user_input is not None:
@@ -107,11 +121,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             query = user_input.get("school", "").strip()
 
-            # School is selected
+            # School is selected from a previous search.
             selected = user_input.get("school_choice")
             if selected:
                 selected_school = next(
-                    (school for school in self._search_results if school["login_name"] == selected),
+                    (
+                        school
+                        for school in self._search_results
+                        if school["login_name"] == selected
+                    ),
                     None,
                 )
                 if selected_school:
@@ -121,30 +139,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     return await self.async_step_auth()
 
-            # Do search
+            # Search for schools.
             results = await self.hass.async_add_executor_job(search_schools, query)
             self._search_results = results.get("schools", [])
             if not self._search_results:
-                # no results -> show error
                 _LOGGER.debug("No schools found for query: %s", query)
                 errors["school"] = "school_not_found"
-
             elif len(self._search_results) == 1:
-                _LOGGER.debug("One school found: %s", self._search_results[0].get("name"))
+                _LOGGER.debug(
+                    "One school found: %s", self._search_results[0].get("name")
+                )
                 if self._search_results[0].get("login_name").lower() == query.lower():
                     _LOGGER.debug("Name matches query, skipping choose_school step")
                     self._selected_school = self._search_results[0]
-                    self._user_input_temp["school"] = self._search_results[0].get("login_name")
-                    self._user_input_temp["server"] = self._search_results[0].get("server")
+                    self._user_input_temp["school"] = self._search_results[0].get(
+                        "login_name"
+                    )
+                    self._user_input_temp["server"] = self._search_results[0].get(
+                        "server"
+                    )
                     return await self.async_step_auth()
 
         user_input = user_input or {}
 
-        schema = {
+        schema: dict[Any, Any] = {
             vol.Required("school", default=user_input.get("school", "")): str
         }
 
-        # Show dropdown if there are search results
         if getattr(self, "_search_results", None):
             schema[vol.Optional("school_choice")] = selector.SelectSelector(
                 selector.SelectSelectorConfig(
@@ -159,8 +180,63 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         return self.async_show_form(
-            step_id="user",
+            step_id="manual_login",
             data_schema=vol.Schema(schema),
+            errors=errors,
+        )
+
+    async def async_step_qr_login(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult | config_entries.ConfigFlowResult:
+        """Handle QR-code based login."""
+        errors = errors or {}
+
+        if user_input is not None:
+            payload = user_input.get("qr_payload", "").strip()
+            try:
+                creds = parse_qr_payload(payload)
+                qr_session = async_get_clientsession(self.hass)
+                qr_client = WebUntisQrClient(creds, qr_session)
+                user_data, jsessionid = await qr_client.async_login()
+
+                session = qr_client.create_session(jsessionid)
+                session.login_result = WebUntisQrClient.login_result_from_user_data(
+                    user_data
+                )
+
+                self._session_temp = session
+                self._user_input_temp = {
+                    "login_method": "qr",
+                    "server": f"https://{creds.server}",
+                    "school": creds.school,
+                    "username": creds.user,
+                    "password": "",
+                    "jsessionid": jsessionid,
+                }
+                if session.login_result:
+                    self._user_input_temp.update(session.login_result)
+
+                return await self.async_step_timetable_source()
+            except ValueError:
+                errors["base"] = "invalid_qr_format"
+            except webuntis.errors.NotLoggedInError:
+                errors["base"] = "invalid_auth"
+            except Exception as err:
+                _LOGGER.error("QR login failed: %s", err)
+                errors["base"] = "cannot_connect"
+
+        user_input = user_input or {}
+        return self.async_show_form(
+            step_id="qr_login",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "qr_payload", default=user_input.get("qr_payload", "")
+                    ): str,
+                }
+            ),
             errors=errors,
         )
 
@@ -477,13 +553,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             session = webuntis.Session(
                 server=credentials["server"],
                 school=credentials["school"],
-                username=credentials["username"],
-                password=credentials["password"],
+                username=credentials.get("username", ""),
+                password=credentials.get("password", ""),
+                jsessionid=credentials.get("jsessionid"),
                 useragent="home-assistant",
             )
-            await hass.async_add_executor_job(session.login)
+            if credentials.get("jsessionid"):
+                session.login_result = {
+                    key: credentials[key]
+                    for key in ("personType", "personId", "klasseId")
+                    if key in credentials
+                }
+                await hass.async_add_executor_job(session.schoolyears)
+            else:
+                await hass.async_add_executor_job(session.login)
         except webuntis.errors.BadCredentialsError:
             errors["base"] = "bad_credentials"
+        except webuntis.errors.NotLoggedInError:
+            errors["base"] = "invalid_auth"
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.error("webuntis.Session connection error: %s", exc)
             errors["base"] = "cannot_connect"
@@ -510,7 +597,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             if user_input["timetable_source"] == "personal":
                 session.my_timetable(start=day, end=day)
-                self._source_id = session.login_result["personId"]
+                login_result = getattr(session, "login_result", {}) or {}
+                self._source_id = login_result.get("personId")
+                if self._source_id is None:
+                    return {"base": "no_personal_timetable"}
             else:
                 timetable_object = get_timetable_object(
                     user_input["timetable_source_id"],

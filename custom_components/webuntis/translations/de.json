@@ -15,7 +15,8 @@
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
       "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
-      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
+      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen.",
+      "invalid_qr_format": "Ung?ltige QR-Code-Nutzlast"
     },
     "step": {
       "user": {
@@ -28,7 +29,12 @@
         "data_description": {
           "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein",
           "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen."
-        }
+        },
+        "menu_options": {
+          "manual_login": "Manueller Login",
+          "qr_login": "Mit QR-Code anmelden"
+        },
+        "description": "W?hle aus, wie du dich anmelden m?chtest."
       },
       "auth": {
         "description": "Bitte gib deine Untis Zugangsdaten für **{school_name}** ein.",
@@ -68,6 +74,28 @@
       "reconfigure": {
         "data": {
           "password": "Passwort"
+        }
+      },
+      "manual_login": {
+        "description": "Suche nach deiner Schule oder w?hle sie aus den Suchergebnissen.",
+        "data": {
+          "school": "Schulname oder Suchbegriff",
+          "timetable_source": "Stundenplan-Quelle",
+          "timetable_source_id": "Voller Name/Klasse",
+          "school_choice": "Wähle deine Schule:"
+        },
+        "data_description": {
+          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein",
+          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen."
+        }
+      },
+      "qr_login": {
+        "description": "F?ge die QR-Nutzlast aus der WebUntis-App ein.",
+        "data": {
+          "qr_payload": "QR-Code-Nutzlast"
+        },
+        "data_description": {
+          "qr_payload": "Die Nutzlast beginnt normalerweise mit `untis://`."
         }
       }
     }
