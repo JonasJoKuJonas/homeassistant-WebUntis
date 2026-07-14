@@ -220,7 +220,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
 
                 current_schoolyear = await self.hass.async_add_executor_job(
-                    lambda: schoolyears.current
+                    self._safe_current_schoolyear, schoolyears
                 )
                 if current_schoolyear:
                     return await self.async_step_pick_klasse()
@@ -503,9 +503,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         day = datetime.date.today()
         schoolyears = session.schoolyears()
-        current_schoolyear = schoolyears.current
+        current_schoolyear = self._safe_current_schoolyear(schoolyears)
         if not current_schoolyear:
-            day = schoolyears[-1].start.date()
+            if schoolyears:
+                day = schoolyears[-1].start.date()
+            else:
+                return {"base": "no_school_year"}
 
         try:
             if user_input["timetable_source"] == "personal":
@@ -538,6 +541,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             _LOGGER.error("Error testing timetable: %s", exc)
             return {"base": "unknown"}
+
+    @staticmethod
+    def _safe_current_schoolyear(schoolyears):
+        """Return the current schoolyear, or None when WebUntis has none."""
+
+        try:
+            return schoolyears.current
+        except webuntis.errors.RemoteError:
+            return None
 
 
 OPTIONS_MENU = [
