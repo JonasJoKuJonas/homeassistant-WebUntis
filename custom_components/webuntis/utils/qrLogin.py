@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-import time
 from dataclasses import dataclass
+import time
 from typing import Any
-from urllib.parse import parse_qs, urlparse
-
 import aiohttp
+from urllib.parse import parse_qs, urlparse
 import pyotp
 import webuntis
 from voluptuous import Error
@@ -20,9 +19,7 @@ API_VERSION = "i3.2"
 
 
 @dataclass(frozen=True)
-class WebUntisCredentials:
-    """Credentials extracted from the QR payload."""
-
+class qrData:
     server: str
     school: str
     user: str
@@ -30,81 +27,74 @@ class WebUntisCredentials:
     school_number: str | None = None
 
 
-def _normalize_server(server: str) -> str:
-    """Return a host name that can be used by webuntis.Session."""
+def _normalize_server_url(server: str) -> str:
     parsed = urlparse(server if "://" in server else f"https://{server}")
-    host = parsed.netloc or parsed.path.split("/", 1)[0]
-    host = host.strip()
+    host = (parsed.netloc or parsed.path.split("/", 1)[0]).strip()
     if not host:
         raise ValueError("QR payload does not contain a valid server")
     return host
 
 
-def parse_qr_payload(payload: str) -> WebUntisCredentials:
+def parse_qr_code(payload: str) -> qrData:
     """Parse the untis:// QR payload."""
     payload = payload.strip()
 
     if not payload.startswith("untis://"):
-        if payload.startswith("?"):
-            payload = "untis://setschool" + payload
-        else:
+        if not payload.startswith("?"):
             raise ValueError("QR payload must start with untis://")
+        payload = f"untis://setschool{payload}"
 
-    parsed = urlparse(payload)
-    query = parse_qs(parsed.query)
+    parsed_result = urlparse(payload)
+    query = parse_qs(parsed_result.query)
 
-    def _first(name: str) -> str | None:
-        values = query.get(name)
-        return values[0] if values else None
+    # get the first value of a query parameter or None if not present
+    _first_obj = lambda name: next(iter(query.get(name, [])), None)
 
-    server = _first("url") or _first("server")
-    school = _first("school")
-    user = _first("user")
-    key = _first("key")
-    school_number = _first("schoolNumber")
+    server = _first_obj("url") or _first_obj("server")
+    school = _first_obj("school")
+    user = _first_obj("user")
+    key = _first_obj("key")
+    school_number = _first_obj("schoolNumber")
 
     if not all([server, school, user, key]):
         raise ValueError("QR payload is incomplete")
 
-    return WebUntisCredentials(
-        server=_normalize_server(server),
-        school=school,
-        user=user,
-        key=key,
+    return qrData(
+        server=_normalize_server_url(server), # type: ignore[arg-type]
+        school=school,  # type: ignore[arg-type]
+        user=user,  # type: ignore[arg-type]
+        key=key,  # type: ignore[arg-type]
         school_number=school_number,
     )
 
 
 def _extract_login_result(data: dict[str, Any]) -> dict[str, Any]:
     """Extract the fields expected by webuntis.Session.login_result."""
-    login_result: dict[str, Any] = {}
-
-    for key in ("personType", "personId", "klasseId"):
-        if key in data:
-            login_result[key] = data[key]
+    keys = ("personType", "personId", "klasseId")
+    login_result = {k: data[k] for k in keys if k in data}
 
     result = data.get("result")
     if isinstance(result, dict):
-        for key in ("personType", "personId", "klasseId"):
+        for key in keys:
             if key in result and key not in login_result:
                 login_result[key] = result[key]
 
     return login_result
 
 
-class WebUntisQrClient:
-    """Asynchronous QR login helper for the WebUntis JSON-RPC API."""
+class WebUntisQrLogin:
+    """Async QR login helper for the WebUntis JSON-RPC API."""
 
     def __init__(
         self,
-        credentials: WebUntisCredentials,
+        credentials: qrData,
         session: aiohttp.ClientSession,
     ) -> None:
         self._creds = credentials
         self._session = session
 
     @property
-    def credentials(self) -> WebUntisCredentials:
+    def credentials(self) -> qrData:
         return self._creds
 
     def _endpoint(self, method: str) -> str:
@@ -114,10 +104,9 @@ class WebUntisQrClient:
         )
 
     def _auth_block(self) -> dict[str, Any]:
-        totp = pyotp.TOTP(self._creds.key)
         return {
             "user": self._creds.user,
-            "otp": totp.now(),
+            "otp": pyotp.TOTP(self._creds.key).now(),
             "clientTime": int(time.time() * 1000),
         }
 
@@ -127,13 +116,11 @@ class WebUntisQrClient:
         body = {
             "id": "ha-webuntis-qr",
             "method": method,
-            "params": [
-                {
-                    "auth": self._auth_block(),
-                    "deviceOs": "AND",
-                    "deviceOsVersion": "13",
-                }
-            ],
+            "params": [{
+                "auth": self._auth_block(),
+                "deviceOs": "AND",
+                "deviceOsVersion": "13",
+            }],
             "jsonrpc": "2.0",
         }
         headers = {
@@ -150,24 +137,19 @@ class WebUntisQrClient:
             resp.raise_for_status()
             data = await resp.json(content_type=None)
 
-            if data.get("error"):
-                raise Error(
-                    f"WebUntis error: {data['error'].get('message', data['error'])}"
-                )
+            if error := data.get("error"):
+                msg = error.get("message", error) if isinstance(error, dict) else error
+                raise Error(f"WebUntis error: {msg}")
 
-            jsessionid = resp.cookies.get("JSESSIONID")
-            if not jsessionid:
+            if not (jsessionid := resp.cookies.get("JSESSIONID")):
                 raise Error("Could not find JSESSIONID in QR login response")
 
-            result = data.get("result", {})
-            if not isinstance(result, dict):
-                result = {}
-
-            return result, jsessionid.value
+            result = data.get("result")
+            return result if isinstance(result, dict) else {}, jsessionid.value
 
     def create_session(self, jsessionid: str) -> webuntis.Session:
         """Create a standard webuntis.Session bound to the QR cookie."""
-        session = webuntis.Session(
+        return webuntis.Session(
             server=self._creds.server,
             school=self._creds.school,
             username=self._creds.user,
@@ -175,7 +157,6 @@ class WebUntisQrClient:
             jsessionid=jsessionid,
             useragent="home-assistant",
         )
-        return session
 
     @staticmethod
     def login_result_from_user_data(user_data: dict[str, Any]) -> dict[str, Any]:

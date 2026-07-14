@@ -22,7 +22,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .utils.qrLogin import WebUntisQrClient, parse_qr_payload
+from .utils.qrLogin import WebUntisQrLogin, parse_qr_code
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -196,13 +196,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             payload = user_input.get("qr_payload", "").strip()
             try:
-                creds = parse_qr_payload(payload)
+                creds = parse_qr_code(payload)
                 qr_session = async_get_clientsession(self.hass)
-                qr_client = WebUntisQrClient(creds, qr_session)
+                qr_client = WebUntisQrLogin(creds, qr_session)
                 user_data, jsessionid = await qr_client.async_login()
 
                 session = qr_client.create_session(jsessionid)
-                session.login_result = WebUntisQrClient.login_result_from_user_data(
+                session.login_result = WebUntisQrLogin.login_result_from_user_data(
                     user_data
                 )
 

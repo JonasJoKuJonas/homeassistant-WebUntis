@@ -16,7 +16,7 @@
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
       "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
       "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen.",
-      "invalid_qr_format": "Ung?ltige QR-Code-Nutzlast"
+      "invalid_qr_format": "Ungültige QR-Code-Nutzlast"
     },
     "step": {
       "user": {
@@ -34,7 +34,7 @@
           "manual_login": "Manueller Login",
           "qr_login": "Mit QR-Code anmelden"
         },
-        "description": "W?hle aus, wie du dich anmelden m?chtest."
+        "description": "Wähle aus, wie du dich anmelden möchtest."
       },
       "auth": {
         "description": "Bitte gib deine Untis Zugangsdaten für **{school_name}** ein.",
@@ -77,7 +77,7 @@
         }
       },
       "manual_login": {
-        "description": "Suche nach deiner Schule oder w?hle sie aus den Suchergebnissen.",
+        "description": "Suche nach deiner Schule oder wähle sie aus den Suchergebnissen.",
         "data": {
           "school": "Schulname oder Suchbegriff",
           "timetable_source": "Stundenplan-Quelle",
@@ -90,7 +90,7 @@
         }
       },
       "qr_login": {
-        "description": "F?ge die QR-Nutzlast aus der WebUntis-App ein.",
+        "description": "Füge die QR-Nutzlast aus der WebUntis-App ein.",
         "data": {
           "qr_payload": "QR-Code-Nutzlast"
         },
