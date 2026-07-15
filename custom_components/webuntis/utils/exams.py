@@ -20,6 +20,9 @@ class ExamEventsFetcher:
         Fetch exam events from the WebUntis API using the session object and return them as a list of event dictionaries.
         """
 
+        if not self.current_schoolyear:
+            return []
+
         # Fetch exam data using the session object
         try:
             exam_data = self.session.get_exams(
