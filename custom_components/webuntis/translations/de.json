@@ -16,7 +16,7 @@
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
       "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
       "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen.",
-      "invalid_qr_format": "Ungültige QR-Code-Nutzlast"
+      "invalid_qr_format": "Ungültiger QR-Code-Inhalt"
     },
     "step": {
       "user": {
@@ -90,12 +90,12 @@
         }
       },
       "qr_login": {
-        "description": "Füge die QR-Nutzlast aus der WebUntis-App ein.",
+        "description": "Füge den QR-Inhalt aus WebUntis ein.",
         "data": {
-          "qr_payload": "QR-Code-Nutzlast"
+          "qr_payload": "QR-Code-Inhalt"
         },
         "data_description": {
-          "qr_payload": "Die Nutzlast beginnt normalerweise mit `untis://`."
+          "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`."
         }
       }
     }
