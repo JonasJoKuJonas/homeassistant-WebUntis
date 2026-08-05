@@ -2,7 +2,9 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 21
+CONFIG_ENTRY_VERSION = 22
+
+CONF_LIVE_ACTIVITIES = "live_activities"
 
 DEFAULT_OPTIONS = {
     "lesson_long_name": True,
@@ -21,7 +23,10 @@ DEFAULT_OPTIONS = {
     "notify_config": {},
     "invalid_subjects": False,
     "exclude_filter_comparison": False,
+    "live_activities": {},
 }
+
+LIVE_ACTIVITY_TAG_SUFFIX = "live_stundenplan"
 
 NOTIFY_OPTIONS = [
     "homework",
