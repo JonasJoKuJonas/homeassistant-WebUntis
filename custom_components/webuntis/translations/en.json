@@ -86,7 +86,8 @@
           "calendar": "Calendar",
           "lesson": "Lesson Display",
           "backend": "Backend",
-          "notify_menu": "Notify Menu"
+          "notify_menu": "Notify Menu",
+          "live_activities_menu": "Live Timetable"
         }
       },
       "filter": {
@@ -171,6 +172,21 @@
           "template": "may overwrite data keys"
         }
       },
+      "edit_live_activity": {
+        "title": "Live Timetable",
+        "description": "Add or edit a Live Activity for the timetable.",
+        "data": {
+          "name": "Name",
+          "platform": "Platform",
+          "entity_id": "Notify Service",
+          "start_offset": "Start before school",
+          "end_offset": "End after school"
+        },
+        "data_description": {
+          "start_offset": "Minutes before the first lesson.",
+          "end_offset": "Minutes after the last lesson."
+        }
+      },
       "notify_menu": {
         "title": "Notify Service",
         "menu_options": {
@@ -178,6 +194,15 @@
           "edit_notify_service_select": "edit notify service",
           "remove_notify_service": "remove notify service",
           "test_notify_service": "test notify service"
+        }
+      },
+      "live_activities_menu": {
+        "title": "Live Timetable",
+        "menu_options": {
+          "edit_live_activity": "add Live Timetable",
+          "edit_live_activity_select": "edit Live Timetable",
+          "remove_live_activity": "remove Live Timetable",
+          "test_live_activity": "test Live Timetable"
         }
       }
     }
@@ -221,6 +246,11 @@
         "class_name_short": "Class Name (short)",
         "class_name_long": "Class Name (long)"
       }
+    },
+    "live_activity_platform": {
+      "options": {
+        "ios": "iOS"
+      }
     }
   },
   "issues": {
@@ -243,6 +273,10 @@
         }
       },
       "title": "Password has been changed"
+    },
+    "live_activity_notify_missing": {
+      "title": "Live Timetable: notify target unreachable",
+      "description": "{entity_id} has no {service_id} action. Is the target an Companion App device? Please check the Live Timetable configuration."
     }
   },
   "services": {
