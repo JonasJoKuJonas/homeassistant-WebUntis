@@ -86,7 +86,8 @@
           "calendar": "Kalender",
           "lesson": "Stunden-Darstellung",
           "backend": "Backend",
-          "notify_menu": "Notify Menü"
+          "notify_menu": "Notify Menü",
+          "live_activities_menu": "Live Stundenplan"
         }
       },
       "filter": {
@@ -171,6 +172,21 @@
           "template": "Kann Benachrichtigungs-Daten überschreiben"
         }
       },
+      "edit_live_activity": {
+        "title": "Live Stundenplan",
+        "description": "Live Activity für den Stundenplan hinzufügen oder bearbeiten.",
+        "data": {
+          "name": "Name",
+          "platform": "Plattform",
+          "entity_id": "Notify-Dienst",
+          "start_offset": "Start vor Schulbeginn",
+          "end_offset": "Ende nach Schulschluss"
+        },
+        "data_description": {
+          "start_offset": "Minuten vor der ersten Stunde.",
+          "end_offset": "Minuten nach der letzten Stunde."
+        }
+      },
       "notify_menu": {
         "title": "Notify Dienst",
         "menu_options": {
@@ -178,6 +194,15 @@
           "edit_notify_service_select": "Notify Dienst bearbeiten",
           "remove_notify_service": "Notify Dienst löschen",
           "test_notify_service": "Notify Dienst testen"
+        }
+      },
+      "live_activities_menu": {
+        "title": "Live Stundenplan",
+        "menu_options": {
+          "edit_live_activity": "Live Stundenplan hinzufügen",
+          "edit_live_activity_select": "Live Stundenplan bearbeiten",
+          "remove_live_activity": "Live Stundenplan löschen",
+          "test_live_activity": "Live Stundenplan testen"
         }
       }
     }
@@ -220,6 +245,11 @@
         "class_name_short": "Klassen Name (kurz)",
         "class_name_long": "Klassen Name (lang)"
       }
+    },
+    "live_activity_platform": {
+      "options": {
+        "ios": "iOS"
+      }
     }
   },
   "issues": {
@@ -242,6 +272,10 @@
         }
       },
       "title": "Das Passwort wurde geändert"
+    },
+    "live_activity_notify_missing": {
+      "title": "Live Stundenplan: Notify-Ziel nicht erreichbar",
+      "description": "{entity_id} hat keine Aktion {service_id}. Ist das Ziel ein Gerät der Companion-App? Bitte in der Live-Stundenplan-Konfiguration prüfen."
     }
   },
   "services": {
