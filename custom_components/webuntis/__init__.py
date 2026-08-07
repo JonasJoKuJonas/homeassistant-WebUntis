@@ -336,23 +336,17 @@ class WebUntis:
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
                 self.calendar_homework = []
+                self.calendar_exams = []
                 self.next_day_json = None
                 self.day_json = None
                 self.today = [None, None]
 
-                # Inform user once about failed update if necessary.
+                # Only log schoolyear warning once
                 if not self._last_status_request_failed:
-                    _LOGGER.info(
-                        "No active schoolyear '%s@%s'",
+                    _LOGGER.warning(
+                        "No active schoolyear found for '%s@%s'. Timetable request returned empty.",
                         self.school,
                         self.username,
-                    )
-                    _LOGGER.info(
-                        "Found schoolyears for '%s@%s': %s (%s)",
-                        self.school,
-                        self.username,
-                        self.schoolyears,
-                        self.current_schoolyear,
                     )
                 self._last_status_request_failed = True
                 await self._hass.async_add_executor_job(self.webuntis_logout)
@@ -381,9 +375,7 @@ class WebUntis:
             )
 
         try:
-            self.klassen = await self._hass.async_add_executor_job(
-                self.session.klassen
-            )
+            self.klassen = await self._hass.async_add_executor_job(self.session.klassen)
         except OSError as error:
             self.klassen = []
 
@@ -654,7 +646,7 @@ class WebUntis:
             )
 
         if not self.current_schoolyear:
-            _LOGGER.warning(
+            _LOGGER.debug(
                 "No valid school year found for start date %s. Returning empty timetable.",
                 start,
             )
