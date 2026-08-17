@@ -121,6 +121,17 @@ class ExtendedSession(WebUntisSession):
         session.login_result = cls._extract_login_result(user_data)
         return session, jsessionid
 
+    def _request(self, method, params=None, use_login_repeat=None):
+        try:
+            return super()._request(
+                method, params=params, use_login_repeat=use_login_repeat
+            )
+        except errors.RemoteError as err:
+            # Catch the schoolyear not found error from untis
+            if err.code == -8998 or ("schoolyear" in str(err) and "null" in str(err)):
+                return []
+            raise
+
     def _send_custom_request(self, endpoint, params):
         """
         A custom method for sending a request to a specific endpoint, different from the JSON-RPC method.
