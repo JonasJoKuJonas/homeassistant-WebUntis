@@ -22,7 +22,8 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .utils.qrLogin import WebUntisQrLogin, parse_qr_code
+from .utils.qrLogin import parse_qr_code
+from .utils.web_untis_extended import ExtendedSession
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -198,12 +199,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 creds = parse_qr_code(payload)
                 qr_session = async_get_clientsession(self.hass)
-                qr_client = WebUntisQrLogin(creds, qr_session)
-                user_data, jsessionid = await qr_client.async_login()
-
-                session = qr_client.create_session(jsessionid)
-                session.login_result = WebUntisQrLogin.login_result_from_user_data(
-                    user_data
+                session, jsessionid = await ExtendedSession.async_create_from_qr(
+                    creds,
+                    qr_session,
                 )
 
                 self._session_temp = session
