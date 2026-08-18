@@ -7,12 +7,12 @@ from typing import Any
 
 
 def resolve_schoolyear(schoolyears: Any):
-    """Return a usable schoolyear without relying on WebUntis' broken current property.
+    """Return a usable schoolyear without relying on unreliable python-webuntis package.
 
     Preference order:
-    1. A schoolyear that contains today's date.
-    2. The next future schoolyear, for summer holiday gaps.
-    3. The most recent past schoolyear, as a last resort.
+    1. A schoolyear that contains today's date
+    2. The next future schoolyear, for summer holiday gaps
+    3. The most recent past schoolyear
     """
 
     if not schoolyears:
