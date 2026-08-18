@@ -31,6 +31,7 @@ from .const import (
 )
 from .notify import get_notification_data
 from .utils.errors import *
+from .utils.schoolyears import resolve_schoolyear
 from .utils.utils import async_notify, is_service
 from .utils.web_untis import get_timetable_object
 from .utils.search_schools import search_schools
@@ -220,7 +221,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
 
                 current_schoolyear = await self.hass.async_add_executor_job(
-                    self._safe_current_schoolyear, schoolyears
+                    resolve_schoolyear, schoolyears
                 )
                 if current_schoolyear:
                     return await self.async_step_pick_klasse()
@@ -503,7 +504,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         day = datetime.date.today()
         schoolyears = session.schoolyears()
-        current_schoolyear = self._safe_current_schoolyear(schoolyears)
+        current_schoolyear = resolve_schoolyear(schoolyears)
         if not current_schoolyear:
             if schoolyears:
                 day = schoolyears[-1].start.date()
@@ -541,16 +542,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             _LOGGER.error("Error testing timetable: %s", exc)
             return {"base": "unknown"}
-
-    @staticmethod
-    def _safe_current_schoolyear(schoolyears):
-        """Return the current schoolyear, or None when WebUntis has none."""
-
-        try:
-            return schoolyears.current
-        except webuntis.errors.RemoteError:
-            return None
-
 
 OPTIONS_MENU = [
     "filter",
