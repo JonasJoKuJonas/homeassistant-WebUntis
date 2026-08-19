@@ -25,6 +25,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 # pylint: disable=maybe-no-member
 from webuntis import errors
 from .utils.web_untis_extended import ExtendedSession
+from .utils.qrLogin import QrData, parse_qr_code
 from .utils.homework import return_homework_events
 from .utils.exams import return_exam_events
 from .utils.schoolyears import resolve_schoolyear
@@ -175,6 +176,32 @@ class WebUntis:
         self.school = config.data["school"]
         self.username = config.data["username"]
         self.password = config.data.get("password", "")
+        self.is_qr = config.data.get("login_method") == "qr"
+        self.qr_data = None
+        if self.is_qr:
+            if config.data.get("qr_key"):
+                self.qr_data = QrData(
+                    server=self.server.removeprefix("https://").removeprefix("http://"),
+                    school=self.school,
+                    user=self.username,
+                    key=config.data["qr_key"],
+                    school_number=config.data.get("qr_school_number"),
+                )
+            elif config.data.get("qr_payload"):
+                try:
+                    self.qr_data = parse_qr_code(config.data["qr_payload"])
+                except ValueError:
+                    _LOGGER.error(
+                        "Stored QR login data for '%s@%s' is invalid; reconfigure the integration",
+                        self.school,
+                        self.username,
+                    )
+            else:
+                _LOGGER.error(
+                    "QR login secret is missing for '%s@%s'; reconfigure the integration",
+                    self.school,
+                    self.username,
+                )
         self.timetable_source = config.data["timetable_source"]
         self.timetable_source_id = config.data["timetable_source_id"]
         self.title = config.title
@@ -222,11 +249,11 @@ class WebUntis:
             "useragent": "foo",
             "school": self.school,
         }
-        if config.data.get("jsessionid"):
+        if config.data.get("jsessionid") and not self.is_qr:
             session_kwargs["jsessionid"] = config.data["jsessionid"]
 
         self.session = ExtendedSession(**session_kwargs)
-        if config.data.get("jsessionid"):
+        if config.data.get("jsessionid") and not self.is_qr:
             self.session.login_result = {
                 key: config.data[key]
                 for key in ("personType", "personId", "klasseId")
@@ -307,9 +334,24 @@ class WebUntis:
             for i in self.exclude_data_run:
                 self.exclude_data_(i)
 
-        if getattr(self, "is_qr", False) and "jsessionid" not in self.session.config:
+        if (
+            getattr(self, "is_qr", False)
+            and self.qr_data
+            and "jsessionid" not in self.session.config
+        ):
             client_session = async_get_clientsession(self._hass)
-            await self.session.async_refresh_qr(self.qr_data, client_session)
+            self.session, jsessionid = await ExtendedSession.async_create_from_qr(
+                self.qr_data,
+                client_session,
+            )
+            self._hass.config_entries.async_update_entry(
+                self._config,
+                data={
+                    **self._config.data,
+                    "jsessionid": jsessionid,
+                    **self.session.login_result,
+                },
+            )
 
         login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 

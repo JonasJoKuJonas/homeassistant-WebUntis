@@ -212,6 +212,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "school": creds.school,
                     "username": creds.user,
                     "password": "",
+                    "qr_key": creds.key,
+                    "qr_school_number": creds.school_number,
+                    "qr_payload": payload,
                     "jsessionid": jsessionid,
                 }
                 if session.login_result:
