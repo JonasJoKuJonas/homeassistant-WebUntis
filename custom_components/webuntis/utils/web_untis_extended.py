@@ -140,8 +140,8 @@ class ExtendedSession(WebUntisSession):
             jsessionid=jsessionid,
             useragent="home-assistant",
         )
+
         session.login_result = cls._extract_login_result(user_data)
-        print("login result - extendedSession: %s", session.login_result)
         return session, jsessionid
 
     def _request(self, method, params=None, use_login_repeat=None):

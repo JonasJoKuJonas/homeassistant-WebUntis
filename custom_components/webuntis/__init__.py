@@ -225,7 +225,13 @@ class WebUntis:
             session_kwargs["jsessionid"] = config.data["jsessionid"]
 
         self.session = ExtendedSession(**session_kwargs)
-        self._loged_in = False
+        if config.data.get("jsessionid"):
+            self.session.login_result = {
+                key: config.data[key]
+                for key in ("personType", "personId", "klasseId")
+                if key in config.data
+            }
+        self._loged_in = bool(config.data.get("jsessionid"))
         self._last_status_request_failed = False
         self._no_lessons = False
         self.updating = 0
