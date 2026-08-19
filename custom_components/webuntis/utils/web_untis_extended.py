@@ -9,7 +9,7 @@ from webuntis import errors
 from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
 
-from qrLogin import QrData
+from .qrLogin import QrData
 
 QR_USER_AGENT = "UntisMobileAndroid"
 QR_API_VERSION = "i3.2"
@@ -23,15 +23,37 @@ class ExtendedSession(WebUntisSession):
 
     @staticmethod
     def _extract_login_result(data: dict[str, Any]) -> dict[str, Any]:
-        """Extract fields expected by webuntis.Session.login_result."""
-        keys = ("personType", "personId", "klasseId")
-        login_result = {key: data[key] for key in keys if key in data}
+        """Extract fields expected by webuntis.Session.login_result from QR user_data."""
+        login_result = {}
 
-        result = data.get("result")
-        if isinstance(result, dict):
-            for key in keys:
-                if key in result and key not in login_result:
-                    login_result[key] = result[key]
+        # Custom ID mapping
+        type_map = {
+            "KLASSE": 1,
+            "TEACHER": 2,
+            "SUBJECT": 3,
+            "ROOM": 4,
+            "STUDENT": 5,
+        }
+
+        user_data = data.get("userData", {}) if isinstance(data, dict) else {}
+
+        if "elemId" in user_data:
+            login_result["personId"] = user_data["elemId"]
+
+        if "elemType" in user_data:
+            elem_type = user_data["elemType"]
+            if isinstance(elem_type, str):
+                login_result["personType"] = type_map.get(elem_type.upper(), 5)
+            else:
+                login_result["personType"] = elem_type
+
+        if user_data.get("klassenIds"):
+            login_result["klasseId"] = user_data["klassenIds"][0]
+
+        # fallback for default keys
+        for key in ("personType", "personId", "klasseId"):
+            if key in data and key not in login_result:
+                login_result[key] = data[key]
 
         return login_result
 
@@ -119,6 +141,7 @@ class ExtendedSession(WebUntisSession):
             useragent="home-assistant",
         )
         session.login_result = cls._extract_login_result(user_data)
+        print("login result - extendedSession: %s", session.login_result)
         return session, jsessionid
 
     def _request(self, method, params=None, use_login_repeat=None):

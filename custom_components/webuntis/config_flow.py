@@ -173,7 +173,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 selector.SelectSelectorConfig(
                     options=[
                         selector.SelectOptionDict(
-                            label=f'{school["name"]} ({school["address"]})',
+                            label=f"{school['name']} ({school['address']})",
                             value=school["login_name"],
                         )
                         for school in self._search_results
@@ -239,7 +239,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_auth(self, user_input: dict[str, Any] | None = None, errors: dict[str, Any] | None = None) -> FlowResult | config_entries.ConfigFlowResult:
+    async def async_step_auth(
+        self,
+        user_input: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+    ) -> FlowResult | config_entries.ConfigFlowResult:
         """Authenticate with username/password after school is chosen."""
         errors = errors or {}
 
@@ -256,13 +260,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="auth",
-                description_placeholders={
-                    "school_name": self._selected_school["name"],
-                },
+            description_placeholders={
+                "school_name": self._selected_school["name"],
+            },
             data_schema=vol.Schema(
                 {
-                    vol.Required("username", default=user_input.get("username", "")): str,
-                    vol.Required("password", default=user_input.get("password", "")): str,
+                    vol.Required(
+                        "username", default=user_input.get("username", "")
+                    ): str,
+                    vol.Required(
+                        "password", default=user_input.get("password", "")
+                    ): str,
                 }
             ),
             errors=errors,
@@ -508,7 +516,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         errors = {}
         session = None
-        server =  credentials.get("server") or credentials.get("advanced_options", {}).get("server") # keep fallback for advanced_options for backward compatibility
+        server = credentials.get("server") or credentials.get(
+            "advanced_options", {}
+        ).get("server")  # keep fallback for advanced_options for backward compatibility
 
         if not server:
             # use server from selected school (provided by the untis search)
@@ -587,19 +597,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         session: webuntis.Session = self._session_temp
         user_input = self._user_input_temp
 
-        day = datetime.date.today()
         schoolyears = session.schoolyears()
         current_schoolyear = resolve_schoolyear(schoolyears)
+        print("current schoolyear", current_schoolyear)
         if not current_schoolyear:
             if schoolyears:
                 day = schoolyears[-1].start.date()
             else:
                 return {"base": "no_school_year"}
+        else:
+            day = current_schoolyear.start.date()
+            print("day", day)
 
         try:
             if user_input["timetable_source"] == "personal":
                 session.my_timetable(start=day, end=day)
                 login_result = getattr(session, "login_result", {}) or {}
+                print("login result: %s", login_result)
                 self._source_id = login_result.get("personId")
                 if self._source_id is None:
                     return {"base": "no_personal_timetable"}
@@ -630,6 +644,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             _LOGGER.error("Error testing timetable: %s", exc)
             return {"base": "unknown"}
+
 
 OPTIONS_MENU = [
     "filter",
