@@ -599,7 +599,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schoolyears = session.schoolyears()
         current_schoolyear = resolve_schoolyear(schoolyears)
-        print("current schoolyear", current_schoolyear)
         if not current_schoolyear:
             if schoolyears:
                 day = schoolyears[-1].start.date()
@@ -607,13 +606,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return {"base": "no_school_year"}
         else:
             day = current_schoolyear.start.date()
-            print("day", day)
 
         try:
             if user_input["timetable_source"] == "personal":
                 session.my_timetable(start=day, end=day)
                 login_result = getattr(session, "login_result", {}) or {}
-                print("login result: %s", login_result)
                 self._source_id = login_result.get("personId")
                 if self._source_id is None:
                     return {"base": "no_personal_timetable"}

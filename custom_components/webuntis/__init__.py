@@ -20,6 +20,7 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 # pylint: disable=maybe-no-member
 from webuntis import errors
@@ -306,6 +307,10 @@ class WebUntis:
             for i in self.exclude_data_run:
                 self.exclude_data_(i)
 
+        if getattr(self, "is_qr", False) and "jsessionid" not in self.session.config:
+            client_session = async_get_clientsession(self._hass)
+            await self.session.async_refresh_qr(self.qr_data, client_session)
+
         login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 
         if login_error:
@@ -590,64 +595,38 @@ class WebUntis:
         await self._hass.async_add_executor_job(self.webuntis_logout)
 
     def webuntis_login(self):
-        if self._loged_in:
-            # Check if there is a session id.
-            if "jsessionid" not in self.session.config:
-                _LOGGER.debug("No session id found")
-                self._loged_in = False
-            else:
-                # Keep the existing session if the cookie is still present.
-                # WebUntis' schoolyear probe can emit -8998 during holiday gaps.
-                self.updating += 1
-                return None
+        """Handle login for standard password sessions."""
+        if getattr(self, "is_qr", False):
+            return None
 
-        if not self._loged_in:
-            # _LOGGER.debug("logging in")
+        if self._loged_in and "jsessionid" in self.session.config:
+            self.updating += 1
+            return None
 
-            try:
-                self.session.login()
-                # _LOGGER.debug("Login successful")
-                self._loged_in = True
-                self.updating += 1
-
-                return None
-            except OSError as error:
-                # Login error, set all properties to unknown.
-                self.next_class = None
-                self.next_class_json = None
-                self.next_lesson_to_wake_up = None
-                self.calendar_events = []
-                self.calendar_homework = []
-                self.calendar_exams = []
-                self.next_day_json = None
-                self.day_json = None
-
-                # Inform user once about failed update if necessary.
-                if not self._last_status_request_failed:
-                    _LOGGER.warning(
-                        "Login to WebUntis '%s@%s' failed - OSError: %s",
-                        self.school,
-                        self.username,
-                        error,
-                    )
-                self._last_status_request_failed = True
-
-                return error
-            except Exception as error:
-                _LOGGER.error(
-                    "Login to WebUntis '%s@%s' failed - ERROR: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
-                self._last_status_request_failed = True
-                return error
+        try:
+            self.session.login()
+            self._loged_in = True
+            self.updating += 1
+            return None
+        except Exception as error:
+            _LOGGER.error(
+                "Login failed for '%s@%s': %s", self.school, self.username, error
+            )
+            self._last_status_request_failed = True
+            return error
 
     def webuntis_logout(self):
-        self.updating -= 1
+        """Logout from WebUntis (skipped for QR sessions)."""
+        self.updating = max(0, self.updating - 1)
+
+        if getattr(self, "is_qr", False):
+            return
+
         if not self.keep_logged_in and self.updating == 0:
-            self.session.logout()
-            # _LOGGER.debug("Logout successful")
+            try:
+                self.session.logout()
+            except Exception as error:
+                _LOGGER.debug("Logout failed: %s", error)
             self._loged_in = False
 
     def get_student_id(self):
