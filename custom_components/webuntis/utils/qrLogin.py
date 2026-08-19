@@ -5,6 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
 
+import time
+from typing import Any
+
+import aiohttp
+import pyotp
+from webuntis import errors
+
 
 @dataclass(frozen=True)
 class QrData:
@@ -17,6 +24,92 @@ class QrData:
 
 qrData = QrData
 
+QR_USER_AGENT = "UntisMobileAndroid"
+QR_API_VERSION = "i3.2"
+
+
+def extract_login_result(data: dict[str, Any]) -> dict[str, Any]:
+    """Extract fields expected by webuntis.Session.login_result from QR user_data."""
+    login_result = {}
+
+    type_map = {
+        "KLASSE": 1,
+        "TEACHER": 2,
+        "SUBJECT": 3,
+        "ROOM": 4,
+        "STUDENT": 5,
+    }
+
+    user_data = data.get("userData", {}) if isinstance(data, dict) else {}
+
+    if "elemId" in user_data:
+        login_result["personId"] = user_data["elemId"]
+
+    if "elemType" in user_data:
+        elem_type = user_data["elemType"]
+        if isinstance(elem_type, str):
+            login_result["personType"] = type_map.get(elem_type.upper(), 5)
+        else:
+            login_result["personType"] = elem_type
+
+    if user_data.get("klassenIds"):
+        login_result["klasseId"] = user_data["klassenIds"][0]
+
+    # Fallback for default keys
+    for key in ("personType", "personId", "klasseId"):
+        if key in data and key not in login_result:
+            login_result[key] = data[key]
+
+    return login_result
+
+
+async def async_qr_login(
+    credentials: QrData,
+    client_session: aiohttp.ClientSession,
+) -> tuple[dict[str, Any], str]:
+    """Authenticate via QR credentials and return user payload and JSESSIONID."""
+    method = "getUserData2017"
+    body = {
+        "id": "ha-webuntis-qr",
+        "method": method,
+        "params": [
+            {
+                "auth": _qr_auth_block(credentials),
+                "deviceOs": "AND",
+                "deviceOsVersion": "13",
+            }
+        ],
+        "jsonrpc": "2.0",
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": QR_USER_AGENT,
+    }
+
+    async with client_session.post(
+        _qr_endpoint(credentials, method),
+        json=body,
+        headers=headers,
+        timeout=aiohttp.ClientTimeout(total=20),
+    ) as response:
+        response.raise_for_status()
+        data = await response.json(content_type=None)
+
+        error = data.get("error")
+        if error:
+            message = error.get("message", error) if isinstance(error, dict) else error
+            raise errors.NotLoggedInError(f"WebUntis error: {message}")
+
+        jsessionid = response.cookies.get("JSESSIONID")
+        if jsessionid is None:
+            raise errors.NotLoggedInError(
+                "Could not find JSESSIONID in QR login response"
+            )
+
+        result = data.get("result")
+        user_data = result if isinstance(result, dict) else {}
+        return user_data, jsessionid.value
+
 
 def _normalize_server_url(server: str) -> str:
     parsed = urlparse(server if "://" in server else f"https://{server}")
@@ -24,6 +117,23 @@ def _normalize_server_url(server: str) -> str:
     if not host:
         raise ValueError("QR payload does not contain a valid server")
     return host
+
+
+def _qr_endpoint(credentials: QrData, method: str) -> str:
+    """Build the API endpoint URL for QR login."""
+    return (
+        f"https://{credentials.server}/WebUntis/jsonrpc_intern.do"
+        f"?m={method}&school={credentials.school}&v={QR_API_VERSION}"
+    )
+
+
+def _qr_auth_block(credentials: QrData) -> dict[str, Any]:
+    """Generate auth block with TOTP for QR login."""
+    return {
+        "user": credentials.user,
+        "otp": pyotp.TOTP(credentials.key).now(),
+        "clientTime": int(time.time() * 1000),
+    }
 
 
 def parse_qr_code(payload: str) -> QrData:

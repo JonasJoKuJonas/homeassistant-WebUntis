@@ -3,13 +3,12 @@ import time
 from typing import Any
 
 import aiohttp
-import pyotp
 import requests
 from webuntis import errors
 from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
 
-from .qrLogin import QrData
+from .qrLogin import QrData, async_qr_login, extract_login_result
 
 QR_USER_AGENT = "UntisMobileAndroid"
 QR_API_VERSION = "i3.2"
@@ -21,109 +20,6 @@ class ExtendedSession(WebUntisSession):
     fetching homeworks from the WebUntis API using a different endpoint.
     """
 
-    @staticmethod
-    def _extract_login_result(data: dict[str, Any]) -> dict[str, Any]:
-        """Extract fields expected by webuntis.Session.login_result from QR user_data."""
-        login_result = {}
-
-        # Custom ID mapping
-        type_map = {
-            "KLASSE": 1,
-            "TEACHER": 2,
-            "SUBJECT": 3,
-            "ROOM": 4,
-            "STUDENT": 5,
-        }
-
-        user_data = data.get("userData", {}) if isinstance(data, dict) else {}
-
-        if "elemId" in user_data:
-            login_result["personId"] = user_data["elemId"]
-
-        if "elemType" in user_data:
-            elem_type = user_data["elemType"]
-            if isinstance(elem_type, str):
-                login_result["personType"] = type_map.get(elem_type.upper(), 5)
-            else:
-                login_result["personType"] = elem_type
-
-        if user_data.get("klassenIds"):
-            login_result["klasseId"] = user_data["klassenIds"][0]
-
-        # fallback for default keys
-        for key in ("personType", "personId", "klasseId"):
-            if key in data and key not in login_result:
-                login_result[key] = data[key]
-
-        return login_result
-
-    @staticmethod
-    def _qr_endpoint(credentials: QrData, method: str) -> str:
-        return (
-            f"https://{credentials.server}/WebUntis/jsonrpc_intern.do"
-            f"?m={method}&school={credentials.school}&v={QR_API_VERSION}"
-        )
-
-    @staticmethod
-    def _qr_auth_block(credentials: QrData) -> dict[str, Any]:
-        """Generate auth block for QR login."""
-        return {
-            "user": credentials.user,
-            "otp": pyotp.TOTP(credentials.key).now(),
-            "clientTime": int(time.time() * 1000),
-        }
-
-    @classmethod
-    async def async_qr_login(
-        cls,
-        credentials: QrData,
-        client_session: aiohttp.ClientSession,
-    ) -> tuple[dict[str, Any], str]:
-        """Authenticate via QR credentials and return user payload and JSESSIONID."""
-        method = "getUserData2017"
-        body = {
-            "id": "ha-webuntis-qr",
-            "method": method,
-            "params": [
-                {
-                    "auth": cls._qr_auth_block(credentials),
-                    "deviceOs": "AND",
-                    "deviceOsVersion": "13",
-                }
-            ],
-            "jsonrpc": "2.0",
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": QR_USER_AGENT,
-        }
-
-        async with client_session.post(
-            cls._qr_endpoint(credentials, method),
-            json=body,
-            headers=headers,
-            timeout=aiohttp.ClientTimeout(total=20),
-        ) as response:
-            response.raise_for_status()
-            data = await response.json(content_type=None)
-
-            error = data.get("error")
-            if error:
-                message = (
-                    error.get("message", error) if isinstance(error, dict) else error
-                )
-                raise errors.NotLoggedInError(f"WebUntis error: {message}")
-
-            jsessionid = response.cookies.get("JSESSIONID")
-            if jsessionid is None:
-                raise errors.NotLoggedInError(
-                    "Could not find JSESSIONID in QR login response"
-                )
-
-            result = data.get("result")
-            user_data = result if isinstance(result, dict) else {}
-            return user_data, jsessionid.value
-
     @classmethod
     async def async_create_from_qr(
         cls,
@@ -131,7 +27,10 @@ class ExtendedSession(WebUntisSession):
         client_session: aiohttp.ClientSession,
     ) -> tuple["ExtendedSession", str]:
         """Create an authenticated ExtendedSession from QR credentials."""
-        user_data, jsessionid = await cls.async_qr_login(credentials, client_session)
+        # 1. QR-Login über die ausgelagerte Funktion durchführen
+        user_data, jsessionid = await async_qr_login(credentials, client_session)
+
+        # 2. Session-Instanz aufbauen
         session = cls(
             server=f"https://{credentials.server}",
             school=credentials.school,
@@ -141,7 +40,8 @@ class ExtendedSession(WebUntisSession):
             useragent="home-assistant",
         )
 
-        session.login_result = cls._extract_login_result(user_data)
+        # 3. Login-Ergebnis verarbeiten und zuweisen
+        session.login_result = extract_login_result(user_data)
         return session, jsessionid
 
     def _request(self, method, params=None, use_login_repeat=None):

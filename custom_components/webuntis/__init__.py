@@ -507,6 +507,8 @@ class WebUntis:
                     error,
                 )
 
+            param_list = []
+
             try:
                 (
                     self.calendar_homework,
@@ -516,6 +518,7 @@ class WebUntis:
                 )
             except OSError as error:
                 self.calendar_homework = []
+                param_list = []
 
                 _LOGGER.warning(
                     "Updating the property calendar_homework of '%s@%s' failed - OSError: %s",
