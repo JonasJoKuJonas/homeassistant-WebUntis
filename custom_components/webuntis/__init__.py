@@ -26,6 +26,7 @@ from webuntis import errors
 from .utils.web_untis_extended import ExtendedSession
 from .utils.homework import return_homework_events
 from .utils.exams import return_exam_events
+from .utils.schoolyears import resolve_schoolyear
 from .utils.web_untis import get_lesson_name
 
 
@@ -330,7 +331,7 @@ class WebUntis:
                 self.session.schoolyears
             )
             self.current_schoolyear = await self._hass.async_add_executor_job(
-                lambda: self.schoolyears.current
+                resolve_schoolyear, self.schoolyears
             )
 
             if not self.current_schoolyear:
@@ -355,6 +356,16 @@ class WebUntis:
                 self._last_status_request_failed = True
                 await self._hass.async_add_executor_job(self.webuntis_logout)
                 return
+
+            self._last_status_request_failed = False
+            _LOGGER.debug(
+                "Using schoolyear '%s' for '%s@%s' (start=%s, end=%s)",
+                self.current_schoolyear.name,
+                self.school,
+                self.username,
+                self.current_schoolyear.start.date(),
+                self.current_schoolyear.end.date(),
+            )
 
         except OSError as error:
             _LOGGER.warning(
@@ -576,14 +587,10 @@ class WebUntis:
                 _LOGGER.debug("No session id found")
                 self._loged_in = False
             else:
-                # Check if session id is still valid.
-                try:
-                    self.session.schoolyears()
-                    self.updating += 1
-                    return None
-                except errors.NotLoggedInError:
-                    _LOGGER.debug("Session invalid")
-                    self._loged_in = False
+                # Keep the existing session if the cookie is still present.
+                # WebUntis' schoolyear probe can emit -8998 during holiday gaps.
+                self.updating += 1
+                return None
 
         if not self._loged_in:
             # _LOGGER.debug("logging in")
@@ -649,6 +656,11 @@ class WebUntis:
                 self.timetable_source_id, self.timetable_source, self.session
             )
 
+        if isinstance(start, datetime):
+            start = start.date()
+        if isinstance(end, datetime):
+            end = end.date()
+
         if not self.current_schoolyear:
             _LOGGER.debug(
                 "No valid school year found for start date %s. Returning empty timetable.",
@@ -661,6 +673,16 @@ class WebUntis:
             start = self.current_schoolyear.start.date()
         if end > self.current_schoolyear.end.date():
             end = self.current_schoolyear.end.date()
+
+        if start > end:
+            _LOGGER.debug(
+                "Requested timetable range %s-%s is outside school year %s-%s. Returning empty timetable.",
+                start,
+                end,
+                self.current_schoolyear.start.date(),
+                self.current_schoolyear.end.date(),
+            )
+            return []
 
         result = []
         if self.timetable_source == "personal":

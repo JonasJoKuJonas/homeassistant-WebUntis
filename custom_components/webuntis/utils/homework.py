@@ -8,6 +8,7 @@ from custom_components.webuntis.const import DAYS_TO_CHECK
 
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
+from ..utils.schoolyears import resolve_schoolyear
 
 
 class HomeworkEventsFetcher:
@@ -32,6 +33,16 @@ class HomeworkEventsFetcher:
         today = date.today()
         start = today - timedelta(days=DAYS_TO_CHECK)
         end = today + timedelta(days=DAYS_TO_CHECK)
+
+        schoolyear = resolve_schoolyear(getattr(self.server, "schoolyears", None))
+        if schoolyear:
+            schoolyear_start = schoolyear.start.date()
+            schoolyear_end = schoolyear.end.date()
+            if end < schoolyear_start or start > schoolyear_end:
+                return [], []
+
+            start = max(start, schoolyear_start)
+            end = min(end, schoolyear_end)
 
         # Fetch homework data using the session object
         try:
