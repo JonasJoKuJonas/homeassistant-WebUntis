@@ -6,6 +6,7 @@ from webuntis.utils.datetime_utils import parse_datetime
 
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
+from ..utils.schoolyears import resolve_schoolyear
 
 
 class ExamEventsFetcher:
@@ -20,14 +21,20 @@ class ExamEventsFetcher:
         Fetch exam events from the WebUntis API using the session object and return them as a list of event dictionaries.
         """
 
-        if not self.current_schoolyear:
+        schoolyear = resolve_schoolyear(getattr(self.server, "schoolyears", None))
+        if not schoolyear:
             return []
 
         # Fetch exam data using the session object
+        schoolyear_start = schoolyear.start.date()
+        schoolyear_end = schoolyear.end.date()
+        if schoolyear_start > schoolyear_end:
+            return []
+
         try:
             exam_data = self.session.get_exams(
-                start=self.current_schoolyear.start.date(),
-                end=self.current_schoolyear.end.date(),
+                start=schoolyear_start,
+                end=schoolyear_end,
             )
         except errors.NotLoggedInError:
             raise Exception("You are not logged in. Please log in and try again.")
