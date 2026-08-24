@@ -100,15 +100,23 @@ async def async_qr_login(
             message = error.get("message", error) if isinstance(error, dict) else error
             raise errors.NotLoggedInError(f"WebUntis error: {message}")
 
-        jsessionid = response.cookies.get("JSESSIONID")
-        if jsessionid is None:
-            raise errors.NotLoggedInError(
-                "Could not find JSESSIONID in QR login response"
-            )
-
         result = data.get("result")
         user_data = result if isinstance(result, dict) else {}
-        return user_data, jsessionid.value
+
+        jsessionid_cookie = response.cookies.get("JSESSIONID")
+        jsessionid = jsessionid_cookie.value if jsessionid_cookie else None
+
+        # 2. read ID from the JSON body as fallback
+        if not jsessionid and isinstance(user_data, dict):
+            jsessionid = user_data.get("sessionId")
+
+        if not jsessionid:
+            raise errors.NotLoggedInError(
+                f"Could not find JSESSIONID or sessionId in QR login response. "
+                f"Response data: {data}"
+            )
+
+        return user_data, jsessionid
 
 
 def _normalize_server_url(server: str) -> str:
