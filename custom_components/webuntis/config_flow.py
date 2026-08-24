@@ -600,15 +600,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         session: webuntis.Session = self._session_temp
         user_input = self._user_input_temp
 
+        _LOGGER.error(
+            "Testing timetable for source: %s", user_input["timetable_source"]
+        )
+
         schoolyears = session.schoolyears()
         current_schoolyear = resolve_schoolyear(schoolyears)
         if not current_schoolyear:
             if schoolyears:
-                day = schoolyears[-1].start.date()
+                day = datetime.datetime.now
             else:
                 return {"base": "no_school_year"}
         else:
-            day = current_schoolyear.start.date()
+            today = datetime.datetime.now().date()
+            day = (
+                today
+                if today >= schoolyears[0].start.date()
+                else schoolyears[0].start.date()
+            )  # if today is after the first schoolyear, use today, otherwise use the start of the first schoolyear
 
         try:
             if user_input["timetable_source"] == "personal":
