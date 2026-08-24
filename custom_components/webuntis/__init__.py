@@ -657,19 +657,24 @@ class WebUntis:
             self._last_status_request_failed = True
             return error
 
-    def webuntis_logout(self):
-        """Logout from WebUntis (skipped for QR sessions)."""
-        self.updating = max(0, self.updating - 1)
+    def webuntis_logout(self) -> None:
+        """Logout from WebUntis."""
 
+        # Do not logout for qr code sessions
         if getattr(self, "is_qr", False):
-            return
+            _LOGGER.debug(
+                "Skipping webuntis_logout for QR code session to keep JSESSIONID active"
+            )
+            return None
 
-        if not self.keep_logged_in and self.updating == 0:
+        # Normal logout
+        if self._loged_in:
             try:
                 self.session.logout()
-            except Exception as error:
-                _LOGGER.debug("Logout failed: %s", error)
-            self._loged_in = False
+            except Exception as err:
+                _LOGGER.warning("Error during WebUntis logout: %s", err)
+            finally:
+                self._loged_in = False
 
     def get_student_id(self):
         if self.timetable_source == "student":

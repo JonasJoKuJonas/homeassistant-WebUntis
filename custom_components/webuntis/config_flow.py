@@ -225,6 +225,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "invalid_qr_format"
             except webuntis.errors.NotLoggedInError:
                 errors["base"] = "invalid_auth"
+                _LOGGER.error("QR login failed: Not logged in error")
             except Exception as err:
                 _LOGGER.error("QR login failed: %s", err)
                 errors["base"] = "cannot_connect"

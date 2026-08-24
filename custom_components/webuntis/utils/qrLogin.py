@@ -69,25 +69,37 @@ async def async_qr_login(
 ) -> tuple[dict[str, Any], str]:
     """Authenticate via QR credentials and return user payload and JSESSIONID."""
     method = "getUserData2017"
+
+    # 1. TOTP generieren
+    totp = pyotp.TOTP(credentials.key)
+    otp_value = totp.now()
+
     body = {
         "id": "ha-webuntis-qr",
         "method": method,
         "params": [
             {
-                "auth": _qr_auth_block(credentials),
+                "auth": {
+                    "user": credentials.user,
+                    "otp": int(otp_value) if otp_value.isdigit() else otp_value,
+                    "clientTime": int(time.time() * 1000),
+                },
                 "deviceOs": "AND",
                 "deviceOsVersion": "13",
             }
         ],
         "jsonrpc": "2.0",
     }
+
     headers = {
         "Content-Type": "application/json",
         "User-Agent": QR_USER_AGENT,
     }
 
+    url = _qr_endpoint(credentials, method)
+
     async with client_session.post(
-        _qr_endpoint(credentials, method),
+        url,
         json=body,
         headers=headers,
         timeout=aiohttp.ClientTimeout(total=20),
@@ -95,25 +107,45 @@ async def async_qr_login(
         response.raise_for_status()
         data = await response.json(content_type=None)
 
+        # Prüfen, ob WebUntis ein explizites Error-Objekt geschickt hat
         error = data.get("error")
         if error:
             message = error.get("message", error) if isinstance(error, dict) else error
-            raise errors.NotLoggedInError(f"WebUntis error: {message}")
+            code = error.get("code", "") if isinstance(error, dict) else ""
+            raise errors.NotLoggedInError(f"WebUntis RPC Error ({code}): {message}")
 
         result = data.get("result")
         user_data = result if isinstance(result, dict) else {}
 
-        jsessionid_cookie = response.cookies.get("JSESSIONID")
-        jsessionid = jsessionid_cookie.value if jsessionid_cookie else None
+        # --- JSESSIONID EXTRAKTION (3-Wege-Fallback) ---
+        jsessionid = None
 
-        # 2. read ID from the JSON body as fallback
+        # Weg A: Direkte Abfrage aus den Response-Cookies
+        if "JSESSIONID" in response.cookies:
+            jsessionid = response.cookies["JSESSIONID"].value
+
+        # Weg B: Aus dem CookieJar der ClientSession suchen
+        if not jsessionid and client_session.cookie_jar:
+            for cookie in client_session.cookie_jar:
+                if cookie.key == "JSESSIONID":
+                    jsessionid = cookie.value
+                    break
+
+        # Weg C: Aus den rohen 'Set-Cookie' Headern parsen
+        if not jsessionid:
+            set_cookie_headers = response.headers.getall("Set-Cookie", [])
+            for header in set_cookie_headers:
+                if "JSESSIONID=" in header:
+                    jsessionid = header.split("JSESSIONID=")[1].split(";")[0].strip()
+                    break
+
+        # Weg D: Fallback aus dem JSON-Body
         if not jsessionid and isinstance(user_data, dict):
             jsessionid = user_data.get("sessionId")
 
         if not jsessionid:
             raise errors.NotLoggedInError(
-                f"Could not find JSESSIONID or sessionId in QR login response. "
-                f"Response data: {data}"
+                f"WebUntis lehnte Session ab oder sendete keine JSESSIONID. Response: {data}"
             )
 
         return user_data, jsessionid
