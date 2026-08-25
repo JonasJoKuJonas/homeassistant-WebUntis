@@ -27,10 +27,8 @@ class ExtendedSession(WebUntisSession):
         client_session: aiohttp.ClientSession,
     ) -> tuple["ExtendedSession", str]:
         """Create an authenticated ExtendedSession from QR credentials."""
-        # 1. QR-Login über die ausgelagerte Funktion durchführen
         user_data, jsessionid = await async_qr_login(credentials, client_session)
 
-        # 2. Session-Instanz aufbauen
         session = cls(
             server=f"https://{credentials.server}",
             school=credentials.school,
@@ -40,7 +38,6 @@ class ExtendedSession(WebUntisSession):
             useragent="home-assistant",
         )
 
-        # 3. Login-Ergebnis verarbeiten und zuweisen
         session.login_result = extract_login_result(user_data)
         return session, jsessionid
 
@@ -59,12 +56,8 @@ class ExtendedSession(WebUntisSession):
             self._session.cookies.set("JSESSIONID", jsessionid)
 
     def _request(self, method, params=None, use_login_repeat=None):
-        if (
-            use_login_repeat is None
-            and (
-                "password" not in self.config
-                or not self.config["password"]
-            )
+        if use_login_repeat is None and (
+            "password" not in self.config or not self.config["password"]
         ):
             use_login_repeat = False
 

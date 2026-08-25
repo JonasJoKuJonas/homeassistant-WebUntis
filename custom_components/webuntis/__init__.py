@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
 import uuid
+import asyncio
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
@@ -338,17 +339,16 @@ class WebUntis:
             try:
                 client_session = async_get_clientsession(self._hass)
 
-                # 1. Neue QR-Session async anfordern
                 new_session, jsessionid = await ExtendedSession.async_create_from_qr(
                     self.qr_data,
                     client_session,
                 )
 
-                # 2. Session zuweisen
+                # Wait a moment to ensure the session is fully established before proceeding
+                await asyncio.sleep(1)
+
                 self.session = new_session
 
-                # 3. WICHTIG: Flag für internen Zustand setzen, damit executor_jobs
-                # die neue Session sofort als valide erkennen
                 self._loged_in = True
 
                 self._hass.config_entries.async_update_entry(
@@ -362,7 +362,6 @@ class WebUntis:
             except Exception as err:
                 _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
                 self._last_status_request_failed = True
-                # Hier greift dein gewünschter Reset auf None:
                 self.next_class = None
                 self.day_json = None
                 self.calendar_events = []
@@ -472,7 +471,7 @@ class WebUntis:
                 self.get_student_id
             )
         except OSError as error:
-            self.student_id = []
+            self.student_id = None
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",
