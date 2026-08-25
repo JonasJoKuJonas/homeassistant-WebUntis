@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import date, datetime, timedelta
 from typing import Any
 import uuid
-import asyncio
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
@@ -297,6 +297,7 @@ class WebUntis:
 
         # Callback for stopping periodic update.
         self._stop_periodic_update: CALLBACK_TYPE | None = None
+        self._qr_session_lock = asyncio.Lock()
 
         self.lesson_change_callback = None
         self.homework_change_callback = None
@@ -328,27 +329,61 @@ class WebUntis:
         # Notify sensors about new data.
         async_dispatcher_send(self._hass, self.signal_name)
 
-    async def _async_status_request(self) -> None:
-        """Request status and update properties."""
+    def _session_has_jsessionid(self) -> bool:
+        """Return True when current session has a usable JSESSIONID."""
+        session = getattr(self, "session", None)
+        if session is None:
+            return False
 
-        if self.exclude_data_run:
-            for i in self.exclude_data_run:
-                self.exclude_data_(i)
+        config = getattr(session, "config", None)
+        if config is None:
+            return False
 
-        if getattr(self, "is_qr", False) and self.qr_data:
+        try:
+            return bool(config["jsessionid"])
+        except Exception:
+            return False
+
+    async def _async_ensure_valid_session(self, force_refresh: bool = False) -> bool:
+        """Ensure QR session exists and is valid, reauthenticating when required."""
+        if not self.is_qr:
+            return True
+
+        if not self.qr_data:
+            _LOGGER.error(
+                "QR login data is missing for '%s@%s'; reconfigure the integration",
+                self.school,
+                self.username,
+            )
+            self._last_status_request_failed = True
+            return False
+
+        if (
+            not force_refresh
+            and self._loged_in
+            and getattr(self, "session", None)
+            and self._session_has_jsessionid()
+        ):
+            return True
+
+        async with self._qr_session_lock:
+            if (
+                not force_refresh
+                and self._loged_in
+                and getattr(self, "session", None)
+                and self._session_has_jsessionid()
+            ):
+                return True
+
             try:
                 client_session = async_get_clientsession(self._hass)
-
                 new_session, jsessionid = await ExtendedSession.async_create_from_qr(
                     self.qr_data,
                     client_session,
                 )
 
-                # Wait a moment to ensure the session is fully established before proceeding
-                await asyncio.sleep(1)
-
+                # Only assign after async_create_from_qr finished successfully.
                 self.session = new_session
-
                 self._loged_in = True
 
                 self._hass.config_entries.async_update_entry(
@@ -359,12 +394,34 @@ class WebUntis:
                         **self.session.login_result,
                     },
                 )
+                return True
             except Exception as err:
                 _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
                 self._last_status_request_failed = True
-                self.next_class = None
-                self.day_json = None
-                self.calendar_events = []
+                return False
+
+    async def _async_add_executor_job_with_retry(self, func_name, func, *args):
+        try:
+            return await self._hass.async_add_executor_job(func, *args)
+        except Exception as err:
+            _LOGGER.debug("Session vermutlich abgelaufen (%s), erneuere direkt...", err)
+
+            if self.is_qr:
+                await self._async_ensure_valid_session(force_refresh=True)
+            else:
+                await self._hass.async_add_executor_job(self.webuntis_login)
+
+            return await self._hass.async_add_executor_job(func, *args)
+
+    async def _async_status_request(self) -> None:
+        """Request status and update properties."""
+
+        if self.exclude_data_run:
+            for i in self.exclude_data_run:
+                self.exclude_data_(i)
+
+        if self.is_qr:
+            if not await self._async_ensure_valid_session():
                 return
         else:
             login_error = await self._hass.async_add_executor_job(self.webuntis_login)
@@ -392,12 +449,28 @@ class WebUntis:
                 self.issue = False
 
         try:
-            self.schoolyears = await self._hass.async_add_executor_job(
-                self.session.schoolyears
+            schoolyears = await self._async_add_executor_job_with_retry(
+                "schoolyears",
+                lambda: self.session.schoolyears(),
             )
-            self.current_schoolyear = await self._hass.async_add_executor_job(
-                resolve_schoolyear, self.schoolyears
+            current_schoolyear = await self._hass.async_add_executor_job(
+                resolve_schoolyear,
+                schoolyears,
             )
+
+            if not current_schoolyear and self.is_qr:
+                if await self._async_ensure_valid_session(force_refresh=True):
+                    schoolyears = await self._async_add_executor_job_with_retry(
+                        "schoolyears",
+                        lambda: self.session.schoolyears(),
+                    )
+                    current_schoolyear = await self._hass.async_add_executor_job(
+                        resolve_schoolyear,
+                        schoolyears,
+                    )
+
+            self.schoolyears = schoolyears
+            self.current_schoolyear = current_schoolyear
 
             if not self.current_schoolyear:
                 # Login error, set all properties to unknown.
@@ -441,11 +514,14 @@ class WebUntis:
             )
 
         try:
-            self.subjects = await self._hass.async_add_executor_job(
-                self.session.subjects
+            subjects = await self._async_add_executor_job_with_retry(
+                "subjects",
+                lambda: self.session.subjects(),
             )
+            self.subjects = subjects
         except OSError as error:
-            self.subjects = []
+            if not self.is_qr:
+                self.subjects = []
 
             _LOGGER.warning(
                 "Updating the subjects of '%s@%s' failed - OSError: %s",
@@ -455,9 +531,14 @@ class WebUntis:
             )
 
         try:
-            self.klassen = await self._hass.async_add_executor_job(self.session.klassen)
+            klassen = await self._async_add_executor_job_with_retry(
+                "klassen",
+                lambda: self.session.klassen(),
+            )
+            self.klassen = klassen
         except OSError as error:
-            self.klassen = []
+            if not self.is_qr:
+                self.klassen = []
 
             _LOGGER.warning(
                 "Updating the classes (klassen) of '%s@%s' failed - OSError: %s",
@@ -467,11 +548,14 @@ class WebUntis:
             )
 
         try:
-            self.student_id = await self._hass.async_add_executor_job(
-                self.get_student_id
+            student_id = await self._async_add_executor_job_with_retry(
+                "student_id",
+                lambda: self.get_student_id(),
             )
+            self.student_id = student_id
         except OSError as error:
-            self.student_id = None
+            if not self.is_qr:
+                self.student_id = None
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",
@@ -481,9 +565,14 @@ class WebUntis:
             )
 
         try:
-            self.next_class = await self._hass.async_add_executor_job(self._next_class)
+            next_class = await self._async_add_executor_job_with_retry(
+                "next_class",
+                lambda: self._next_class(),
+            )
+            self.next_class = next_class
         except OSError as error:
-            self.next_class = None
+            if not self.is_qr:
+                self.next_class = None
 
             _LOGGER.warning(
                 "Updating the property next_class of '%s@%s' failed - OSError: %s",
@@ -493,11 +582,14 @@ class WebUntis:
             )
 
         try:
-            self.next_lesson_to_wake_up = await self._hass.async_add_executor_job(
-                self._next_lesson_to_wake_up
+            next_lesson_to_wake_up = await self._async_add_executor_job_with_retry(
+                "next_lesson_to_wake_up",
+                lambda: self._next_lesson_to_wake_up(),
             )
+            self.next_lesson_to_wake_up = next_lesson_to_wake_up
         except OSError as error:
-            self.next_lesson_to_wake_up = None
+            if not self.is_qr:
+                self.next_lesson_to_wake_up = None
 
             _LOGGER.warning(
                 "Updating the property next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
@@ -507,11 +599,14 @@ class WebUntis:
             )
 
         try:
-            self.next_day_json = await self._hass.async_add_executor_job(
-                self._next_day_json
+            next_day_json = await self._async_add_executor_job_with_retry(
+                "next_day_json",
+                lambda: self._next_day_json(),
             )
+            self.next_day_json = next_day_json
         except OSError as error:
-            self.next_day_json = None
+            if not self.is_qr:
+                self.next_day_json = None
 
             _LOGGER.warning(
                 "Updating the property next_day_json of '%s@%s' failed - OSError: %s",
@@ -521,9 +616,14 @@ class WebUntis:
             )
 
         try:
-            self.day_json = await self._hass.async_add_executor_job(self._day_json)
+            day_json = await self._async_add_executor_job_with_retry(
+                "day_json",
+                lambda: self._day_json(),
+            )
+            self.day_json = day_json
         except OSError as error:
-            self.day_json = None
+            if not self.is_qr:
+                self.day_json = None
 
             _LOGGER.warning(
                 "Updating the property day_json of '%s@%s' failed - OSError: %s",
@@ -533,16 +633,18 @@ class WebUntis:
             )
 
         try:
-            self.calendar_events = await self._hass.async_add_executor_job(
-                self._get_events
+            calendar_events = await self._async_add_executor_job_with_retry(
+                "calendar_events",
+                lambda: self._get_events(),
             )
             self.calendar_events = compact_list(
-                self.calendar_events,
+                calendar_events,
                 "calendar",
                 timedelta(minutes=self.lesson_compacting_tolerance),
             )
         except OSError as error:
-            self.calendar_events = []
+            if not self.is_qr:
+                self.calendar_events = []
 
             _LOGGER.warning(
                 "Updating the property calendar_events of '%s@%s' failed - OSError: %s",
@@ -553,11 +655,14 @@ class WebUntis:
 
         if self.timetable_source != "teacher":
             try:
-                self.calendar_exams = await self._hass.async_add_executor_job(
-                    return_exam_events, self
+                calendar_exams = await self._async_add_executor_job_with_retry(
+                    "calendar_exams",
+                    lambda: return_exam_events(self),
                 )
+                self.calendar_exams = calendar_exams
             except OSError as error:
-                self.calendar_exams = []
+                if not self.is_qr:
+                    self.calendar_exams = []
 
                 _LOGGER.warning(
                     "Updating the property calendar_exams of '%s@%s' failed - OSError: %s",
@@ -570,14 +675,22 @@ class WebUntis:
 
             try:
                 (
-                    self.calendar_homework,
+                    calendar_homework,
                     param_list,
-                ) = await self._hass.async_add_executor_job(
-                    return_homework_events, self
+                ) = await self._async_add_executor_job_with_retry(
+                    "calendar_homework",
+                    lambda: return_homework_events(self),
                 )
+                self.calendar_homework = calendar_homework
             except OSError as error:
-                self.calendar_homework = []
-                param_list = []
+                if not self.is_qr:
+                    self.calendar_homework = []
+                    param_list = []
+                else:
+                    param_list = [
+                        {"homework_id": homework_id}
+                        for homework_id in self.calendar_homework_ids
+                    ]
 
                 _LOGGER.warning(
                     "Updating the property calendar_homework of '%s@%s' failed - OSError: %s",
@@ -625,9 +738,14 @@ class WebUntis:
                 self.calendar_homework_ids.append(event["homework_id"])
 
         try:
-            self.today = await self._hass.async_add_executor_job(self._today)
+            today = await self._async_add_executor_job_with_retry(
+                "today",
+                lambda: self._today(),
+            )
+            self.today = today
         except OSError as error:
-            self.today = [None, None]
+            if not self.is_qr:
+                self.today = [None, None]
 
             _LOGGER.warning(
                 "Updating the property today-sensor of '%s@%s' failed - OSError: %s",
