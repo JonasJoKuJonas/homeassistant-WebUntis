@@ -334,50 +334,63 @@ class WebUntis:
             for i in self.exclude_data_run:
                 self.exclude_data_(i)
 
-        if (
-            getattr(self, "is_qr", False)
-            and self.qr_data
-            and "jsessionid" not in self.session.config
-        ):
-            client_session = async_get_clientsession(self._hass)
-            self.session, jsessionid = await ExtendedSession.async_create_from_qr(
-                self.qr_data,
-                client_session,
-            )
-            self._hass.config_entries.async_update_entry(
-                self._config,
-                data={
-                    **self._config.data,
-                    "jsessionid": jsessionid,
-                    **self.session.login_result,
-                },
-            )
+        if getattr(self, "is_qr", False) and self.qr_data:
+            try:
+                client_session = async_get_clientsession(self._hass)
 
-        login_error = await self._hass.async_add_executor_job(self.webuntis_login)
+                # 1. Neue QR-Session async anfordern
+                new_session, jsessionid = await ExtendedSession.async_create_from_qr(
+                    self.qr_data,
+                    client_session,
+                )
 
-        if login_error:
-            if str(login_error) == "bad credentials":
-                self.issue = True
-                ir.async_create_issue(
-                    self._hass,
-                    DOMAIN,
-                    "bad_credentials",
-                    is_fixable=True,
-                    severity=ir.IssueSeverity.ERROR,
-                    translation_key="bad_credentials",
+                # 2. Session zuweisen
+                self.session = new_session
+
+                # 3. WICHTIG: Flag für internen Zustand setzen, damit executor_jobs
+                # die neue Session sofort als valide erkennen
+                self._loged_in = True
+
+                self._hass.config_entries.async_update_entry(
+                    self._config,
                     data={
-                        "unique_id": self.unique_id,
-                        "config_data": dict(self._config.data),
-                        "entry_id": self._config.entry_id,
+                        **self._config.data,
+                        "jsessionid": jsessionid,
+                        **self.session.login_result,
                     },
                 )
-            return
-        elif self.issue:
-            _LOGGER.info("delete issue bad_credentials")
-            ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
-            self.issue = False
+            except Exception as err:
+                _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
+                self._last_status_request_failed = True
+                # Hier greift dein gewünschter Reset auf None:
+                self.next_class = None
+                self.day_json = None
+                self.calendar_events = []
+                return
+        else:
+            login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 
-        # _LOGGER.debug("updating data")
+            if login_error:
+                if str(login_error) == "bad credentials":
+                    self.issue = True
+                    ir.async_create_issue(
+                        self._hass,
+                        DOMAIN,
+                        "bad_credentials",
+                        is_fixable=True,
+                        severity=ir.IssueSeverity.ERROR,
+                        translation_key="bad_credentials",
+                        data={
+                            "unique_id": self.unique_id,
+                            "config_data": dict(self._config.data),
+                            "entry_id": self._config.entry_id,
+                        },
+                    )
+                return
+            elif self.issue:
+                _LOGGER.info("delete issue bad_credentials")
+                ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
+                self.issue = False
 
         try:
             self.schoolyears = await self._hass.async_add_executor_job(
@@ -459,7 +472,7 @@ class WebUntis:
                 self.get_student_id
             )
         except OSError as error:
-            self.subjects = []
+            self.student_id = []
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",

@@ -107,7 +107,6 @@ async def async_qr_login(
         response.raise_for_status()
         data = await response.json(content_type=None)
 
-        # Prüfen, ob WebUntis ein explizites Error-Objekt geschickt hat
         error = data.get("error")
         if error:
             message = error.get("message", error) if isinstance(error, dict) else error
@@ -117,21 +116,17 @@ async def async_qr_login(
         result = data.get("result")
         user_data = result if isinstance(result, dict) else {}
 
-        # --- JSESSIONID EXTRAKTION (3-Wege-Fallback) ---
         jsessionid = None
 
-        # Weg A: Direkte Abfrage aus den Response-Cookies
         if "JSESSIONID" in response.cookies:
             jsessionid = response.cookies["JSESSIONID"].value
 
-        # Weg B: Aus dem CookieJar der ClientSession suchen
         if not jsessionid and client_session.cookie_jar:
             for cookie in client_session.cookie_jar:
                 if cookie.key == "JSESSIONID":
                     jsessionid = cookie.value
                     break
 
-        # Weg C: Aus den rohen 'Set-Cookie' Headern parsen
         if not jsessionid:
             set_cookie_headers = response.headers.getall("Set-Cookie", [])
             for header in set_cookie_headers:
@@ -139,7 +134,6 @@ async def async_qr_login(
                     jsessionid = header.split("JSESSIONID=")[1].split(";")[0].strip()
                     break
 
-        # Weg D: Fallback aus dem JSON-Body
         if not jsessionid and isinstance(user_data, dict):
             jsessionid = user_data.get("sessionId")
 

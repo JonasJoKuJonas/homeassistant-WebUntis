@@ -59,6 +59,15 @@ class ExtendedSession(WebUntisSession):
             self._session.cookies.set("JSESSIONID", jsessionid)
 
     def _request(self, method, params=None, use_login_repeat=None):
+        if (
+            use_login_repeat is None
+            and (
+                "password" not in self.config
+                or not self.config["password"]
+            )
+        ):
+            use_login_repeat = False
+
         try:
             return super()._request(
                 method, params=params, use_login_repeat=use_login_repeat
