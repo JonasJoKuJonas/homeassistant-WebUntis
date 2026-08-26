@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 from collections.abc import Callable, Mapping
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 import uuid
 
@@ -50,6 +50,8 @@ from .utils.utils import compact_list, async_notify
 from .utils.web_untis import get_timetable_object
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
+
+QR_SESSION_REFRESH_INTERVAL = timedelta(minutes=5)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -363,6 +365,9 @@ class WebUntis:
             and self._loged_in
             and getattr(self, "session", None)
             and self._session_has_jsessionid()
+            and self._qr_session_created_at is not None
+            and datetime.now(timezone.utc) - self._qr_session_created_at
+            < QR_SESSION_REFRESH_INTERVAL
         ):
             return True
 
@@ -372,6 +377,9 @@ class WebUntis:
                 and self._loged_in
                 and getattr(self, "session", None)
                 and self._session_has_jsessionid()
+                and self._qr_session_created_at is not None
+                and datetime.now(timezone.utc) - self._qr_session_created_at
+                < QR_SESSION_REFRESH_INTERVAL
             ):
                 return True
 
@@ -385,6 +393,7 @@ class WebUntis:
                 # Only assign after async_create_from_qr finished successfully.
                 self.session = new_session
                 self._loged_in = True
+                self._qr_session_created_at = datetime.now(timezone.utc)
 
                 self._hass.config_entries.async_update_entry(
                     self._config,
