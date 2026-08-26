@@ -384,10 +384,20 @@ class WebUntis:
                 return True
 
             try:
+                _LOGGER.warning(
+                    "QR session refresh START for '%s@%s'",
+                    self.school,
+                    self.username,
+                )
                 client_session = async_get_clientsession(self._hass)
                 new_session, jsessionid = await ExtendedSession.async_create_from_qr(
                     self.qr_data,
                     client_session,
+                )
+                _LOGGER.warning(
+                    "QR session refresh SUCCESS for '%s@%s'",
+                    self.school,
+                    self.username,
                 )
 
                 # Only assign after async_create_from_qr finished successfully.
@@ -395,14 +405,6 @@ class WebUntis:
                 self._loged_in = True
                 self._qr_session_created_at = datetime.now(timezone.utc)
 
-                self._hass.config_entries.async_update_entry(
-                    self._config,
-                    data={
-                        **self._config.data,
-                        "jsessionid": jsessionid,
-                        **self.session.login_result,
-                    },
-                )
                 return True
             except Exception as err:
                 _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
