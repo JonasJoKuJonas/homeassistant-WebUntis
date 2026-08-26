@@ -531,8 +531,7 @@ class WebUntis:
             )
             self.subjects = subjects
         except OSError as error:
-            if not self.is_qr:
-                self.subjects = []
+            self.subjects = []
 
             _LOGGER.warning(
                 "Updating the subjects of '%s@%s' failed - OSError: %s",
@@ -548,8 +547,7 @@ class WebUntis:
             )
             self.klassen = klassen
         except OSError as error:
-            if not self.is_qr:
-                self.klassen = []
+            self.klassen = []
 
             _LOGGER.warning(
                 "Updating the classes (klassen) of '%s@%s' failed - OSError: %s",
@@ -565,8 +563,7 @@ class WebUntis:
             )
             self.student_id = student_id
         except OSError as error:
-            if not self.is_qr:
-                self.student_id = None
+            self.student_id = None
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",
@@ -582,8 +579,7 @@ class WebUntis:
             )
             self.next_class = next_class
         except OSError as error:
-            if not self.is_qr:
-                self.next_class = None
+            self.next_class = None
 
             _LOGGER.warning(
                 "Updating the property next_class of '%s@%s' failed - OSError: %s",
@@ -599,8 +595,7 @@ class WebUntis:
             )
             self.next_lesson_to_wake_up = next_lesson_to_wake_up
         except OSError as error:
-            if not self.is_qr:
-                self.next_lesson_to_wake_up = None
+            self.next_lesson_to_wake_up = None
 
             _LOGGER.warning(
                 "Updating the property next_lesson_to_wake_up of '%s@%s' failed - OSError: %s",
@@ -616,8 +611,7 @@ class WebUntis:
             )
             self.next_day_json = next_day_json
         except OSError as error:
-            if not self.is_qr:
-                self.next_day_json = None
+            self.next_day_json = None
 
             _LOGGER.warning(
                 "Updating the property next_day_json of '%s@%s' failed - OSError: %s",
@@ -633,8 +627,7 @@ class WebUntis:
             )
             self.day_json = day_json
         except OSError as error:
-            if not self.is_qr:
-                self.day_json = None
+            self.day_json = None
 
             _LOGGER.warning(
                 "Updating the property day_json of '%s@%s' failed - OSError: %s",
@@ -654,8 +647,7 @@ class WebUntis:
                 timedelta(minutes=self.lesson_compacting_tolerance),
             )
         except OSError as error:
-            if not self.is_qr:
-                self.calendar_events = []
+            self.calendar_events = []
 
             _LOGGER.warning(
                 "Updating the property calendar_events of '%s@%s' failed - OSError: %s",
@@ -672,8 +664,7 @@ class WebUntis:
                 )
                 self.calendar_exams = calendar_exams
             except OSError as error:
-                if not self.is_qr:
-                    self.calendar_exams = []
+                self.calendar_exams = []
 
                 _LOGGER.warning(
                     "Updating the property calendar_exams of '%s@%s' failed - OSError: %s",
@@ -694,14 +685,13 @@ class WebUntis:
                 )
                 self.calendar_homework = calendar_homework
             except OSError as error:
-                if not self.is_qr:
-                    self.calendar_homework = []
-                    param_list = []
-                else:
-                    param_list = [
-                        {"homework_id": homework_id}
-                        for homework_id in self.calendar_homework_ids
-                    ]
+                self.calendar_homework = []
+                param_list = []
+
+                param_list = [
+                    {"homework_id": homework_id}
+                    for homework_id in self.calendar_homework_ids
+                ]
 
                 _LOGGER.warning(
                     "Updating the property calendar_homework of '%s@%s' failed - OSError: %s",
@@ -755,8 +745,7 @@ class WebUntis:
             )
             self.today = today
         except OSError as error:
-            if not self.is_qr:
-                self.today = [None, None]
+            self.today = [None, None]
 
             _LOGGER.warning(
                 "Updating the property today-sensor of '%s@%s' failed - OSError: %s",
