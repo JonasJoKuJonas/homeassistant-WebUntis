@@ -79,8 +79,8 @@
       "qr_menu": {
         "description": "Wähle aus, wie du dich mit einem QR-Code anmelden möchtest.",
         "menu_options": {
-          "qr_login": "QR-Code-Inhalt einfügen",
-          "qr_manual": "Einzeldaten manuell eingeben"
+          "choose_qr_string": "QR-Code-Inhalt einfügen",
+          "choose_qr_manual": "Einzeldaten manuell eingeben"
         }
       },
       "reconfigure": {

@@ -79,8 +79,8 @@
       "qr_menu": {
         "description": "Choose how you want to sign in with a QR code.",
         "menu_options": {
-          "choose_qr_manual": "Login with QRCode (Manual)",
-          "choose_qr_string": "Login with QRCode"
+          "choose_qr_manual": "Login with QRCode (Manual data)",
+          "choose_qr_string": "Login with QRCode content"
         }
       },
       "reconfigure": {
