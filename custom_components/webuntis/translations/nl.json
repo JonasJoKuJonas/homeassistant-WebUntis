@@ -295,8 +295,8 @@
       "qr_menu": {
         "description": "Kies hoe je wilt inloggen met een QR-code.",
         "menu_options": {
-          "qr_login": "QR-code inhoud invoeren",
-          "qr_manual": "Handmatig gegevens invoeren"
+          "choose_qr_string": "QR-code inhoud invoeren",
+          "choose_qr_manual": "Handmatig gegevens invoeren"
         }
       },
       "reconfigure": {
