@@ -22,7 +22,7 @@
       "user": {
         "menu_options": {
           "manual_login": "Manual login",
-          "qr_login": "Login with QRCode"
+          "qr_menu": "Login with QRCode"
         },
         "description": "Choose how you want to sign in.",
         "data": {
@@ -34,6 +34,13 @@
         "data_description": {
           "timetable_source_id": "Enter the full name of the student/teacher or the class name",
           "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input."
+        }
+      },
+      "qr_menu": {
+        "description": "Choose how you want to sign in with a QR code.",
+        "menu_options": {
+          "choose_qr_string": "Login with QRCode",
+          "choose_qr_manual": "Login with QRCode (Manual)"
         }
       },
       "manual_login": {
@@ -50,9 +57,14 @@
         "description": "Search for your school or select it from the search results."
       },
       "qr_login": {
-        "description": "Paste the QR payload from the WebUntis app.",
+        "description": "You can find the QRCode in the WebUntis webapp app under **Your Name > Data access**.",
         "data": {
-          "qr_payload": "QRCode payload"
+          "qr_payload": "QRCode payload. You can get it by scanning the QRCode with your phone or by copying the payload",
+          "school": "School",
+          "school_number": "School number",
+          "url": "Server URL",
+          "user": "Username",
+          "key": "Key"
         },
         "data_description": {
           "qr_payload": "The payload usually starts with `untis://`."

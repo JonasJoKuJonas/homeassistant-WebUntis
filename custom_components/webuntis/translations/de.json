@@ -32,7 +32,7 @@
         },
         "menu_options": {
           "manual_login": "Manueller Login",
-          "qr_login": "Mit QR-Code anmelden"
+          "qr_menu": "Mit QR-Code anmelden"
         },
         "description": "Wähle aus, wie du dich anmelden möchtest."
       },
@@ -41,6 +41,13 @@
         "data": {
           "username": "Benutzername",
           "password": "Passwort"
+        }
+      },
+      "qr_menu": {
+        "description": "Wähle aus, wie du dich mit einem QR-Code anmelden möchtest.",
+        "menu_options": {
+          "qr_login": "QR-Code-Inhalt einfügen",
+          "qr_manual": "Einzeldaten manuell eingeben"
         }
       },
       "timetable_source": {
@@ -90,9 +97,14 @@
         }
       },
       "qr_login": {
-        "description": "Füge den QR-Inhalt aus WebUntis ein.",
+        "description": "Du kannst den QR-Code in der WebUntis-Webapp unter **Dein Name > Freigaben** finden.",
         "data": {
-          "qr_payload": "QR-Code-Inhalt"
+          "qr_payload": "QR-Code-Inhalt. Du kannst ihn erhalten, indem du den QR-Code scannst und den Inhalt kopierst.",
+          "school": "Schule",
+          "school_number": "Schulnummer",
+          "url": "URL",
+          "user": "Benutzer",
+          "key": "Key"
         },
         "data_description": {
           "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`."
