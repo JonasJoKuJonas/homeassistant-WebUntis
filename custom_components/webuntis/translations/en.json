@@ -106,7 +106,7 @@
         },
         "description": "Choose how you want to sign in.",
         "menu_options": {
-          "manual_login": "Manual login",
+          "manual_login": "Normal login (recommended)",
           "qr_menu": "Login with QRCode"
         }
       }

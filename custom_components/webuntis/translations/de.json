@@ -106,7 +106,7 @@
         },
         "description": "Wähle aus, wie du dich anmelden möchtest.",
         "menu_options": {
-          "manual_login": "Manueller Login",
+          "manual_login": "Normaler Login (empfohlen)",
           "qr_menu": "Mit QR-Code anmelden"
         }
       }
