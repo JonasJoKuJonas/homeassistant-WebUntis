@@ -65,14 +65,14 @@
       "qr_login": {
         "data": {
           "key": "Key",
-          "qr_payload": "QR-Code-Inhalt. Du kannst ihn erhalten, indem du den QR-Code scannst und den Inhalt kopierst.",
+          "qr_payload": "QR-Code-Inhalt.",
           "school": "Schule",
           "school_number": "Schulnummer",
           "url": "URL",
           "user": "Benutzer"
         },
         "data_description": {
-          "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`."
+          "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`.\nDu kannst ihn erhalten, indem du den QR-Code scannst und den Inhalt kopierst."
         },
         "description": "Du kannst den QR-Code in der WebUntis-Webapp unter **Dein Name > Freigaben** finden."
       },

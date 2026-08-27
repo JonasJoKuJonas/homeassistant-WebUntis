@@ -65,14 +65,14 @@
       "qr_login": {
         "data": {
           "key": "Key",
-          "qr_payload": "QRCode payload. You can get it by scanning the QRCode with your phone or by copying the payload",
+          "qr_payload": "QRCode payload",
           "school": "School",
           "school_number": "School number",
           "url": "Server URL",
           "user": "Username"
         },
         "data_description": {
-          "qr_payload": "The payload usually starts with `untis://`."
+          "qr_payload": "The payload usually starts with `untis://`.\nYou can get it by scanning the QRCode with your phone or by copying the payload"
         },
         "description": "You can find the QRCode in the WebUntis webapp app under **Your Name > Data access**."
       },
