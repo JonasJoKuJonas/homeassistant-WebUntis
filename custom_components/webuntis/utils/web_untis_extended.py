@@ -1,12 +1,17 @@
-import requests
 import json
+import time
+from typing import Any
+
+import aiohttp
+import requests
 from webuntis import errors
 from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
 
-import logging
+from .qrLogin import QrData, async_qr_login, extract_login_result
 
-# logging.basicConfig(level=logging.DEBUG)
+QR_USER_AGENT = "UntisMobileAndroid"
+QR_API_VERSION = "i3.2"
 
 
 class ExtendedSession(WebUntisSession):
@@ -15,7 +20,47 @@ class ExtendedSession(WebUntisSession):
     fetching homeworks from the WebUntis API using a different endpoint.
     """
 
+    @classmethod
+    async def async_create_from_qr(
+        cls,
+        credentials: QrData,
+        client_session: aiohttp.ClientSession,
+    ) -> tuple["ExtendedSession", str]:
+        """Create an authenticated ExtendedSession from QR credentials."""
+        user_data, jsessionid = await async_qr_login(credentials, client_session)
+
+        session = cls(
+            server=f"https://{credentials.server}",
+            school=credentials.school,
+            username=credentials.user,
+            password="",
+            jsessionid=jsessionid,
+            useragent="home-assistant",
+        )
+
+        session.login_result = extract_login_result(user_data)
+        return session, jsessionid
+
+    async def async_refresh_qr(
+        self,
+        credentials: QrData,
+        client_session: aiohttp.ClientSession,
+    ) -> None:
+        """Refresh JSESSIONID using QR credentials ."""
+        user_data, jsessionid = await async_qr_login(credentials, client_session)
+
+        self.config["jsessionid"] = jsessionid
+        self.login_result = extract_login_result(user_data)
+
+        if hasattr(self, "_session") and self._session is not None:
+            self._session.cookies.set("JSESSIONID", jsessionid)
+
     def _request(self, method, params=None, use_login_repeat=None):
+        if use_login_repeat is None and (
+            "password" not in self.config or not self.config["password"]
+        ):
+            use_login_repeat = False
+
         try:
             return super()._request(
                 method, params=params, use_login_repeat=use_login_repeat
