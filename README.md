@@ -46,13 +46,6 @@ You can install WebUntis via HACS or manually. For detailed instructions, see th
 
 ---
 
-## 🌐 Help Translate
-
-We use Crowdin to simplify translations. If you’re fluent in another language and want to contribute, you can help translate the project. Contributions in any language are welcome!
-
-[![Help Translate on Crowdin](https://badges.crowdin.net/badge/light/crowdin-on-dark.png)](https://crowdin.com/project/homeassistant-webuntis)
-
----
 
 ## Dashboard card for timetable
 There is an inofficial dashboard card for displaying timetables in Home Assistant.

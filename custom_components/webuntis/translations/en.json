@@ -4,36 +4,87 @@
       "already_configured": "Device is already configured"
     },
     "error": {
-      "cannot_connect": "Failed to connect. Please check the host.",
-      "invalid_auth": "Invalid authentication",
       "bad_credentials": "Invalid username and/or password",
-      "school_not_found": "There are no schools matching your input. Please check the name or try a different search term.",
-      "name_split_error": "Invalid name. Try \"first_name, last_name\".",
-      "student_not_found": "Student not found. Check the name or choose another source.",
-      "teacher_not_found": "Teacher not found. Check the name or choose another source.",
+      "cannot_connect": "Failed to connect. Please check the host.",
       "class_not_found": "Class not found. Check the class or choose another source.",
+      "invalid_auth": "Invalid authentication",
+      "invalid_qr_format": "Invalid QR code payload",
+      "name_split_error": "Invalid name. Try \"first_name, last_name\".",
+      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
       "no_rights_for_timetable": "No rights for timetable. Choose another name or source.",
       "no_school_year": "Configuration via class only possible during an active school year.",
-      "no_personal_timetable": "No personal timetable is available for this user. Please choose another source.",
+      "school_not_found": "There are no schools matching your input. Please check the name or try a different search term.",
+      "student_not_found": "Student not found. Check the name or choose another source.",
+      "teacher_not_found": "Teacher not found. Check the name or choose another source.",
       "unknown": "Unexpected error. View logs for more information."
     },
     "step": {
-      "user": {
+      "auth": {
+        "data": {
+          "password": "Password",
+          "username": "Username"
+        },
+        "description": "Please enter your Untis credentials for **{school_name}**."
+      },
+      "manual_login": {
         "data": {
           "school": "School name or search term",
+          "school_choice": "Choose your school:",
           "timetable_source": "Timetable source",
-          "timetable_source_id": "Full name/Class",
-          "school_choice": "Choose your school:"
+          "timetable_source_id": "Full name/Class"
         },
         "data_description": {
-          "timetable_source_id": "Enter the full name of the student/teacher or the class name",
-          "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input."
+          "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input.",
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+        },
+        "description": "Search for your school or select it from the search results."
+      },
+      "pick_klasse": {
+        "data": {
+          "back": "Back",
+          "klasse": "Class"
+        },
+        "description": "Enter a class name"
+      },
+      "pick_student": {
+        "data": {
+          "back": "Back",
+          "fore_name": "Fore Name",
+          "surname": "Surname"
+        },
+        "description": "Enter a Student Name"
+      },
+      "pick_teacher": {
+        "data": {
+          "back": "Back",
+          "fore_name": "Fore Name",
+          "surname": "Surname"
+        },
+        "description": "Enter a Teacher Name"
+      },
+      "qr_login": {
+        "data": {
+          "key": "Key",
+          "qr_payload": "QRCode payload",
+          "school": "School",
+          "school_number": "School number",
+          "url": "Server URL",
+          "user": "Username"
+        },
+        "data_description": {
+          "qr_payload": "The payload usually starts with `untis://`.\nYou can get it by scanning the QRCode with your phone or by copying the payload"
+        },
+        "description": "You can find the QRCode in the WebUntis webapp app under **Your Name > Data access**."
+      },
+      "qr_menu": {
+        "description": "Choose how you want to sign in with a QR code.",
+        "menu_options": {
+          "choose_qr_manual": "Login with QRCode (Manual data)",
+          "choose_qr_string": "Login with QRCode content"
         }
       },
-      "auth": {
-        "description": "Please enter your Untis credentials for **{school_name}**.",
+      "reconfigure": {
         "data": {
-          "username": "Username",
           "password": "Password"
         }
       },
@@ -42,302 +93,32 @@
           "timetable_source": "Select the timetable data source:"
         }
       },
-      "pick_student": {
-        "description": "Enter a Student Name",
+      "user": {
         "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name",
-          "back": "Back"
-        }
-      },
-      "pick_teacher": {
-        "description": "Enter a Teacher Name",
-        "data": {
-          "surname": "Surname",
-          "fore_name": "Fore Name",
-          "back": "Back"
-        }
-      },
-      "pick_klasse": {
-        "description": "Enter a class name",
-        "data": {
-          "klasse": "Class",
-          "back": "Back"
-        }
-      },
-      "reconfigure": {
-        "data": {
-          "password": "Password"
-        }
-      }
-    }
-  },
-  "options": {
-    "error": {
-      "unknown_service": "Service ID not found.",
-      "not_a_dict": "Has to be a dictionary",
-      "notification_invalid": "Notification could not be sent. See logs for more information.",
-      "unknown": "Unexpected error"
-    },
-    "step": {
-      "init": {
+          "school": "School name or search term",
+          "school_choice": "Choose your school:",
+          "timetable_source": "Timetable source",
+          "timetable_source_id": "Full name/Class"
+        },
+        "data_description": {
+          "school": "You do not have to enter the full name of the school.\nThe integration will search for schools matching your input.",
+          "timetable_source_id": "Enter the full name of the student/teacher or the class name"
+        },
+        "description": "Choose how you want to sign in.",
         "menu_options": {
-          "filter": "Filter",
-          "calendar": "Calendar",
-          "lesson": "Lesson Display",
-          "backend": "Backend",
-          "notify_menu": "Notify Menu"
-        }
-      },
-      "filter": {
-        "title": "Filter Settings",
-        "description": "Settings to filter out unwanted lessons.",
-        "data": {
-          "filter_mode": "Filter mode",
-          "filter_subjects": "Filter mode - subjects",
-          "filter_klassen": "Filter mode - classes",
-          "filter_description": "Filter mode - Description",
-          "invalid_subjects": "No Subjects",
-          "exclude_filter_comparison": "Do not filter lessons for notifications and events"
-        },
-        "data_description": {
-          "filter_mode": "Applies to both subject and class filters",
-          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list) \nNot affected by blacklist/whitelist.",
-          "invalid_subjects": "Allow lessons with no subjects",
-          "exclude_filter_comparison": "When enabled the events and notifications are triggered for filtered lessons."
-        }
-      },
-      "lesson": {
-        "title": "Lesson Display Settings",
-        "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
-        "data": {
-          "lesson_long_name": "Long name",
-          "lesson_replace_name": "Replace Lesson name",
-          "lesson_add_teacher": "Add Teacher to subject",
-          "lesson_compacting_tolerance": "Max. break time between double lessons"
-        },
-        "data_description": {
-          "lesson_replace_name": "e.g.,\nM: Math",
-          "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name.",
-          "lesson_compacting_tolerance": "Identical consecutive lessons will be combined to double lessons if the break time is shorter than this value."
-        }
-      },
-      "calendar": {
-        "title": "Calendar Settings",
-        "description": "Settings to customize the calendar.",
-        "data": {
-          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
-          "calendar_description": "Calendar - description",
-          "calendar_room": "Calendar - Location",
-          "calendar_show_room_change": "Calendar - Room change",
-          "calendar_replace_name": "Replace event name"
-        },
-        "data_description": {
-          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
-          "calendar_description": "Determine what should be in the description of a calendar event.",
-          "calendar_room": "Specify what to display for location.",
-          "calendar_show_room_change": "Show room changes in the calendar.",
-          "calendar_replace_name": "e.g.,\nCancelled: ❌"
-        }
-      },
-      "backend": {
-        "title": "Backend Settings",
-        "description": "Connection and data processing settings.",
-        "data": {
-          "keep_loged_in": "Keep logged in",
-          "generate_json": "Generate JSON",
-          "exclude_data": "Exclude data from request"
-        },
-        "data_description": {
-          "keep_loged_in": "Try to save the session data. (BETA)",
-          "generate_json": "Generate JSON in Sensor Attributes - enable only if needed.",
-          "exclude_data": "This option is set automatically if the user has no rights, to prevent error spamming."
-        }
-      },
-      "edit_notify_service": {
-        "title": "Notify Menu",
-        "description": "add or edit a notify service",
-        "data": {
-          "name": "Name",
-          "entity_id": "Notify Service ID",
-          "target": "Platform-Specific Target Data",
-          "data": "Platform-Specific Notification Data",
-          "template": "Notify Template",
-          "options": "Notify on"
-        },
-        "data_description": {
-          "data": "e.g.,\nnotification_icon: mdi:school-outline",
-          "entity_id": "e.g., notify.discord",
-          "template": "may overwrite data keys"
-        }
-      },
-      "notify_menu": {
-        "title": "Notify Service",
-        "menu_options": {
-          "edit_notify_service": "add notify service",
-          "edit_notify_service_select": "edit notify service",
-          "remove_notify_service": "remove notify service",
-          "test_notify_service": "test notify service"
+          "manual_login": "Normal login (recommended)",
+          "qr_menu": "Login with QRCode"
         }
       }
-    }
-  },
-  "selector": {
-    "notify_options": {
-      "options": {
-        "homework": "Homework added",
-        "code": "Lesson status changed",
-        "rooms": "Room changed",
-        "teachers": "Teacher changed",
-        "cancelled": "Lesson is cancelled",
-        "subject": "Subject changed",
-        "lstext": "Lesson text changed",
-        "info": "Info text changed"
-      }
-    },
-    "timetable_source": {
-      "options": {
-        "personal": "Personal timetable (recommended)",
-        "student": "Student",
-        "klasse": "Class",
-        "teacher": "Teacher",
-        "subject": "Subject",
-        "room": "Raum"
-      }
-    },
-    "notify_template": {
-      "options": {
-        "message_title": "Message & Title",
-        "message": "Message",
-        "discord": "Discord",
-        "telegram": "Telegram"
-      }
-    },
-    "calendar_description": {
-      "options": {
-        "none": "None",
-        "json": "JSON",
-        "lesson_info": "Lesson Info",
-        "class_name_short": "Class Name (short)",
-        "class_name_long": "Class Name (long)"
-      }
-    }
-  },
-  "issues": {
-    "bad_credentials": {
-      "fix_flow": {
-        "error": {
-          "cannot_connect": "Failed to connect. Please check the host.",
-          "invalid_auth": "Invalid authentication",
-          "bad_credentials": "Invalid password",
-          "unknown": "Unexpected error"
-        },
-        "step": {
-          "confirm": {
-            "description": "Please enter the new password!",
-            "title": "Password has been changed",
-            "data": {
-              "password": "Password"
-            }
-          }
-        }
-      },
-      "title": "Password has been changed"
-    }
-  },
-  "services": {
-    "get_timetable": {
-      "description": "Get the timetable in a given time range.",
-      "fields": {
-        "device_id": {
-          "name": "Device",
-          "description": "Select an instance"
-        },
-        "start": {
-          "name": "Start",
-          "description": "Start of time range"
-        },
-        "end": {
-          "name": "End",
-          "description": "End of time range"
-        },
-        "apply_filter": {
-          "name": "Activate Filter",
-          "description": "Applies the filter from the settings to the results"
-        },
-        "show_cancelled": {
-          "name": "Show Cancelled lessons",
-          "description": "Display cancelled lessons in the result"
-        },
-        "compact_result": {
-          "name": "Simplify Results",
-          "description": "Combine double lessons in the result"
-        },
-        "compact_tolerance_minutes": {
-          "name": "Tolerance for combining (minutes)",
-          "description": "Time tolerance to combine lessons as double lessons. (Only relevant if 'Simplify Results' is activated)"
-        }
-      },
-      "name": "Get Timetable"
-    },
-    "count_lessons": {
-      "description": "Count lessons within a time range.",
-      "fields": {
-        "device_id": {
-          "name": "Device",
-          "description": "Select an instance"
-        },
-        "start": {
-          "name": "Start",
-          "description": "Start of time range"
-        },
-        "end": {
-          "name": "End",
-          "description": "End of time range"
-        },
-        "apply_filter": {
-          "name": "Activate Filter",
-          "description": "Apply the filter from the settings to the results"
-        },
-        "count_cancelled": {
-          "name": "Count Cancelled lessons",
-          "description": "Count cancelled lessons"
-        }
-      },
-      "name": "Count Hours"
-    },
-    "get_schoolyears": {
-      "description": "Get WebUntis schoolyears",
-      "fields": {
-        "device_id": {
-          "name": "Device",
-          "description": "Select an instance"
-        }
-      },
-      "name": "Get Schoolyears"
     }
   },
   "entity": {
-    "sensor": {
-      "next_class": {
-        "name": "Next Lesson"
-      },
-      "next_lesson_to_wake_up": {
-        "name": "Next Lesson to Wake Up"
-      },
-      "today_school_start": {
-        "name": "Today's School Start"
-      },
-      "today_school_end": {
-        "name": "Today's School End"
-      }
-    },
     "calendar": {
-      "homework": {
-        "name": "Homework"
-      },
       "exam": {
         "name": "Exams"
+      },
+      "homework": {
+        "name": "Homework"
       }
     },
     "event": {
@@ -346,13 +127,13 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "code": "Lesson status changed",
-              "rooms": "Room changed",
-              "teachers": "Teacher changed",
               "cancelled": "Lesson cancelled",
+              "code": "Lesson status changed",
+              "info": "Info text changed",
               "lstext": "Lesson text changed",
+              "rooms": "Room changed",
               "subject": "Subject changed",
-              "info": "Info text changed"
+              "teachers": "Teacher changed"
             }
           }
         }
@@ -367,6 +148,265 @@
           }
         }
       }
+    },
+    "sensor": {
+      "next_class": {
+        "name": "Next Lesson"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Next Lesson to Wake Up"
+      },
+      "today_school_end": {
+        "name": "Today's School End"
+      },
+      "today_school_start": {
+        "name": "Today's School Start"
+      }
+    }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "bad_credentials": "Invalid password",
+          "cannot_connect": "Failed to connect. Please check the host.",
+          "invalid_auth": "Invalid authentication",
+          "unknown": "Unexpected error"
+        },
+        "step": {
+          "confirm": {
+            "data": {
+              "password": "Password"
+            },
+            "description": "Please enter the new password!",
+            "title": "Password has been changed"
+          }
+        }
+      },
+      "title": "Password has been changed"
+    }
+  },
+  "options": {
+    "error": {
+      "not_a_dict": "Has to be a dictionary",
+      "notification_invalid": "Notification could not be sent. See logs for more information.",
+      "unknown": "Unexpected error",
+      "unknown_service": "Service ID not found."
+    },
+    "step": {
+      "backend": {
+        "data": {
+          "exclude_data": "Exclude data from request",
+          "generate_json": "Generate JSON",
+          "keep_loged_in": "Keep logged in"
+        },
+        "data_description": {
+          "exclude_data": "This option is set automatically if the user has no rights, to prevent error spamming.",
+          "generate_json": "Generate JSON in Sensor Attributes - enable only if needed.",
+          "keep_loged_in": "Try to save the session data. (BETA)"
+        },
+        "description": "Connection and data processing settings.",
+        "title": "Backend Settings"
+      },
+      "calendar": {
+        "data": {
+          "calendar_description": "Calendar - description",
+          "calendar_replace_name": "Replace event name",
+          "calendar_room": "Calendar - Location",
+          "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
+          "calendar_show_room_change": "Calendar - Room change"
+        },
+        "data_description": {
+          "calendar_description": "Determine what should be in the description of a calendar event.",
+          "calendar_replace_name": "e.g.,\nCancelled: ❌",
+          "calendar_room": "Specify what to display for location.",
+          "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
+          "calendar_show_room_change": "Show room changes in the calendar."
+        },
+        "description": "Settings to customize the calendar.",
+        "title": "Calendar Settings"
+      },
+      "edit_notify_service": {
+        "data": {
+          "data": "Platform-Specific Notification Data",
+          "entity_id": "Notify Service ID",
+          "name": "Name",
+          "options": "Notify on",
+          "target": "Platform-Specific Target Data",
+          "template": "Notify Template"
+        },
+        "data_description": {
+          "data": "e.g.,\nnotification_icon: mdi:school-outline",
+          "entity_id": "e.g., notify.discord",
+          "template": "may overwrite data keys"
+        },
+        "description": "add or edit a notify service",
+        "title": "Notify Menu"
+      },
+      "filter": {
+        "data": {
+          "exclude_filter_comparison": "Do not filter lessons for notifications and events",
+          "filter_description": "Filter mode - Description",
+          "filter_klassen": "Filter mode - classes",
+          "filter_mode": "Filter mode",
+          "filter_subjects": "Filter mode - subjects",
+          "invalid_subjects": "No Subjects"
+        },
+        "data_description": {
+          "exclude_filter_comparison": "When enabled the events and notifications are triggered for filtered lessons.",
+          "filter_description": "Hide lessons that contain the following phrases in the description. (Comma-separated list) \nNot affected by blacklist/whitelist.",
+          "filter_mode": "Applies to both subject and class filters",
+          "invalid_subjects": "Allow lessons with no subjects"
+        },
+        "description": "Settings to filter out unwanted lessons.",
+        "title": "Filter Settings"
+      },
+      "init": {
+        "menu_options": {
+          "backend": "Backend",
+          "calendar": "Calendar",
+          "filter": "Filter",
+          "lesson": "Lesson Display",
+          "notify_menu": "Notify Menu"
+        }
+      },
+      "lesson": {
+        "data": {
+          "lesson_add_teacher": "Add Teacher to subject",
+          "lesson_compacting_tolerance": "Max. break time between double lessons",
+          "lesson_long_name": "Long name",
+          "lesson_replace_name": "Replace Lesson name"
+        },
+        "data_description": {
+          "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name.",
+          "lesson_compacting_tolerance": "Identical consecutive lessons will be combined to double lessons if the break time is shorter than this value.",
+          "lesson_replace_name": "e.g.,\nM: Math"
+        },
+        "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
+        "title": "Lesson Display Settings"
+      },
+      "notify_menu": {
+        "menu_options": {
+          "edit_notify_service": "add notify service",
+          "edit_notify_service_select": "edit notify service",
+          "remove_notify_service": "remove notify service",
+          "test_notify_service": "test notify service"
+        },
+        "title": "Notify Service"
+      }
+    }
+  },
+  "selector": {
+    "calendar_description": {
+      "options": {
+        "class_name_long": "Class Name (long)",
+        "class_name_short": "Class Name (short)",
+        "json": "JSON",
+        "lesson_info": "Lesson Info",
+        "none": "None"
+      }
+    },
+    "notify_options": {
+      "options": {
+        "cancelled": "Lesson is cancelled",
+        "code": "Lesson status changed",
+        "homework": "Homework added",
+        "info": "Info text changed",
+        "lstext": "Lesson text changed",
+        "rooms": "Room changed",
+        "subject": "Subject changed",
+        "teachers": "Teacher changed"
+      }
+    },
+    "notify_template": {
+      "options": {
+        "discord": "Discord",
+        "message": "Message",
+        "message_title": "Message & Title",
+        "telegram": "Telegram"
+      }
+    },
+    "timetable_source": {
+      "options": {
+        "klasse": "Class",
+        "personal": "Personal timetable (recommended)",
+        "room": "Raum",
+        "student": "Student",
+        "subject": "Subject",
+        "teacher": "Teacher"
+      }
+    }
+  },
+  "services": {
+    "count_lessons": {
+      "description": "Count lessons within a time range.",
+      "fields": {
+        "apply_filter": {
+          "description": "Apply the filter from the settings to the results",
+          "name": "Activate Filter"
+        },
+        "count_cancelled": {
+          "description": "Count cancelled lessons",
+          "name": "Count Cancelled lessons"
+        },
+        "device_id": {
+          "description": "Select an instance",
+          "name": "Device"
+        },
+        "end": {
+          "description": "End of time range",
+          "name": "End"
+        },
+        "start": {
+          "description": "Start of time range",
+          "name": "Start"
+        }
+      },
+      "name": "Count Hours"
+    },
+    "get_schoolyears": {
+      "description": "Get WebUntis schoolyears",
+      "fields": {
+        "device_id": {
+          "description": "Select an instance",
+          "name": "Device"
+        }
+      },
+      "name": "Get Schoolyears"
+    },
+    "get_timetable": {
+      "description": "Get the timetable in a given time range.",
+      "fields": {
+        "apply_filter": {
+          "description": "Applies the filter from the settings to the results",
+          "name": "Activate Filter"
+        },
+        "compact_result": {
+          "description": "Combine double lessons in the result",
+          "name": "Simplify Results"
+        },
+        "compact_tolerance_minutes": {
+          "description": "Time tolerance to combine lessons as double lessons. (Only relevant if 'Simplify Results' is activated)",
+          "name": "Tolerance for combining (minutes)"
+        },
+        "device_id": {
+          "description": "Select an instance",
+          "name": "Device"
+        },
+        "end": {
+          "description": "End of time range",
+          "name": "End"
+        },
+        "show_cancelled": {
+          "description": "Display cancelled lessons in the result",
+          "name": "Show Cancelled lessons"
+        },
+        "start": {
+          "description": "Start of time range",
+          "name": "Start"
+        }
+      },
+      "name": "Get Timetable"
     }
   }
 }
