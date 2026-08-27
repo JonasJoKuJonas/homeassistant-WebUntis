@@ -4,44 +4,77 @@
       "already_configured": "Der Sensor ist bereits konfiguriert."
     },
     "error": {
-      "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
-      "invalid_auth": "Ungültige Authentifizierung",
       "bad_credentials": "Ungültiger Benutzername und/oder Passwort",
-      "school_not_found": "Es wurden keine Schulen gefunden. Versuche es mit einem anderen Suchbegriff.",
-      "name_split_error": "Ungültiger Name. Versuche \"Vorname, Nachname\".",
-      "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
-      "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
+      "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
       "class_not_found": "Klasse nicht gefunden. Überprüfen Sie die Klasse oder wählen Sie eine andere Quelle.",
+      "invalid_auth": "Ungültige Authentifizierung",
+      "invalid_qr_format": "Ungültiger QR-Code-Inhalt",
+      "name_split_error": "Ungültiger Name. Versuche \"Vorname, Nachname\".",
+      "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
       "no_rights_for_timetable": "Keine Rechte für den Stundenplan. Wählen Sie einen anderen Namen oder eine andere Quelle.",
       "no_school_year": "Konfiguration über die Klasse nur während eines aktiven Schuljahres möglich.",
-      "no_personal_timetable": "Für diesen Benutzer ist kein persönlicher Stundenplan verfügbar. Bitte wähle eine andere Quelle.",
-      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen.",
-      "invalid_qr_format": "Ungültiger QR-Code-Inhalt"
+      "school_not_found": "Es wurden keine Schulen gefunden. Versuche es mit einem anderen Suchbegriff.",
+      "student_not_found": "Schüler nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
+      "teacher_not_found": "Lehrer nicht gefunden. Überprüfen Sie den Namen oder wählen Sie eine andere Quelle.",
+      "unknown": "Unerwarteter Fehler. Logs für weitere Informationen ansehen."
     },
     "step": {
-      "user": {
+      "auth": {
+        "data": {
+          "password": "Passwort",
+          "username": "Benutzername"
+        },
+        "description": "Bitte gib deine Untis Zugangsdaten für **{school_name}** ein."
+      },
+      "manual_login": {
         "data": {
           "school": "Schulname oder Suchbegriff",
+          "school_choice": "Wähle deine Schule:",
           "timetable_source": "Stundenplan-Quelle",
-          "timetable_source_id": "Voller Name/Klasse",
-          "school_choice": "Wähle deine Schule:"
+          "timetable_source_id": "Voller Name/Klasse"
         },
         "data_description": {
-          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein",
-          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen."
+          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen.",
+          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
         },
-        "menu_options": {
-          "manual_login": "Manueller Login",
-          "qr_menu": "Mit QR-Code anmelden"
-        },
-        "description": "Wähle aus, wie du dich anmelden möchtest."
+        "description": "Suche nach deiner Schule oder wähle sie aus den Suchergebnissen."
       },
-      "auth": {
-        "description": "Bitte gib deine Untis Zugangsdaten für **{school_name}** ein.",
+      "pick_klasse": {
         "data": {
-          "username": "Benutzername",
-          "password": "Passwort"
-        }
+          "back": "Zurück",
+          "klasse": "Klasse"
+        },
+        "description": "Klasse eingeben"
+      },
+      "pick_student": {
+        "data": {
+          "back": "Zurück",
+          "fore_name": "Vorname",
+          "surname": "Nachname"
+        },
+        "description": "Name eines Schülers eingeben"
+      },
+      "pick_teacher": {
+        "data": {
+          "back": "Zurück",
+          "fore_name": "Vorname",
+          "surname": "Nachname"
+        },
+        "description": "Name eines Lehrers eingeben"
+      },
+      "qr_login": {
+        "data": {
+          "key": "Key",
+          "qr_payload": "QR-Code-Inhalt. Du kannst ihn erhalten, indem du den QR-Code scannst und den Inhalt kopierst.",
+          "school": "Schule",
+          "school_number": "Schulnummer",
+          "url": "URL",
+          "user": "Benutzer"
+        },
+        "data_description": {
+          "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`."
+        },
+        "description": "Du kannst den QR-Code in der WebUntis-Webapp unter **Dein Name > Freigaben** finden."
       },
       "qr_menu": {
         "description": "Wähle aus, wie du dich mit einem QR-Code anmelden möchtest.",
@@ -50,333 +83,42 @@
           "qr_manual": "Einzeldaten manuell eingeben"
         }
       },
-      "timetable_source": {
-        "data": {
-          "timetable_source": "Wähle die Datenquelle für den Stundenplan:"
-        }
-      },
-      "pick_student": {
-        "description": "Name eines Schülers eingeben",
-        "data": {
-          "surname": "Nachname",
-          "fore_name": "Vorname",
-          "back": "Zurück"
-        }
-      },
-      "pick_teacher": {
-        "description": "Name eines Lehrers eingeben",
-        "data": {
-          "surname": "Nachname",
-          "fore_name": "Vorname",
-          "back": "Zurück"
-        }
-      },
-      "pick_klasse": {
-        "description": "Klasse eingeben",
-        "data": {
-          "klasse": "Klasse",
-          "back": "Zurück"
-        }
-      },
       "reconfigure": {
         "data": {
           "password": "Passwort"
         }
       },
-      "manual_login": {
-        "description": "Suche nach deiner Schule oder wähle sie aus den Suchergebnissen.",
+      "timetable_source": {
+        "data": {
+          "timetable_source": "Wähle die Datenquelle für den Stundenplan:"
+        }
+      },
+      "user": {
         "data": {
           "school": "Schulname oder Suchbegriff",
+          "school_choice": "Wähle deine Schule:",
           "timetable_source": "Stundenplan-Quelle",
-          "timetable_source_id": "Voller Name/Klasse",
-          "school_choice": "Wähle deine Schule:"
+          "timetable_source_id": "Voller Name/Klasse"
         },
         "data_description": {
-          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein",
-          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen."
-        }
-      },
-      "qr_login": {
-        "description": "Du kannst den QR-Code in der WebUntis-Webapp unter **Dein Name > Freigaben** finden.",
-        "data": {
-          "qr_payload": "QR-Code-Inhalt. Du kannst ihn erhalten, indem du den QR-Code scannst und den Inhalt kopierst.",
-          "school": "Schule",
-          "school_number": "Schulnummer",
-          "url": "URL",
-          "user": "Benutzer",
-          "key": "Key"
+          "school": "Du musst nicht den vollständigen Namen der Schule eingeben. Die Integration sucht nach Schulen, die mit deiner Eingabe übereinstimmen.",
+          "timetable_source_id": "Geben Sie den vollständigen Namen des Schülers/Lehrers oder den Namen der Klasse ein"
         },
-        "data_description": {
-          "qr_payload": "Der QR-Inhalt beginnt normalerweise mit `untis://`."
-        }
-      }
-    }
-  },
-  "options": {
-    "error": {
-      "unknown_service": "Service-ID nicht gefunden.",
-      "not_a_dict": "Muss ein Dictionary sein",
-      "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
-      "unknown": "Unerwarteter Fehler"
-    },
-    "step": {
-      "init": {
+        "description": "Wähle aus, wie du dich anmelden möchtest.",
         "menu_options": {
-          "filter": "Filter",
-          "calendar": "Kalender",
-          "lesson": "Stunden-Darstellung",
-          "backend": "Backend",
-          "notify_menu": "Notify Menü"
-        }
-      },
-      "filter": {
-        "title": "Filter-Einstellungen",
-        "description": "Einstellungen zum Herausfiltern unerwünschter Stunden.",
-        "data": {
-          "filter_mode": "Fächer Filter",
-          "filter_subjects": "Fächer Filter - Fächer",
-          "filter_klassen": "Fächer Filter - Klassen",
-          "filter_description": "Fächer Filter - Beschreibung",
-          "invalid_subjects": "Kein Fach",
-          "exclude_filter_comparison": "Stunden für Benachrichtigungen und Events nicht filtern"
-        },
-        "data_description": {
-          "filter_mode": "Gilt sowohl für Fach- als auch Klassen-Filter",
-          "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste) \nWird nicht von Black/Whitelist beeinflusst.",
-          "invalid_subjects": "Erlaube Stunden ohne Fach",
-          "exclude_filter_comparison": "Dadurch können Events und Benachrichtigungen auch bei Änderungen von gefilterten Stunden ausgelöst werden."
-        }
-      },
-      "lesson": {
-        "title": "Stunden-Darstellungs-Einstellungen",
-        "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
-        "data": {
-          "lesson_long_name": "Langer Name",
-          "lesson_replace_name": "Stunden-Name ersetzen",
-          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu",
-          "lesson_compacting_tolerance": "Max. Pausenzeit für Doppelstunde"
-        },
-        "data_description": {
-          "lesson_replace_name": "Bsp:\nM: Mathe",
-          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen.",
-          "lesson_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst"
-        }
-      },
-      "calendar": {
-        "title": "Kalender-Einstellungen",
-        "description": "Einstellungen zur Kalender Darstellung.",
-        "data": {
-          "calendar_show_cancelled_lessons": "Kalender - Ausfallende Stunden",
-          "calendar_description": "Kalender - Beschreibung",
-          "calendar_room": "Kalender - Ort",
-          "calendar_show_room_change": "Kalender - Zimmerwechsel",
-          "calendar_replace_name": "Ereignisnamen ersetzen"
-        },
-        "data_description": {
-          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
-          "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
-          "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
-          "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an.",
-          "calendar_replace_name": "Bsp:\nCancelled: ❌"
-        }
-      },
-      "backend": {
-        "title": "Server-Einstellungen",
-        "description": "Einstellungen zur Verbindung und Datenverarbeitung.",
-        "data": {
-          "keep_loged_in": "Eingeloggt bleiben",
-          "generate_json": "JSON generieren",
-          "exclude_data": "Daten von request ausschließen"
-        },
-        "data_description": {
-          "keep_loged_in": "Versucht die Session zu speichern. (BETA)",
-          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
-          "exclude_data": "Diese Option wird automatisch gesetzt, wenn der Benutzer keine Rechte hat, um das spamen von Fehlermeldungen zu vermeiden."
-        }
-      },
-      "edit_notify_service": {
-        "title": "Notify Menü",
-        "description": "füge oder bearbeite einen Benachrichtigungs-Dienst",
-        "data": {
-          "name": "Name",
-          "entity_id": "Notify Service ID",
-          "target": "Plattformspezifische Targetdaten",
-          "data": "Plattformspezifische Benachrichtigungs-Daten",
-          "template": "Benachrichtigungs-Template",
-          "options": "Benachrichtigen, wenn"
-        },
-        "data_description": {
-          "data": "Bsp:\nnotification_icon: mdi:school-outline",
-          "entity_id": "Bsp: notify.discord",
-          "template": "Kann Benachrichtigungs-Daten überschreiben"
-        }
-      },
-      "notify_menu": {
-        "title": "Notify Dienst",
-        "menu_options": {
-          "edit_notify_service": "Notify Dienst hinzufügen",
-          "edit_notify_service_select": "Notify Dienst bearbeiten",
-          "remove_notify_service": "Notify Dienst löschen",
-          "test_notify_service": "Notify Dienst testen"
+          "manual_login": "Manueller Login",
+          "qr_menu": "Mit QR-Code anmelden"
         }
       }
-    }
-  },
-  "selector": {
-    "notify_options": {
-      "options": {
-        "homework": "Hausaufgaben hinzugefügt",
-        "code": "Stunden-Status Änderung",
-        "rooms": "Raum Änderung",
-        "teachers": "Lehrer Änderung",
-        "cancelled": "Stunde fällt aus",
-        "subject": "Fach Änderung",
-        "lstext": "Stundentext Änderung",
-        "info": "Stundeninfo Änderung"
-      }
-    },
-    "timetable_source": {
-      "options": {
-        "personal": "Persönlicher Stundenplan (empfohlen)",
-        "student": "Schüler",
-        "klasse": "Klasse",
-        "teacher": "Lehrer",
-        "subject": "Fach",
-        "room": "Raum"
-      }
-    },
-    "notify_template": {
-      "options": {
-        "message_title": "Nachricht & Titel",
-        "message": "Nachricht",
-        "discord": "Discord"
-      }
-    },
-    "calendar_description": {
-      "options": {
-        "none": "Keine",
-        "json": "JSON",
-        "lesson_info": "Stunden Info",
-        "class_name_short": "Klassen Name (kurz)",
-        "class_name_long": "Klassen Name (lang)"
-      }
-    }
-  },
-  "issues": {
-    "bad_credentials": {
-      "fix_flow": {
-        "error": {
-          "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
-          "invalid_auth": "Ungültige Authentifizierung",
-          "bad_credentials": "Ungültiges Passwort",
-          "unknown": "Unerwarteter Fehler"
-        },
-        "step": {
-          "confirm": {
-            "description": "Bitte gib das neue Passwort ein!",
-            "title": "Das Passwort wurde geändert",
-            "data": {
-              "password": "Passwort"
-            }
-          }
-        }
-      },
-      "title": "Das Passwort wurde geändert"
-    }
-  },
-  "services": {
-    "get_timetable": {
-      "description": "Stundenplan in einem bestimmten Zeitraum abrufen.",
-      "fields": {
-        "device_id": {
-          "name": "Gerät",
-          "description": "Eine Instanz auswählen"
-        },
-        "start": {
-          "name": "Start",
-          "description": "Start des Zeitraums"
-        },
-        "end": {
-          "name": "Ende",
-          "description": "Ende des Zeitraums"
-        },
-        "apply_filter": {
-          "name": "Filter aktivieren",
-          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an"
-        },
-        "show_cancelled": {
-          "name": "Zeige ausgefallene Stunden",
-          "description": "Zeige ausgefallene Stunden im Ergebnis"
-        },
-        "compact_result": {
-          "name": "Vereinfachte Ergebnisse",
-          "description": "Fasse Doppelstunden im Ergebnis zusammen"
-        },
-        "compact_tolerance_minutes": {
-          "name": "Toleranz für das Zusammenfassen (Minuten)",
-          "description": "Zeitliche Toleranz, um Stunden als Doppelstunden zusammenzufassen. (Nur relevant, wenn 'Vereinfachte Ergebnisse' aktiviert ist)"
-        }
-      },
-      "name": "Stundenplan abrufen"
-    },
-    "count_lessons": {
-      "description": "Stunden in einem Zeitraum zählen.",
-      "fields": {
-        "device_id": {
-          "name": "Gerät",
-          "description": "Eine Instanz auswählen"
-        },
-        "start": {
-          "name": "Start",
-          "description": "Start des Zeitraums"
-        },
-        "end": {
-          "name": "Ende",
-          "description": "Ende des Zeitraums"
-        },
-        "apply_filter": {
-          "name": "Filter aktivieren",
-          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an"
-        },
-        "count_cancelled": {
-          "name": "Zähle ausgefallene Stunden",
-          "description": "Zähle ausgefallene Stunden"
-        }
-      },
-      "name": "Stunden zählen"
-    },
-    "get_schoolyears": {
-      "description": "WebUntis Schuljahre abrufen.",
-      "fields": {
-        "device_id": {
-          "name": "Gerät",
-          "description": "Eine Instanz auswählen"
-        }
-      },
-      "name": "Schuljahre abrufen"
     }
   },
   "entity": {
-    "sensor": {
-      "next_class": {
-        "name": "Nächste Stunde"
-      },
-      "next_lesson_to_wake_up": {
-        "name": "Nächste Stunde zum Aufstehen"
-      },
-      "today_school_start": {
-        "name": "Heutiger Schulbeginn"
-      },
-      "today_school_end": {
-        "name": "Heutiges Schulende"
-      }
-    },
     "calendar": {
-      "homework": {
-        "name": "Hausaufgaben"
-      },
       "exam": {
         "name": "Prüfungen"
+      },
+      "homework": {
+        "name": "Hausaufgaben"
       }
     },
     "event": {
@@ -385,13 +127,13 @@
         "state_attributes": {
           "event_type": {
             "state": {
-              "code": "Stunden-Status Änderung",
-              "rooms": "Raum Änderung",
-              "teachers": "Lehrer Änderung",
               "cancelled": "Stundenausfall",
+              "code": "Stunden-Status Änderung",
+              "info": "Info-Text Änderung",
               "lstext": "Stundentext Änderung",
+              "rooms": "Raum Änderung",
               "subject": "Fach Änderung",
-              "info": "Info-Text Änderung"
+              "teachers": "Lehrer Änderung"
             }
           }
         }
@@ -406,6 +148,264 @@
           }
         }
       }
+    },
+    "sensor": {
+      "next_class": {
+        "name": "Nächste Stunde"
+      },
+      "next_lesson_to_wake_up": {
+        "name": "Nächste Stunde zum Aufstehen"
+      },
+      "today_school_end": {
+        "name": "Heutiges Schulende"
+      },
+      "today_school_start": {
+        "name": "Heutiger Schulbeginn"
+      }
+    }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "bad_credentials": "Ungültiges Passwort",
+          "cannot_connect": "Verbindung fehlgeschlagen. Überprüfe die Server-Domain.",
+          "invalid_auth": "Ungültige Authentifizierung",
+          "unknown": "Unerwarteter Fehler"
+        },
+        "step": {
+          "confirm": {
+            "data": {
+              "password": "Passwort"
+            },
+            "description": "Bitte gib das neue Passwort ein!",
+            "title": "Das Passwort wurde geändert"
+          }
+        }
+      },
+      "title": "Das Passwort wurde geändert"
+    }
+  },
+  "options": {
+    "error": {
+      "not_a_dict": "Muss ein Dictionary sein",
+      "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
+      "unknown": "Unerwarteter Fehler",
+      "unknown_service": "Service-ID nicht gefunden."
+    },
+    "step": {
+      "backend": {
+        "data": {
+          "exclude_data": "Daten von request ausschließen",
+          "generate_json": "JSON generieren",
+          "keep_loged_in": "Eingeloggt bleiben"
+        },
+        "data_description": {
+          "exclude_data": "Diese Option wird automatisch gesetzt, wenn der Benutzer keine Rechte hat, um das spamen von Fehlermeldungen zu vermeiden.",
+          "generate_json": "Generiere JSON in Sensor-Attribute - nur aktivieren, wenn es benötigt wird.",
+          "keep_loged_in": "Versucht die Session zu speichern. (BETA)"
+        },
+        "description": "Einstellungen zur Verbindung und Datenverarbeitung.",
+        "title": "Server-Einstellungen"
+      },
+      "calendar": {
+        "data": {
+          "calendar_description": "Kalender - Beschreibung",
+          "calendar_replace_name": "Ereignisnamen ersetzen",
+          "calendar_room": "Kalender - Ort",
+          "calendar_show_cancelled_lessons": "Kalender - Ausfallende Stunden",
+          "calendar_show_room_change": "Kalender - Zimmerwechsel"
+        },
+        "data_description": {
+          "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
+          "calendar_replace_name": "Bsp:\nCancelled: ❌",
+          "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
+          "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
+          "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an."
+        },
+        "description": "Einstellungen zur Kalender Darstellung.",
+        "title": "Kalender-Einstellungen"
+      },
+      "edit_notify_service": {
+        "data": {
+          "data": "Plattformspezifische Benachrichtigungs-Daten",
+          "entity_id": "Notify Service ID",
+          "name": "Name",
+          "options": "Benachrichtigen, wenn",
+          "target": "Plattformspezifische Targetdaten",
+          "template": "Benachrichtigungs-Template"
+        },
+        "data_description": {
+          "data": "Bsp:\nnotification_icon: mdi:school-outline",
+          "entity_id": "Bsp: notify.discord",
+          "template": "Kann Benachrichtigungs-Daten überschreiben"
+        },
+        "description": "füge oder bearbeite einen Benachrichtigungs-Dienst",
+        "title": "Notify Menü"
+      },
+      "filter": {
+        "data": {
+          "exclude_filter_comparison": "Stunden für Benachrichtigungen und Events nicht filtern",
+          "filter_description": "Fächer Filter - Beschreibung",
+          "filter_klassen": "Fächer Filter - Klassen",
+          "filter_mode": "Fächer Filter",
+          "filter_subjects": "Fächer Filter - Fächer",
+          "invalid_subjects": "Kein Fach"
+        },
+        "data_description": {
+          "exclude_filter_comparison": "Dadurch können Events und Benachrichtigungen auch bei Änderungen von gefilterten Stunden ausgelöst werden.",
+          "filter_description": "Verstecke Stunden, die die folgenden Ausdrücke in der Beschreibung enthalten. (Kommagetrennte Liste) \nWird nicht von Black/Whitelist beeinflusst.",
+          "filter_mode": "Gilt sowohl für Fach- als auch Klassen-Filter",
+          "invalid_subjects": "Erlaube Stunden ohne Fach"
+        },
+        "description": "Einstellungen zum Herausfiltern unerwünschter Stunden.",
+        "title": "Filter-Einstellungen"
+      },
+      "init": {
+        "menu_options": {
+          "backend": "Backend",
+          "calendar": "Kalender",
+          "filter": "Filter",
+          "lesson": "Stunden-Darstellung",
+          "notify_menu": "Notify Menü"
+        }
+      },
+      "lesson": {
+        "data": {
+          "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu",
+          "lesson_compacting_tolerance": "Max. Pausenzeit für Doppelstunde",
+          "lesson_long_name": "Langer Name",
+          "lesson_replace_name": "Stunden-Name ersetzen"
+        },
+        "data_description": {
+          "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen.",
+          "lesson_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst",
+          "lesson_replace_name": "Bsp:\nM: Mathe"
+        },
+        "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
+        "title": "Stunden-Darstellungs-Einstellungen"
+      },
+      "notify_menu": {
+        "menu_options": {
+          "edit_notify_service": "Notify Dienst hinzufügen",
+          "edit_notify_service_select": "Notify Dienst bearbeiten",
+          "remove_notify_service": "Notify Dienst löschen",
+          "test_notify_service": "Notify Dienst testen"
+        },
+        "title": "Notify Dienst"
+      }
+    }
+  },
+  "selector": {
+    "calendar_description": {
+      "options": {
+        "class_name_long": "Klassen Name (lang)",
+        "class_name_short": "Klassen Name (kurz)",
+        "json": "JSON",
+        "lesson_info": "Stunden Info",
+        "none": "Keine"
+      }
+    },
+    "notify_options": {
+      "options": {
+        "cancelled": "Stunde fällt aus",
+        "code": "Stunden-Status Änderung",
+        "homework": "Hausaufgaben hinzugefügt",
+        "info": "Stundeninfo Änderung",
+        "lstext": "Stundentext Änderung",
+        "rooms": "Raum Änderung",
+        "subject": "Fach Änderung",
+        "teachers": "Lehrer Änderung"
+      }
+    },
+    "notify_template": {
+      "options": {
+        "discord": "Discord",
+        "message": "Nachricht",
+        "message_title": "Nachricht & Titel"
+      }
+    },
+    "timetable_source": {
+      "options": {
+        "klasse": "Klasse",
+        "personal": "Persönlicher Stundenplan (empfohlen)",
+        "room": "Raum",
+        "student": "Schüler",
+        "subject": "Fach",
+        "teacher": "Lehrer"
+      }
+    }
+  },
+  "services": {
+    "count_lessons": {
+      "description": "Stunden in einem Zeitraum zählen.",
+      "fields": {
+        "apply_filter": {
+          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an",
+          "name": "Filter aktivieren"
+        },
+        "count_cancelled": {
+          "description": "Zähle ausgefallene Stunden",
+          "name": "Zähle ausgefallene Stunden"
+        },
+        "device_id": {
+          "description": "Eine Instanz auswählen",
+          "name": "Gerät"
+        },
+        "end": {
+          "description": "Ende des Zeitraums",
+          "name": "Ende"
+        },
+        "start": {
+          "description": "Start des Zeitraums",
+          "name": "Start"
+        }
+      },
+      "name": "Stunden zählen"
+    },
+    "get_schoolyears": {
+      "description": "WebUntis Schuljahre abrufen.",
+      "fields": {
+        "device_id": {
+          "description": "Eine Instanz auswählen",
+          "name": "Gerät"
+        }
+      },
+      "name": "Schuljahre abrufen"
+    },
+    "get_timetable": {
+      "description": "Stundenplan in einem bestimmten Zeitraum abrufen.",
+      "fields": {
+        "apply_filter": {
+          "description": "Wendet den Filter aus den Einstellungen auf die Ergebnisse an",
+          "name": "Filter aktivieren"
+        },
+        "compact_result": {
+          "description": "Fasse Doppelstunden im Ergebnis zusammen",
+          "name": "Vereinfachte Ergebnisse"
+        },
+        "compact_tolerance_minutes": {
+          "description": "Zeitliche Toleranz, um Stunden als Doppelstunden zusammenzufassen. (Nur relevant, wenn 'Vereinfachte Ergebnisse' aktiviert ist)",
+          "name": "Toleranz für das Zusammenfassen (Minuten)"
+        },
+        "device_id": {
+          "description": "Eine Instanz auswählen",
+          "name": "Gerät"
+        },
+        "end": {
+          "description": "Ende des Zeitraums",
+          "name": "Ende"
+        },
+        "show_cancelled": {
+          "description": "Zeige ausgefallene Stunden im Ergebnis",
+          "name": "Zeige ausgefallene Stunden"
+        },
+        "start": {
+          "description": "Start des Zeitraums",
+          "name": "Start"
+        }
+      },
+      "name": "Stundenplan abrufen"
     }
   }
 }
