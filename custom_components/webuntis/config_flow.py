@@ -57,6 +57,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     _reconfigure = False
     _search_results = []
     _selected_school = None
+    _login_method = None
 
     @staticmethod
     @callback
@@ -104,11 +105,35 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult | config_entries.ConfigFlowResult:
-        """Show the initial login method menu."""
+        """Step 1: Auswahl zwischen manuellem Login und QR-Code Login."""
         return self.async_show_menu(
             step_id="user",
-            menu_options=["manual_login", "qr_login"],
+            menu_options=["manual_login", "qr_menu"],
         )
+
+    async def async_step_qr_menu(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> FlowResult:
+        """Step 2: Untermenü für die zwei QR-Code Optionen."""
+        return self.async_show_menu(
+            step_id="qr_menu",
+            menu_options=["choose_qr_string", "choose_qr_manual"],
+        )
+
+    async def async_step_choose_qr_string(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Nutzer hat QR-Code gewählt -> Flagge setzen und weiterleiten."""
+        self._login_method = "qr_string"
+        return await self.async_step_qr_login()
+
+    async def async_step_choose_qr_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Nutzer hat manuelle Eingabe gewählt -> Flagge setzen und weiterleiten."""
+        self._login_method = "qr_manual"
+        return await self.async_step_qr_login()
 
     async def async_step_manual_login(
         self,
@@ -192,11 +217,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult | config_entries.ConfigFlowResult:
-        """Handle QR-code based login."""
+        """Handle QR-code based login with dynamic UI fields."""
         errors = errors or {}
 
         if user_input is not None:
-            payload = user_input.get("qr_payload", "").strip()
+            if self._login_method == "qr_manual":
+                server = user_input.get("url", "").strip()
+                school = user_input.get("school", "").strip()
+                user = user_input.get("user", "").strip()
+                key = user_input.get("key", "").strip()
+                school_num = user_input.get("school_number", "").strip()
+
+                payload = f"untis://setschool?url={server}&school={school}&user={user}&key={key}&schoolNumber={school_num}"
+            else:
+                payload = user_input.get("qr_payload", "").strip()
+
             try:
                 creds = parse_qr_code(payload)
                 qr_session = async_get_clientsession(self.hass)
@@ -231,15 +266,31 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
 
         user_input = user_input or {}
-        return self.async_show_form(
-            step_id="qr_login",
-            data_schema=vol.Schema(
+
+        if getattr(self, "_login_method", None) == "qr_manual":
+            schema = vol.Schema(
+                {
+                    vol.Required(
+                        "school_number", default=user_input.get("school_number", "")
+                    ): str,
+                    vol.Required("school", default=user_input.get("school", "")): str,
+                    vol.Required("url", default=user_input.get("url", "")): str,
+                    vol.Required("user", default=user_input.get("user", "")): str,
+                    vol.Required("key", default=user_input.get("key", "")): str,
+                }
+            )
+        else:
+            schema = vol.Schema(
                 {
                     vol.Required(
                         "qr_payload", default=user_input.get("qr_payload", "")
                     ): str,
                 }
-            ),
+            )
+
+        return self.async_show_form(
+            step_id="qr_login",
+            data_schema=schema,
             errors=errors,
         )
 
