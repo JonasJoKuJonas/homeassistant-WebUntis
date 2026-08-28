@@ -2,7 +2,7 @@
   "domain": "webuntis",
   "name": "Web Untis",
   "codeowners": [
-    "@JonasJoKuJonas"
+    "@JonasJoKuJonas", "@mrtncode"
   ],
   "config_flow": true,
   "documentation": "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/",

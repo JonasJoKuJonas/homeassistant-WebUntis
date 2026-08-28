@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
-from collections.abc import Mapping
-from datetime import date, datetime, timedelta
+from collections.abc import Callable, Mapping
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 import uuid
 
@@ -20,12 +21,15 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 # pylint: disable=maybe-no-member
 from webuntis import errors
 from .utils.web_untis_extended import ExtendedSession
+from .utils.qrLogin import QrData, parse_qr_code
 from .utils.homework import return_homework_events
 from .utils.exams import return_exam_events
+from .utils.schoolyears import resolve_schoolyear
 from .utils.web_untis import get_lesson_name
 
 
@@ -46,6 +50,8 @@ from .utils.utils import compact_list, async_notify
 from .utils.web_untis import get_timetable_object
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
+
+QR_SESSION_REFRESH_INTERVAL = timedelta(minutes=5)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -172,7 +178,33 @@ class WebUntis:
         self.server = config.data["server"]
         self.school = config.data["school"]
         self.username = config.data["username"]
-        self.password = config.data["password"]
+        self.password = config.data.get("password", "")
+        self.is_qr = config.data.get("login_method") == "qr"
+        self.qr_data = None
+        if self.is_qr:
+            if config.data.get("qr_key"):
+                self.qr_data = QrData(
+                    server=self.server.removeprefix("https://").removeprefix("http://"),
+                    school=self.school,
+                    user=self.username,
+                    key=config.data["qr_key"],
+                    school_number=config.data.get("qr_school_number"),
+                )
+            elif config.data.get("qr_payload"):
+                try:
+                    self.qr_data = parse_qr_code(config.data["qr_payload"])
+                except ValueError:
+                    _LOGGER.error(
+                        "Stored QR login data for '%s@%s' is invalid; reconfigure the integration",
+                        self.school,
+                        self.username,
+                    )
+            else:
+                _LOGGER.error(
+                    "QR login secret is missing for '%s@%s'; reconfigure the integration",
+                    self.school,
+                    self.username,
+                )
         self.timetable_source = config.data["timetable_source"]
         self.timetable_source_id = config.data["timetable_source_id"]
         self.title = config.title
@@ -213,14 +245,24 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
-        self.session = ExtendedSession(
-            username=self.username,
-            password=self.password,
-            server=self.server,
-            useragent="foo",
-            school=self.school,
-        )
-        self._loged_in = False
+        session_kwargs = {
+            "username": self.username,
+            "password": self.password,
+            "server": self.server,
+            "useragent": "foo",
+            "school": self.school,
+        }
+        if config.data.get("jsessionid") and not self.is_qr:
+            session_kwargs["jsessionid"] = config.data["jsessionid"]
+
+        self.session = ExtendedSession(**session_kwargs)
+        if config.data.get("jsessionid") and not self.is_qr:
+            self.session.login_result = {
+                key: config.data[key]
+                for key in ("personType", "personId", "klasseId")
+                if key in config.data
+            }
+        self._loged_in = bool(config.data.get("jsessionid"))
         self._last_status_request_failed = False
         self._no_lessons = False
         self.updating = 0
@@ -257,6 +299,7 @@ class WebUntis:
 
         # Callback for stopping periodic update.
         self._stop_periodic_update: CALLBACK_TYPE | None = None
+        self._qr_session_lock = asyncio.Lock()
 
         self.lesson_change_callback = None
         self.homework_change_callback = None
@@ -288,6 +331,99 @@ class WebUntis:
         # Notify sensors about new data.
         async_dispatcher_send(self._hass, self.signal_name)
 
+    def _session_has_jsessionid(self) -> bool:
+        """Return True when current session has a usable JSESSIONID."""
+        session = getattr(self, "session", None)
+        if session is None:
+            return False
+
+        config = getattr(session, "config", None)
+        if config is None:
+            return False
+
+        try:
+            return bool(config["jsessionid"])
+        except Exception:
+            return False
+
+    async def _async_ensure_valid_session(self, force_refresh: bool = False) -> bool:
+        """Ensure QR session exists and is valid, reauthenticating when required."""
+        if not self.is_qr:
+            return True
+
+        if not self.qr_data:
+            _LOGGER.error(
+                "QR login data is missing for '%s@%s'; reconfigure the integration",
+                self.school,
+                self.username,
+            )
+            self._last_status_request_failed = True
+            return False
+
+        if (
+            not force_refresh
+            and self._loged_in
+            and getattr(self, "session", None)
+            and self._session_has_jsessionid()
+            and self._qr_session_created_at is not None
+            and datetime.now(timezone.utc) - self._qr_session_created_at
+            < QR_SESSION_REFRESH_INTERVAL
+        ):
+            return True
+
+        async with self._qr_session_lock:
+            if (
+                not force_refresh
+                and self._loged_in
+                and getattr(self, "session", None)
+                and self._session_has_jsessionid()
+                and self._qr_session_created_at is not None
+                and datetime.now(timezone.utc) - self._qr_session_created_at
+                < QR_SESSION_REFRESH_INTERVAL
+            ):
+                return True
+
+            try:
+                _LOGGER.warning(
+                    "QR session refresh START for '%s@%s'",
+                    self.school,
+                    self.username,
+                )
+                client_session = async_get_clientsession(self._hass)
+                new_session, jsessionid = await ExtendedSession.async_create_from_qr(
+                    self.qr_data,
+                    client_session,
+                )
+                _LOGGER.warning(
+                    "QR session refresh SUCCESS for '%s@%s'",
+                    self.school,
+                    self.username,
+                )
+
+                # Only assign after async_create_from_qr finished successfully.
+                self.session = new_session
+                self._loged_in = True
+                self._qr_session_created_at = datetime.now(timezone.utc)
+
+                return True
+            except Exception as err:
+                _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
+                self._last_status_request_failed = True
+                return False
+
+    async def _async_add_executor_job_with_retry(self, func_name, func, *args):
+        try:
+            return await self._hass.async_add_executor_job(func, *args)
+        except Exception as err:
+            _LOGGER.debug("Session vermutlich abgelaufen (%s), erneuere direkt...", err)
+
+            if self.is_qr:
+                await self._async_ensure_valid_session(force_refresh=True)
+            else:
+                await self._hass.async_add_executor_job(self.webuntis_login)
+
+            return await self._hass.async_add_executor_job(func, *args)
+
     async def _async_status_request(self) -> None:
         """Request status and update properties."""
 
@@ -295,39 +431,57 @@ class WebUntis:
             for i in self.exclude_data_run:
                 self.exclude_data_(i)
 
-        login_error = await self._hass.async_add_executor_job(self.webuntis_login)
+        if self.is_qr:
+            if not await self._async_ensure_valid_session():
+                return
+        else:
+            login_error = await self._hass.async_add_executor_job(self.webuntis_login)
 
-        if login_error:
-            if str(login_error) == "bad credentials":
-                self.issue = True
-                ir.async_create_issue(
-                    self._hass,
-                    DOMAIN,
-                    "bad_credentials",
-                    is_fixable=True,
-                    severity=ir.IssueSeverity.ERROR,
-                    translation_key="bad_credentials",
-                    data={
-                        "unique_id": self.unique_id,
-                        "config_data": dict(self._config.data),
-                        "entry_id": self._config.entry_id,
-                    },
-                )
-            return
-        elif self.issue:
-            _LOGGER.info("delete issue bad_credentials")
-            ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
-            self.issue = False
-
-        # _LOGGER.debug("updating data")
+            if login_error:
+                if str(login_error) == "bad credentials":
+                    self.issue = True
+                    ir.async_create_issue(
+                        self._hass,
+                        DOMAIN,
+                        "bad_credentials",
+                        is_fixable=True,
+                        severity=ir.IssueSeverity.ERROR,
+                        translation_key="bad_credentials",
+                        data={
+                            "unique_id": self.unique_id,
+                            "config_data": dict(self._config.data),
+                            "entry_id": self._config.entry_id,
+                        },
+                    )
+                return
+            elif self.issue:
+                _LOGGER.info("delete issue bad_credentials")
+                ir.async_delete_issue(self._hass, DOMAIN, "bad_credentials")
+                self.issue = False
 
         try:
-            self.schoolyears = await self._hass.async_add_executor_job(
-                self.session.schoolyears
+            schoolyears = await self._async_add_executor_job_with_retry(
+                "schoolyears",
+                lambda: self.session.schoolyears(),
             )
-            self.current_schoolyear = await self._hass.async_add_executor_job(
-                lambda: self.schoolyears.current
+            current_schoolyear = await self._hass.async_add_executor_job(
+                resolve_schoolyear,
+                schoolyears,
             )
+
+            if not current_schoolyear and self.is_qr:
+                if await self._async_ensure_valid_session(force_refresh=True):
+                    schoolyears = await self._async_add_executor_job_with_retry(
+                        "schoolyears",
+                        lambda: self.session.schoolyears(),
+                    )
+                    current_schoolyear = await self._hass.async_add_executor_job(
+                        resolve_schoolyear,
+                        schoolyears,
+                    )
+
+            self.schoolyears = schoolyears
+            self.current_schoolyear = current_schoolyear
 
             if not self.current_schoolyear:
                 # Login error, set all properties to unknown.
@@ -336,27 +490,31 @@ class WebUntis:
                 self.next_lesson_to_wake_up = None
                 self.calendar_events = []
                 self.calendar_homework = []
+                self.calendar_exams = []
                 self.next_day_json = None
                 self.day_json = None
                 self.today = [None, None]
 
-                # Inform user once about failed update if necessary.
+                # Only log schoolyear warning once
                 if not self._last_status_request_failed:
-                    _LOGGER.info(
-                        "No active schoolyear '%s@%s'",
+                    _LOGGER.warning(
+                        "No active schoolyear found for '%s@%s'. Timetable request returned empty.",
                         self.school,
                         self.username,
-                    )
-                    _LOGGER.info(
-                        "Found schoolyears for '%s@%s': %s (%s)",
-                        self.school,
-                        self.username,
-                        self.schoolyears,
-                        self.current_schoolyear,
                     )
                 self._last_status_request_failed = True
                 await self._hass.async_add_executor_job(self.webuntis_logout)
                 return
+
+            self._last_status_request_failed = False
+            _LOGGER.debug(
+                "Using schoolyear '%s' for '%s@%s' (start=%s, end=%s)",
+                self.current_schoolyear.name,
+                self.school,
+                self.username,
+                self.current_schoolyear.start.date(),
+                self.current_schoolyear.end.date(),
+            )
 
         except OSError as error:
             _LOGGER.warning(
@@ -367,9 +525,11 @@ class WebUntis:
             )
 
         try:
-            self.subjects = await self._hass.async_add_executor_job(
-                self.session.subjects
+            subjects = await self._async_add_executor_job_with_retry(
+                "subjects",
+                lambda: self.session.subjects(),
             )
+            self.subjects = subjects
         except OSError as error:
             self.subjects = []
 
@@ -381,7 +541,11 @@ class WebUntis:
             )
 
         try:
-            self.klassen = await self._hass.async_add_executor_job(self.session.klassen)
+            klassen = await self._async_add_executor_job_with_retry(
+                "klassen",
+                lambda: self.session.klassen(),
+            )
+            self.klassen = klassen
         except OSError as error:
             self.klassen = []
 
@@ -393,11 +557,13 @@ class WebUntis:
             )
 
         try:
-            self.student_id = await self._hass.async_add_executor_job(
-                self.get_student_id
+            student_id = await self._async_add_executor_job_with_retry(
+                "student_id",
+                lambda: self.get_student_id(),
             )
+            self.student_id = student_id
         except OSError as error:
-            self.subjects = []
+            self.student_id = None
 
             _LOGGER.warning(
                 "Updating the student_id of '%s@%s' failed - OSError: %s",
@@ -407,7 +573,11 @@ class WebUntis:
             )
 
         try:
-            self.next_class = await self._hass.async_add_executor_job(self._next_class)
+            next_class = await self._async_add_executor_job_with_retry(
+                "next_class",
+                lambda: self._next_class(),
+            )
+            self.next_class = next_class
         except OSError as error:
             self.next_class = None
 
@@ -419,9 +589,11 @@ class WebUntis:
             )
 
         try:
-            self.next_lesson_to_wake_up = await self._hass.async_add_executor_job(
-                self._next_lesson_to_wake_up
+            next_lesson_to_wake_up = await self._async_add_executor_job_with_retry(
+                "next_lesson_to_wake_up",
+                lambda: self._next_lesson_to_wake_up(),
             )
+            self.next_lesson_to_wake_up = next_lesson_to_wake_up
         except OSError as error:
             self.next_lesson_to_wake_up = None
 
@@ -433,9 +605,11 @@ class WebUntis:
             )
 
         try:
-            self.next_day_json = await self._hass.async_add_executor_job(
-                self._next_day_json
+            next_day_json = await self._async_add_executor_job_with_retry(
+                "next_day_json",
+                lambda: self._next_day_json(),
             )
+            self.next_day_json = next_day_json
         except OSError as error:
             self.next_day_json = None
 
@@ -447,7 +621,11 @@ class WebUntis:
             )
 
         try:
-            self.day_json = await self._hass.async_add_executor_job(self._day_json)
+            day_json = await self._async_add_executor_job_with_retry(
+                "day_json",
+                lambda: self._day_json(),
+            )
+            self.day_json = day_json
         except OSError as error:
             self.day_json = None
 
@@ -459,11 +637,12 @@ class WebUntis:
             )
 
         try:
-            self.calendar_events = await self._hass.async_add_executor_job(
-                self._get_events
+            calendar_events = await self._async_add_executor_job_with_retry(
+                "calendar_events",
+                lambda: self._get_events(),
             )
             self.calendar_events = compact_list(
-                self.calendar_events,
+                calendar_events,
                 "calendar",
                 timedelta(minutes=self.lesson_compacting_tolerance),
             )
@@ -479,9 +658,11 @@ class WebUntis:
 
         if self.timetable_source != "teacher":
             try:
-                self.calendar_exams = await self._hass.async_add_executor_job(
-                    return_exam_events, self
+                calendar_exams = await self._async_add_executor_job_with_retry(
+                    "calendar_exams",
+                    lambda: return_exam_events(self),
                 )
+                self.calendar_exams = calendar_exams
             except OSError as error:
                 self.calendar_exams = []
 
@@ -492,15 +673,25 @@ class WebUntis:
                     error,
                 )
 
+            param_list = []
+
             try:
                 (
-                    self.calendar_homework,
+                    calendar_homework,
                     param_list,
-                ) = await self._hass.async_add_executor_job(
-                    return_homework_events, self
+                ) = await self._async_add_executor_job_with_retry(
+                    "calendar_homework",
+                    lambda: return_homework_events(self),
                 )
+                self.calendar_homework = calendar_homework
             except OSError as error:
                 self.calendar_homework = []
+                param_list = []
+
+                param_list = [
+                    {"homework_id": homework_id}
+                    for homework_id in self.calendar_homework_ids
+                ]
 
                 _LOGGER.warning(
                     "Updating the property calendar_homework of '%s@%s' failed - OSError: %s",
@@ -548,7 +739,11 @@ class WebUntis:
                 self.calendar_homework_ids.append(event["homework_id"])
 
         try:
-            self.today = await self._hass.async_add_executor_job(self._today)
+            today = await self._async_add_executor_job_with_retry(
+                "today",
+                lambda: self._today(),
+            )
+            self.today = today
         except OSError as error:
             self.today = [None, None]
 
@@ -572,69 +767,44 @@ class WebUntis:
         await self._hass.async_add_executor_job(self.webuntis_logout)
 
     def webuntis_login(self):
+        """Handle login for standard password sessions."""
+        if getattr(self, "is_qr", False):
+            return None
+
+        if self._loged_in and "jsessionid" in self.session.config:
+            self.updating += 1
+            return None
+
+        try:
+            self.session.login()
+            self._loged_in = True
+            self.updating += 1
+            return None
+        except Exception as error:
+            _LOGGER.error(
+                "Login failed for '%s@%s': %s", self.school, self.username, error
+            )
+            self._last_status_request_failed = True
+            return error
+
+    def webuntis_logout(self) -> None:
+        """Logout from WebUntis."""
+
+        # Do not logout for qr code sessions
+        if getattr(self, "is_qr", False):
+            _LOGGER.debug(
+                "Skipping webuntis_logout for QR code session to keep JSESSIONID active"
+            )
+            return None
+
+        # Normal logout
         if self._loged_in:
-            # Check if there is a session id.
-            if "jsessionid" not in self.session.config:
-                _LOGGER.debug("No session id found")
-                self._loged_in = False
-            else:
-                # Check if session id is still valid.
-                try:
-                    self.session.schoolyears()
-                    self.updating += 1
-                    return None
-                except errors.NotLoggedInError:
-                    _LOGGER.debug("Session invalid")
-                    self._loged_in = False
-
-        if not self._loged_in:
-            # _LOGGER.debug("logging in")
-
             try:
-                self.session.login()
-                # _LOGGER.debug("Login successful")
-                self._loged_in = True
-                self.updating += 1
-
-                return None
-            except OSError as error:
-                # Login error, set all properties to unknown.
-                self.next_class = None
-                self.next_class_json = None
-                self.next_lesson_to_wake_up = None
-                self.calendar_events = []
-                self.calendar_homework = []
-                self.calendar_exams = []
-                self.next_day_json = None
-                self.day_json = None
-
-                # Inform user once about failed update if necessary.
-                if not self._last_status_request_failed:
-                    _LOGGER.warning(
-                        "Login to WebUntis '%s@%s' failed - OSError: %s",
-                        self.school,
-                        self.username,
-                        error,
-                    )
-                self._last_status_request_failed = True
-
-                return error
-            except Exception as error:
-                _LOGGER.error(
-                    "Login to WebUntis '%s@%s' failed - ERROR: %s",
-                    self.school,
-                    self.username,
-                    error,
-                )
-                self._last_status_request_failed = True
-                return error
-
-    def webuntis_logout(self):
-        self.updating -= 1
-        if not self.keep_logged_in and self.updating == 0:
-            self.session.logout()
-            # _LOGGER.debug("Logout successful")
-            self._loged_in = False
+                self.session.logout()
+            except Exception as err:
+                _LOGGER.warning("Error during WebUntis logout: %s", err)
+            finally:
+                self._loged_in = False
 
     def get_student_id(self):
         if self.timetable_source == "student":
@@ -651,8 +821,13 @@ class WebUntis:
                 self.timetable_source_id, self.timetable_source, self.session
             )
 
+        if isinstance(start, datetime):
+            start = start.date()
+        if isinstance(end, datetime):
+            end = end.date()
+
         if not self.current_schoolyear:
-            _LOGGER.warning(
+            _LOGGER.debug(
                 "No valid school year found for start date %s. Returning empty timetable.",
                 start,
             )
@@ -663,6 +838,16 @@ class WebUntis:
             start = self.current_schoolyear.start.date()
         if end > self.current_schoolyear.end.date():
             end = self.current_schoolyear.end.date()
+
+        if start > end:
+            _LOGGER.debug(
+                "Requested timetable range %s-%s is outside school year %s-%s. Returning empty timetable.",
+                start,
+                end,
+                self.current_schoolyear.start.date(),
+                self.current_schoolyear.end.date(),
+            )
+            return []
 
         result = []
         if self.timetable_source == "personal":

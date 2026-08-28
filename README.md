@@ -37,25 +37,18 @@ You can install WebUntis via HACS or manually. For detailed instructions, see th
 
 ## 📖 Documentation
 
-- **Entities & Services** – Full list of entities, their German/English names, and available services:  
+- **Entities & Services** – Full list of entities, their German/English names, and available services:
   [Entities & Services](docs/ENTITIES_AND_SERVICES.md)
-- **Optional Configurations** – All configuration options for filters, calendars, lessons, notifications, and backend:  
+- **Optional Configurations** – All configuration options for filters, calendars, lessons, notifications, and backend:
   [Optional Configurations](docs/OPTIONAL_CONFIGURATIONS.md)
-- **Examples & Automations** – Ready-to-use automations and template snippets for common use cases:  
+- **Examples & Automations** – Ready-to-use automations and template snippets for common use cases:
   [Examples & Automations](docs/EXAMPLES_AND_AUTOMATIONS.md)
 
 ---
 
-## 🌐 Help Translate
-
-We use Crowdin to simplify translations. If you’re fluent in another language and want to contribute, you can help translate the project. Contributions in any language are welcome!
-
-[![Help Translate on Crowdin](https://badges.crowdin.net/badge/light/crowdin-on-dark.png)](https://crowdin.com/project/homeassistant-webuntis)
-
----
 
 ## Dashboard card for timetable
-There is an inofficial dashboard card for displaying timetables in Home Assistant. 
+There is an inofficial dashboard card for displaying timetables in Home Assistant.
 The card is not related to this project, but it is compatible with the timetable provided by this integration
 
 Check it out here: https://github.com/KingDando8430/HA-Timetable-Card
@@ -74,3 +67,7 @@ I’m a 19-year-old software developer from Germany, creating projects like this
 <a href="https://www.paypal.com/donate/?hosted_button_id=29CAZV3ZHWDMW">
   <img src="https://raw.githubusercontent.com/andreostrovsky/donate-with-paypal/925c5a9e397363c6f7a477973fdeed485df5fdd9/blue.svg" alt="Donate with PayPal" height="40"/>
 </a>
+
+
+## Disclaimer
+This project is not affiliated with WebUntis or Untis GmbH. It is an independent integration developed by hobby developers. All trademarks and logos belong to their respective owners. Use this integration at your own risk. The developer is not responsible for any issues or damages that may arise from using this integration.

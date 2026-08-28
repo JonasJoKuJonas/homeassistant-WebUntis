@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 21
+CONFIG_ENTRY_VERSION = 22
 
 DEFAULT_OPTIONS = {
     "lesson_long_name": True,
