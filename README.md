@@ -56,6 +56,8 @@ For a better experience in Home Assistant, you can use the HA-Timetable-Card. It
 
 Check it out here: https://github.com/KingDando8430/HA-Timetable-Card
 
+See the [WebUntis x Timetable Card Documentation](https://github.com/KingDando8430/HA-Timetable-Card/blob/main/documentation/WebUntis.md) for more information.
+
 ---
 
 ## [![Join our Discord](https://discordapp.com/api/guilds/1090218586565509170/widget.png?style=banner2)](https://discord.gg/34EHnHQaPm)
