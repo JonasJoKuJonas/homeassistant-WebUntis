@@ -178,7 +178,7 @@
             "data": {
               "password": "Passwort"
             },
-            "description": "Bitte gib das neue Passwort ein!",
+            "description": "Bitte gib das neue Passwort für **{username}** ein!",
             "title": "Das Passwort wurde geändert"
           }
         }

@@ -47,6 +47,10 @@ class IssueChangePassword(RepairsFlow):
 
             errors["base"] = next(iter(errors.values()))
 
+        entry = self.hass.config_entries.async_get_entry(self._entry_id)
+        if entry and entry.data:
+            username = entry.data["username"]
+
         return self.async_show_form(
             step_id="confirm",
             data_schema=vol.Schema(
@@ -54,6 +58,7 @@ class IssueChangePassword(RepairsFlow):
                     vol.Required("password"): str,
                 }
             ),
+            description_placeholders={"username": username},
             errors=errors,
         )
 
