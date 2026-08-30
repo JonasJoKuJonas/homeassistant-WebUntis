@@ -48,11 +48,10 @@ You can install WebUntis via HACS or manually. For detailed instructions, see th
 
 ## Dashboard Card for Timetable
 
-For a better experience in Home Assistant, you can use the HA-Timetable-Card. It is designed to work with the timetable data provided by this integration and offers a more detailed and flexible way to display your timetable.
+For a better visual experience in Home Assistant, you can use the HA-Timetable-Card. It is designed to work with the timetable data provided by this integration and offers a more detailed and flexible way to display your timetable.
 
 > [!NOTE]
-> The Timetable Card is not limited to the upcoming 30 days.
-> The integration provides the upcoming 30 days by default, while the Timetable Card can request and display timetable data for a larger date range.
+> While this integration provides a calendar entitiy with the upcoming 30 days, the timetable card can request and display timetable data for a larger date range.
 
 Check it out here: https://github.com/KingDando8430/HA-Timetable-Card
 
