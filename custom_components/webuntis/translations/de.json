@@ -274,12 +274,14 @@
         "data": {
           "lesson_add_teacher": "Füge Lehrer-Kürzel zu Stunde hinzu",
           "lesson_compacting_tolerance": "Max. Pausenzeit für Doppelstunde",
+          "lesson_compacting_parallel": "Parallele Stunden zusammenfassen",
           "lesson_long_name": "Langer Name",
           "lesson_replace_name": "Stunden-Name ersetzen"
         },
         "data_description": {
           "lesson_add_teacher": "Wähle Stunden aus, die mit Lehrer-Kürze angezeigt werden sollen.",
           "lesson_compacting_tolerance": "Aufeinanderfolgende identische Stunden werden bei kürzerer Unterbrechung zusammengefasst",
+          "lesson_compacting_parallel": "Stunden mit gleicher Uhrzeit oder Überschneidungen werden ebenfalls zusammengefasst.",
           "lesson_replace_name": "Bsp:\nM: Mathe"
         },
         "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
