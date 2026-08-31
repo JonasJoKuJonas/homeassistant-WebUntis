@@ -74,68 +74,87 @@ class HomeworkEventsFetcher:
 
         # Process each homework entry
         for homework in homeworks:
-            hw_id = homework.get("id")
-            lesson_id = homework.get("lessonId")
-            date_assigned_int = homework.get("date")  # Date in integer YYYYMMDD format
-            due_date_int = homework.get(
-                "dueDate"
-            )  # Due date in integer YYYYMMDD format
-            text = homework.get("text")
-            completed = homework.get("completed", False)
+            try:
+                hw_id = homework.get("id")
+                lesson_id = homework.get("lessonId")
+                date_assigned_int = homework.get(
+                    "date"
+                )  # Date in integer YYYYMMDD format
+                due_date_int = homework.get(
+                    "dueDate"
+                )  # Due date in integer YYYYMMDD format
+                text = homework.get("text")
+                completed = homework.get("completed", False)
 
-            date_assigned = datetime.strptime(str(date_assigned_int), "%Y%m%d").date()
-            due_date = datetime.strptime(
-                str(due_date_int), "%Y%m%d"
-            ).date()
+                date_assigned = datetime.strptime(
+                    str(date_assigned_int), "%Y%m%d"
+                ).date()
+                due_date = datetime.strptime(str(due_date_int), "%Y%m%d").date()
 
-            # Find the corresponding record to get the teacher ID
-            record = next((rec for rec in records if rec["homeworkId"] == hw_id), None)
+                # Find the corresponding record to get the teacher ID
+                record = next(
+                    (rec for rec in records if rec["homeworkId"] == hw_id), None
+                )
 
-            # Fetch the teacher ID from the record
-            teacher_id = record.get("teacherId") if record else None
+                # Fetch the teacher ID from the record
+                teacher_id = record.get("teacherId") if record else None
 
-            student_id = record.get("elementIds", [])[0]
+                student_id = record.get("elementIds", [])[0]
 
-            # Get the teacher's name using the teacher ID
-            teacher = teacher_map.get(teacher_id, {})
-            teacher_name = teacher.get("name", "Unknown Teacher")
+                # Get the teacher's name using the teacher ID
+                teacher = teacher_map.get(teacher_id, {})
+                teacher_name = teacher.get("name", "Unknown Teacher")
 
-            # Find the corresponding lesson
-            lesson = next((l for l in lessons if l["id"] == lesson_id), {})
-            subject = lesson.get("subject", "Unknown Subject")
+                # Find the corresponding lesson
+                lesson = next((l for l in lessons if l["id"] == lesson_id), {})
+                subject = lesson.get("subject", "Unknown Subject")
 
-            summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
+                summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
 
-            # Create a calendar event for each homework entry
-            event = {
-                "uid": hw_id,
-                "summary": summary,
-                "start": date_assigned,
-                "end": due_date,
-                "description": text,
-            }
+                # Create a calendar event for each homework entry
+                event = {
+                    "uid": hw_id,
+                    "summary": summary,
+                    "start": date_assigned,
+                    "end": due_date,
+                    "description": text,
+                }
 
-            parameters = {
-                "homework_id": hw_id,
-                "subject": subject,
-                "teacher": teacher_name,
-                "student_id": student_id,
-                "completed": completed,
-                "date_assigned": date_assigned,
-                "due_date": due_date,
-                "text": text,
-            }
+                parameters = {
+                    "homework_id": hw_id,
+                    "subject": subject,
+                    "teacher": teacher_name,
+                    "student_id": student_id,
+                    "completed": completed,
+                    "date_assigned": date_assigned,
+                    "due_date": due_date,
+                    "text": text,
+                }
 
-            if self.server.student_id is None or self.server.student_id == student_id:
-                if (
-                    subject in self.server.filter_subjects
-                    and self.server.filter_mode == "Blacklist"
-                ):
+                if parameters["date_assigned"] > parameters["due_date"]:
+                    # Log a warning if the assigned date is after the due date
+                    print(
+                        f"Warning: Homework ID {hw_id} has an assigned date after the due date. Skipping this entry."
+                    )
                     continue
-                # Add the homework event to the event list
-                event_list.append(CalendarEvent(**event))
 
-                param_list.append(parameters)
+                if (
+                    self.server.student_id is None
+                    or self.server.student_id == student_id
+                ):
+                    if (
+                        subject in self.server.filter_subjects
+                        and self.server.filter_mode == "Blacklist"
+                    ):
+                        continue
+                    # Add the homework event to the event list
+                    event_list.append(CalendarEvent(**event))
+
+                    param_list.append(parameters)
+            except Exception as e:  # noqa: BLE001
+                # Log the error and continue processing other homework entries
+                print(f"Error processing homework entry: {homework}. Error: {e!s}")
+                continue
 
         return event_list, param_list
 
