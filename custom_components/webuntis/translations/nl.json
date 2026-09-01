@@ -125,12 +125,14 @@
           "data": {
             "lesson_add_teacher": "Add Teacher to subject",
             "lesson_compacting_tolerance": "Max. break time between double lessons",
+            "lesson_compacting_parallel": "Compact parallel lessons",
             "lesson_long_name": "Long name",
             "lesson_replace_name": "Replace Lesson name"
           },
           "data_description": {
             "lesson_add_teacher": "Select which subjects should be displayed with the teacher's name.",
             "lesson_compacting_tolerance": "Identical consecutive lessons will be combined to double lessons if the break time is shorter than this value.",
+            "lesson_compacting_parallel": "Lessons with the same time or overlapping times will also be merged.",
             "lesson_replace_name": "e.g.,\nM: Math"
           },
           "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",

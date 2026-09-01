@@ -219,6 +219,9 @@ class WebUntis:
         self.lesson_compacting_tolerance = config.options.get(
             "lesson_compacting_tolerance", 0
         )
+        self.lesson_compacting_parallel = config.options.get(
+            "lesson_compacting_parallel", False
+        )
         self.lesson_long_name = config.options["lesson_long_name"]
         self.lesson_replace_name = config.options.get("lesson_replace_name", {})
         self.lesson_add_teacher = config.options.get("lesson_add_teacher", [])
@@ -645,6 +648,7 @@ class WebUntis:
                 calendar_events,
                 "calendar",
                 timedelta(minutes=self.lesson_compacting_tolerance),
+                self.lesson_compacting_parallel,
             )
         except OSError as error:
             self.calendar_events = []
@@ -1086,7 +1090,10 @@ class WebUntis:
 
         if compact_result:
             events = compact_list(
-                events, "dict", timedelta(minutes=compact_tolerance_minutes)
+                events,
+                "dict",
+                timedelta(minutes=compact_tolerance_minutes),
+                self.lesson_compacting_parallel,
             )
 
         return events
@@ -1478,6 +1485,7 @@ class WebUntis:
                 updated_items,
                 "notify",
                 timedelta(minutes=self.lesson_compacting_tolerance),
+                self.lesson_compacting_parallel,
             )
 
             for service in self.notify_config.values():

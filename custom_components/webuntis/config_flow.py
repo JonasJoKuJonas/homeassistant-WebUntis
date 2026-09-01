@@ -969,6 +969,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             translation_key="lesson_compacting_tolerance",
                         )
                     ),
+                    vol.Optional(
+                        "lesson_compacting_parallel",
+                        default=self._config_entry.options.get(
+                            "lesson_compacting_parallel", False
+                        ),
+                    ): selector.BooleanSelector(),
                 }
             ),
         )
