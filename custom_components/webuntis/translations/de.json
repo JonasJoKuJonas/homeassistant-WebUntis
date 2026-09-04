@@ -184,15 +184,13 @@
         }
       },
       "title": "Das Passwort wurde geändert"
+    },
+    "live_activity_notify_missing": {
+      "title": "Live Stundenplan: Notify-Ziel nicht erreichbar",
+      "description": "{entity_id} hat keine Aktion {service_id}. Ist das Ziel ein Gerät der Companion-App? Bitte in der Live-Stundenplan-Konfiguration prüfen."
     }
   },
   "options": {
-    "error": {
-      "not_a_dict": "Muss ein Dictionary sein",
-      "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
-      "unknown": "Unerwarteter Fehler",
-      "unknown_service": "Service-ID nicht gefunden."
-    },
     "step": {
       "backend": {
         "data": {
@@ -225,6 +223,21 @@
         },
         "description": "Einstellungen zur Kalender Darstellung.",
         "title": "Kalender-Einstellungen"
+      },
+      "edit_live_activity": {
+        "title": "Live Stundenplan",
+        "description": "Live Activity für den Stundenplan hinzufügen oder bearbeiten.",
+        "data": {
+          "name": "Name",
+          "platform": "Plattform",
+          "entity_id": "Notify-Dienst",
+          "start_offset": "Start vor Schulbeginn",
+          "end_offset": "Ende nach Schulschluss"
+        },
+        "data_description": {
+          "start_offset": "Minuten vor der ersten Stunde.",
+          "end_offset": "Minuten nach der letzten Stunde."
+        }
       },
       "edit_notify_service": {
         "data": {
@@ -267,6 +280,7 @@
           "calendar": "Kalender",
           "filter": "Filter",
           "lesson": "Stunden-Darstellung",
+          "live_activities_menu": "Live Stundenplan",
           "notify_menu": "Notify Menü"
         }
       },
@@ -287,6 +301,15 @@
         "description": "Einstellungen, wie die Stunden angezeigt werden.\nDies wird auf den Kalender und die Benachrichtigungen angewendet.",
         "title": "Stunden-Darstellungs-Einstellungen"
       },
+      "live_activities_menu": {
+        "title": "Live Stundenplan",
+        "menu_options": {
+          "edit_live_activity": "Live Stundenplan hinzufügen",
+          "edit_live_activity_select": "Live Stundenplan bearbeiten",
+          "remove_live_activity": "Live Stundenplan löschen",
+          "test_live_activity": "Live Stundenplan testen"
+        }
+      },
       "notify_menu": {
         "menu_options": {
           "edit_notify_service": "Notify Dienst hinzufügen",
@@ -296,6 +319,12 @@
         },
         "title": "Notify Dienst"
       }
+    },
+    "error": {
+      "not_a_dict": "Muss ein Dictionary sein",
+      "notification_invalid": "Benachrichtigung konnte nicht gesendet werden. Siehe Logs für mehr Infos.",
+      "unknown": "Unerwarteter Fehler",
+      "unknown_service": "Service-ID nicht gefunden."
     }
   },
   "selector": {
@@ -306,6 +335,11 @@
         "json": "JSON",
         "lesson_info": "Stunden Info",
         "none": "Keine"
+      }
+    },
+    "live_activity_platform": {
+      "options": {
+        "ios": "iOS"
       }
     },
     "notify_options": {

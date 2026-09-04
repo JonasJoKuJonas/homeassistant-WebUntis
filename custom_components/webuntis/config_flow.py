@@ -32,6 +32,7 @@ from .const import (
     NOTIFY_OPTIONS,
     TEMPLATE_OPTIONS,
 )
+from .live_activities import LiveActivityOptionsFlowMixin
 from .notify import get_notification_data
 from .utils.errors import *
 from .utils.schoolyears import resolve_schoolyear
@@ -712,11 +713,12 @@ OPTIONS_MENU = [
     "calendar",
     "lesson",
     "notify_menu",
+    "live_activities_menu",
     "backend",
 ]
 
 
-class OptionsFlowHandler(config_entries.OptionsFlow):
+class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixin):
     """Handle the option flow for WebUntis."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:

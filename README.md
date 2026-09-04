@@ -39,7 +39,7 @@ You can install WebUntis via HACS or manually. For detailed instructions, see th
 
 - **Entities & Services** – Full list of entities, their German/English names, and available services:
   [Entities & Services](docs/ENTITIES_AND_SERVICES.md)
-- **Optional Configurations** – All configuration options for filters, calendars, lessons, notifications, and backend:
+- **Optional Configurations** – All configuration options for filters, calendars, lessons, notifications, live timetable, and backend:
   [Optional Configurations](docs/OPTIONAL_CONFIGURATIONS.md)
 - **Examples & Automations** – Ready-to-use automations and template snippets for common use cases:
   [Examples & Automations](docs/EXAMPLES_AND_AUTOMATIONS.md)

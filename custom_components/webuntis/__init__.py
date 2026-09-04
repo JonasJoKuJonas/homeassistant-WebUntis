@@ -34,6 +34,7 @@ from .utils.web_untis import get_lesson_name
 
 
 from .const import (
+    CONF_LIVE_ACTIVITIES,
     CONFIG_ENTRY_VERSION,
     DAYS_TO_FUTURE,
     DEFAULT_OPTIONS,
@@ -43,6 +44,7 @@ from .const import (
     NAME_EVENT_LESSON_CHANGE,
     NAME_EVENT_HOMEWORK,
 )
+from .live_activities import LiveActivityManager
 from .notify import *
 from .services import async_setup_services
 from .utils.utils import compact_list, async_notify
@@ -77,6 +79,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await server.async_update()
     server.start_periodic_update()
+
+    server.live_activity_manager = LiveActivityManager(hass, server)
+    server.live_activity_manager.start()
 
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
@@ -155,6 +160,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
     # Clean up.
     server.stop_periodic_update()
+    server.live_activity_manager.stop()
     hass.data[DOMAIN].pop(unique_id)
 
     return unload_ok
@@ -248,6 +254,10 @@ class WebUntis:
             config.get("options") for config in self.notify_config.values()
         )
 
+
+        self.live_activities = config.options.get(CONF_LIVE_ACTIVITIES, {})
+        self.live_activity_manager = None
+
         session_kwargs = {
             "username": self.username,
             "password": self.password,
@@ -266,6 +276,7 @@ class WebUntis:
                 if key in config.data
             }
         self._loged_in = bool(config.data.get("jsessionid"))
+
         self._last_status_request_failed = False
         self._no_lessons = False
         self.updating = 0
