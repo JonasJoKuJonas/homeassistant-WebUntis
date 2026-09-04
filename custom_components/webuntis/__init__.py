@@ -255,7 +255,7 @@ class WebUntis:
         )
 
 
-                self.live_activities = config.options.get(CONF_LIVE_ACTIVITIES, {})
+        self.live_activities = config.options.get(CONF_LIVE_ACTIVITIES, {})
         self.live_activity_manager = None
 
         session_kwargs = {
