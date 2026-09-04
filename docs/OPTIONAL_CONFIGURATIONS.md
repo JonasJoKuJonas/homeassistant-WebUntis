@@ -34,6 +34,7 @@ Control how the lesson name is displayed.
 | lesson_replace_name           | Replace lesson names based on mapping.         | `None`  |
 | lesson_add_teacher            | Show the teacher's name for selected subjects. | `None`  |
 | lesson_compacting_tolerance   | Break (in minutes) between lessons for merge.  |  `0`    |
+| lesson_compacting_parallel    | Compact parallel lessons that overlap or share the same time. | `False` |
 
 ### Notification Options
 

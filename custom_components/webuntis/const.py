@@ -17,6 +17,7 @@ DEFAULT_OPTIONS = {
     "exclude_data": [],
     "filter_description": [],
     "lesson_compacting_tolerance": 0,
+    "lesson_compacting_parallel": False,
     "calendar_description": "none",
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,

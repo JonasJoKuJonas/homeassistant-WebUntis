@@ -55,54 +55,71 @@ class ExamEventsFetcher:
 
         # Process each exam entry and create a CalendarEvent object
         for exam in exams:
-            exam_id = exam.get("id", None)
-            exam_type = exam.get("examType", "Unknown Type")
-            name = exam.get("name", "No Name")
-            subject = exam.get("subject", "Unknown Subject")
-            text = exam.get("text", "")
-            grade = exam.get("grade", "")
+            try:
+                exam_id = exam.get("id", None)
+                exam_type = exam.get("examType", "Unknown Type")
+                name = exam.get("name", "No Name")
+                subject = exam.get("subject", "Unknown Subject")
+                text = exam.get("text", "")
+                grade = exam.get("grade", "")
 
-            assigned_students = exam.get("assignedStudents", [])
-            if assigned_students:  # Checks if the list is not empty
-                student_id = assigned_students[0].get("id", None)
-            else:
-                student_id = None
+                assigned_students = exam.get("assignedStudents", [])
+                if assigned_students:  # Checks if the list is not empty
+                    student_id = assigned_students[0].get("id", None)
+                else:
+                    student_id = None
 
-            # Parse dates and times for the exam
-            exam_date = exam.get("examDate")
-            start_time = exam.get("startTime", 0)
-            end_time = exam.get("endTime", 0)
+                # Parse dates and times for the exam
+                exam_date = exam.get("examDate")
+                start_time = exam.get("startTime", 0)
+                end_time = exam.get("endTime", 0)
 
-            # Combine date and time for start and end datetime objects, ensuring they are timezone-aware
-            start_datetime = parse_datetime(
-                date=exam_date, time=start_time
-            ).astimezone()
+                # Combine date and time for start and end datetime objects, ensuring they are timezone-aware
+                start_datetime = parse_datetime(
+                    date=exam_date, time=start_time
+                ).astimezone()
 
-            end_datetime = parse_datetime(date=exam_date, time=end_time).astimezone()
+                end_datetime = parse_datetime(
+                    date=exam_date, time=end_time
+                ).astimezone()
 
-            # Get teacher and room details
-            teachers = ", ".join(exam.get("teachers", [])) or "Unknown Teacher"
-            rooms = ", ".join(exam.get("rooms", [])) or "Unknown Room"
+                if end_datetime < start_datetime:
+                    # Log a warning if the end datetime is before the start datetime
+                    print(
+                        f"Warning: Exam ID {exam_id} has an end datetime before the start datetime. Skipping this entry."
+                    )
+                    continue
 
-            summary = get_lesson_name_str(self.server, subject, teachers)
+                # Get teacher and room details
+                teachers = ", ".join(exam.get("teachers", [])) or "Unknown Teacher"
+                rooms = ", ".join(exam.get("rooms", [])) or "Unknown Room"
 
-            description = f"""{exam_type} Name: {name}"""
+                summary = get_lesson_name_str(self.server, subject, teachers)
 
-            if text:
-                description += f" Text: \n{text}"
+                description = f"""{exam_type} Name: {name}"""
 
-            # Create a structured CalendarEvent object with timezone-aware datetimes
-            event = {
-                "uid": str(uuid.uuid4()),
-                "summary": summary,
-                "start": start_datetime,
-                "end": end_datetime,
-                "description": description,
-                "location": rooms,
-            }
+                if text:
+                    description += f" Text: \n{text}"
 
-            if self.server.student_id is None or self.server.student_id == student_id:
-                event_list.append(CalendarEvent(**event))
+                # Create a structured CalendarEvent object with timezone-aware datetimes
+                event = {
+                    "uid": str(uuid.uuid4()),
+                    "summary": summary,
+                    "start": start_datetime,
+                    "end": end_datetime,
+                    "description": description,
+                    "location": rooms,
+                }
+
+                if (
+                    self.server.student_id is None
+                    or self.server.student_id == student_id
+                ):
+                    event_list.append(CalendarEvent(**event))
+            except Exception as e:  # noqa: BLE001
+                # Log the error and continue processing other exam entries
+                print(f"Error processing exam entry: {exam}. Error: {e!s}")
+                continue
 
         return event_list
 

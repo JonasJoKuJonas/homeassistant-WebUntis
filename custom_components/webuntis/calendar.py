@@ -98,7 +98,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
                 event_end = event_end.replace(tzinfo=timezone)
 
             # Now compare the event start and end with the given range
-            if event_start >= start_date and event_end <= end_date:
+            if event_end > start_date and event_start < end_date:
                 events_in_range.append(event)
 
         return events_in_range

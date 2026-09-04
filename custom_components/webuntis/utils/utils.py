@@ -37,7 +37,17 @@ def is_different(arr1, arr2):
     return False
 
 
-def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=0)):
+def compact_list(
+    item_list,
+    list_type=None,
+    compact_tolerance=timedelta(minutes=0),
+    compact_parallel_lessons=False,
+):
+    def _should_merge(start, last_end):
+        if start >= last_end:
+            return start - last_end <= compact_tolerance
+        return compact_parallel_lessons and start <= last_end
+
     if list_type == "notify":
         compacted_list = []
         i = 0
@@ -48,12 +58,14 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 start = item[2]["start"]
                 end = last_item[2]["end"]
                 if (
-                    start - end <= compact_tolerance
-                    and start >= end
+                    _should_merge(start, end)
                     and last_item[2]["code"] == item[2]["code"]
+                    and last_item[2].get("rooms") == item[2].get("rooms")
+                    and last_item[2].get("teachers") == item[2].get("teachers")
                 ):
-                    last_item[1]["end"] = item[1]["end"]
-                    last_item[2]["end"] = item[2]["end"]
+                    merged_end = max(last_item[2]["end"], item[2]["end"])
+                    last_item[1]["end"] = merged_end
+                    last_item[2]["end"] = merged_end
                     i += 1
                     continue
             compacted_list.append(
@@ -71,12 +83,13 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 start = item["start"]
                 end = last_item["end"]
                 if (
-                    start - end <= compact_tolerance
-                    and start >= end
+                    _should_merge(start, end)
                     and last_item["lsnumber"] == item["lsnumber"]
                     and last_item["code"] == item["code"]
+                    and last_item.get("rooms") == item.get("rooms")
+                    and last_item.get("teachers") == item.get("teachers")
                 ):
-                    last_item["end"] = item["end"]
+                    last_item["end"] = max(last_item["end"], item["end"])
 
                     i += 1
                     continue
@@ -92,12 +105,8 @@ def compact_list(item_list, list_type=None, compact_tolerance=timedelta(minutes=
                 last_item = compacted_list[-1]
                 start = item.start
                 end = last_item.end
-                if (
-                    start - end <= compact_tolerance
-                    and start >= end
-                    and last_item.summary == item.summary
-                ):
-                    last_item.end = item.end
+                if _should_merge(start, end) and last_item.summary == item.summary:
+                    last_item.end = max(last_item.end, item.end)
 
                     i += 1
                     continue
