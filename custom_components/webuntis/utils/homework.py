@@ -111,12 +111,12 @@ class HomeworkEventsFetcher:
 
                 summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
 
-                # Create a calendar event for each homework entry
+                # Create a calendar event for each homework entry.
                 event = {
                     "uid": hw_id,
                     "summary": summary,
                     "start": date_assigned,
-                    "end": due_date,
+                    "end": due_date + timedelta(days=1),
                     "description": text,
                 }
 
