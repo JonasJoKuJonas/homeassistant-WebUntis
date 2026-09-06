@@ -19,6 +19,7 @@ DEFAULT_OPTIONS = {
     "calendar_description": "none",
     "calendar_room": "Room long name",
     "calendar_show_room_change": False,
+    "homework_display": "span",
     "notify_config": {},
     "invalid_subjects": False,
     "exclude_filter_comparison": False,

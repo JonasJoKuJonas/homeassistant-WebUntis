@@ -214,14 +214,16 @@
           "calendar_replace_name": "Ereignisnamen ersetzen",
           "calendar_room": "Kalender - Ort",
           "calendar_show_cancelled_lessons": "Kalender - Ausfallende Stunden",
-          "calendar_show_room_change": "Kalender - Zimmerwechsel"
+          "calendar_show_room_change": "Kalender - Zimmerwechsel",
+          "homework_display": "Hausaufgaben - Anzeigemodus"
         },
         "data_description": {
           "calendar_description": "Bestimme, was in der Beschreibung eines Kalender-Events stehen soll.",
           "calendar_replace_name": "Bsp:\nCancelled: ❌",
           "calendar_room": "Bestimme, was im Kalender als Ort angezeigt wird.",
           "calendar_show_cancelled_lessons": "Zeige ausfallende Stunden im Kalender an.",
-          "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an."
+          "calendar_show_room_change": "Zeige Zimmerwechsel im Kalender an.",
+          "homework_display": "Wähle, wie Hausaufgaben im Hausaufgaben-Kalender erscheinen: als Spanne vom Erteilungs- bis zum Fälligkeitstag (Standard) oder nur am Fälligkeitstag."
         },
         "description": "Einstellungen zur Kalender Darstellung.",
         "title": "Kalender-Einstellungen"
@@ -306,6 +308,12 @@
         "json": "JSON",
         "lesson_info": "Stunden Info",
         "none": "Keine"
+      }
+    },
+    "homework_display": {
+      "options": {
+        "due_date": "Nur am Fälligkeitstag",
+        "span": "Spanne (Erteilung bis Fälligkeit)"
       }
     },
     "notify_options": {
