@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 22
+CONFIG_ENTRY_VERSION = 23
 
 CONF_LIVE_ACTIVITIES = "live_activities"
 
