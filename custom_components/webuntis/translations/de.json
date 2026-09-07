@@ -342,6 +342,8 @@
     "live_activity_platform": {
       "options": {
         "ios": "iOS"
+      }
+    },
     "homework_display": {
       "options": {
         "due_date": "Nur am Fälligkeitstag",
