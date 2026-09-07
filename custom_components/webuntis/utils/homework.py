@@ -112,16 +112,9 @@ class HomeworkEventsFetcher:
                 summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
 
                 # Create a calendar event for each homework entry.
-                # Display mode (config option "homework_display"):
-                # - "span" (default): event spans the assigned date through
-                #   the due date.
-                # - "due_date": event is shown on the due date only.
-                # HA all-day event ends are exclusive (RFC 5545), so the end
-                # is always due_date + 1 day to cover the due date itself.
                 event_start = (
                     due_date
-                    if getattr(self.server, "homework_display", "span")
-                    == "due_date"
+                    if getattr(self.server, "homework_display", "span") == "due_date"
                     else date_assigned
                 )
                 event = {
