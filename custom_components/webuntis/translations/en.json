@@ -212,14 +212,16 @@
           "calendar_replace_name": "Replace event name",
           "calendar_room": "Calendar - Location",
           "calendar_show_cancelled_lessons": "Calendar - cancelled lessons",
-          "calendar_show_room_change": "Calendar - Room change"
+          "calendar_show_room_change": "Calendar - Room change",
+          "homework_display": "Homework - display mode"
         },
         "data_description": {
           "calendar_description": "Determine what should be in the description of a calendar event.",
           "calendar_replace_name": "e.g.,\nCancelled: ❌",
           "calendar_room": "Specify what to display for location.",
           "calendar_show_cancelled_lessons": "Show cancelled lessons in the calendar.",
-          "calendar_show_room_change": "Show room changes in the calendar."
+          "calendar_show_room_change": "Show room changes in the calendar.",
+          "homework_display": "Choose how homework events appear in the homework calendar: spanning the assigned date through the due date (default), or on the due date only."
         },
         "description": "Settings to customize the calendar.",
         "title": "Calendar Settings"
@@ -340,6 +342,10 @@
     "live_activity_platform": {
       "options": {
         "ios": "iOS"
+    "homework_display": {
+      "options": {
+        "due_date": "Due date only",
+        "span": "Span (assigned date through due date)"
       }
     },
     "notify_options": {

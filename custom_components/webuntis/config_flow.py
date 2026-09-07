@@ -897,6 +897,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                             mode="dropdown",
                         )
                     ),
+                    vol.Required(
+                        "homework_display",
+                        default=str(
+                            self._config_entry.options.get("homework_display", "span")
+                        ),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "span",
+                                "due_date",
+                            ],
+                            translation_key="homework_display",
+                            mode="dropdown",
+                        )
+                    ),
                     vol.Optional(
                         "calendar_replace_name",
                         description={

@@ -239,6 +239,10 @@ class WebUntis:
         self.filter_klassen = config.options.get("filter_klassen", [])
         self.exclude_filter_comparison = config.options["exclude_filter_comparison"]
 
+        # How homework calendar events are displayed:
+        # "span" (default) = assigned date through due date and "due_date" = due date only.
+        self.homework_display = config.options["homework_display"]
+
         self.exclude_data = config.options["exclude_data"]
         self.exclude_data_run = []
 
