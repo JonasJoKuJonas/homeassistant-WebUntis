@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import json
 import logging
 from collections.abc import Callable, Mapping
@@ -104,7 +105,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
     for option, default in DEFAULT_OPTIONS.items():
         if option not in options:
-            options[option] = default
+            options[option] = copy.deepcopy(default)
 
     if config_entry.version == 14:
         if "notify_entity_id" in options:
