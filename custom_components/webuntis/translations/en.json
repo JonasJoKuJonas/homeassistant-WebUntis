@@ -241,6 +241,13 @@
           "end_offset": "Minutes after the last lesson."
         }
       },
+      "edit_live_activity_select": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activity to edit.",
+        "data": {
+          "services": "Live Activity"
+        }
+      },
       "edit_notify_service": {
         "data": {
           "data": "Platform-Specific Notification Data",
@@ -320,6 +327,20 @@
           "test_notify_service": "test notify service"
         },
         "title": "Notify Service"
+      },
+      "remove_live_activity": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activities to remove.",
+        "data": {
+          "services": "Live Activities"
+        }
+      },
+      "test_live_activity": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activities to send a test notification to.",
+        "data": {
+          "services": "Live Activities"
+        }
       }
     },
     "error": {
