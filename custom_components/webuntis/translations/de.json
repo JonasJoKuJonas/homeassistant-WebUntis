@@ -241,6 +241,13 @@
           "end_offset": "Minuten nach der letzten Stunde."
         }
       },
+      "edit_live_activity_select": {
+        "title": "Live Stundenplan",
+        "description": "Wähle den Live Stundenplan aus, der bearbeitet werden soll.",
+        "data": {
+          "services": "Live Stundenplan"
+        }
+      },
       "edit_notify_service": {
         "data": {
           "data": "Plattformspezifische Benachrichtigungs-Daten",
@@ -320,6 +327,20 @@
           "test_notify_service": "Notify Dienst testen"
         },
         "title": "Notify Dienst"
+      },
+      "remove_live_activity": {
+        "title": "Live Stundenplan",
+        "description": "Wähle die Live Stundenpläne aus, die entfernt werden sollen.",
+        "data": {
+          "services": "Live Stundenpläne"
+        }
+      },
+      "test_live_activity": {
+        "title": "Live Stundenplan",
+        "description": "Wähle die Live Stundenpläne aus, an die eine Testbenachrichtigung gesendet werden soll.",
+        "data": {
+          "services": "Live Stundenpläne"
+        }
       }
     },
     "error": {
