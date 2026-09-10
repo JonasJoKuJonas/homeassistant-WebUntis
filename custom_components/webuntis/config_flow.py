@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import datetime
 import logging
 import socket
@@ -520,7 +521,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input["username"],
             data=user_input,
-            options=DEFAULT_OPTIONS,
+            options=copy.deepcopy(DEFAULT_OPTIONS),
         )
 
     def _show_form_user(
