@@ -256,7 +256,7 @@ def _build_payload(
     elif phase == "pause":
         title = strings["break_title"]
         message = strings["break_next"].format(lesson=lesson_text)
-        icon, color, silent = "mdi:school-outline", "lightgreen", False
+        icon, color, silent, when = "mdi:school-outline", "lightgreen", False, block["start"]
     elif phase == "schulende":
         if next_school_day:
             day_word = _day_word(lang, next_school_day.date(), date.today())
