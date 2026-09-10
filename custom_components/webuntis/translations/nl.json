@@ -240,12 +240,15 @@
       }
     },
     "step": {
-      "auth": {
-        "data": {
-          "password": "Wachtwoord",
-          "username": "Gebruikersnaam"
-        },
-        "description": "Voer je Untis-gegevens in voor **{school_name}**."
+      "init": {
+        "menu_options": {
+          "filter": "Filter",
+          "calendar": "Calendar",
+          "lesson": "Lesson Display",
+          "backend": "Backend",
+          "notify_menu": "Notify Menu",
+          "live_activities_menu": "Live rooster"
+        }
       },
       "manual_login": {
         "data": {
@@ -294,21 +297,129 @@
         },
         "description": "Je kunt de QR-code vinden in de WebUntis-webapp onder **Je naam > Gegevens toegang**."
       },
-      "qr_menu": {
-        "description": "Kies hoe je wilt inloggen met een QR-code.",
+      "edit_live_activity": {
+        "title": "Live rooster",
+        "description": "Add or edit a Live Activity for the timetable.",
+        "data": {
+          "name": "Name",
+          "platform": "Platform",
+          "entity_id": "Notify Service",
+          "start_offset": "Start before school",
+          "end_offset": "End after school"
+        },
+        "data_description": {
+          "start_offset": "Minutes before the first lesson.",
+          "end_offset": "Minutes after the last lesson."
+        }
+      },
+      "notify_menu": {
+        "title": "Notify Service",
         "menu_options": {
           "choose_qr_string": "QR-code inhoud invoeren",
           "choose_qr_manual": "Handmatig gegevens invoeren"
         }
       },
-      "reconfigure": {
-        "data": {
-          "password": "Wachtwoord"
+      "live_activities_menu": {
+        "title": "Live rooster",
+        "menu_options": {
+          "edit_live_activity": "add Live Timetable",
+          "edit_live_activity_select": "edit Live Timetable",
+          "remove_live_activity": "remove Live Timetable",
+          "test_live_activity": "test Live Timetable"
+        }
+      }
+    }
+  },
+  "selector": {
+    "notify_options": {
+      "options": {
+        "homework": "Homework added",
+        "code": "Lesson status changed",
+        "rooms": "Room changed",
+        "teachers": "Teacher changed",
+        "cancelled": "Lesson is cancelled"
+      }
+    },
+    "timetable_source": {
+      "options": {
+        "personal": "Personal Timetable",
+        "student": "Student",
+        "klasse": "Klasse",
+        "teacher": "Teacher",
+        "subject": "Subject",
+        "room": "Raum"
+      }
+    },
+    "notify_template": {
+      "options": {
+        "message_title": "Message & Title",
+        "message": "Message",
+        "discord": "Discord"
+      }
+    },
+    "live_activity_platform": {
+      "options": {
+        "ios": "iOS"
+      }
+    }
+  },
+  "issues": {
+    "bad_credentials": {
+      "fix_flow": {
+        "error": {
+          "cannot_connect": "Failed to connect. Please check the host.",
+          "invalid_auth": "Invalid authentication",
+          "bad_credentials": "Invalid password",
+          "unknown": "Unexpected error"
+        },
+        "step": {
+          "confirm": {
+            "description": "Please enter the new password!",
+            "title": "Password has been changed",
+            "data": {
+              "password": "Password"
+            }
+          }
         }
       },
-      "timetable_source": {
-        "data": {
-          "timetable_source": "Selecteer de bron van het rooster:"
+      "title": "Password has been changed"
+    },
+    "live_activity_notify_missing": {
+      "title": "Live Timetable: notify target unreachable",
+      "description": "{entity_id} has no {service_id} action. Is the target an Companion App device? Please check the Live Timetable configuration."
+    }
+  },
+  "services": {
+    "get_timetable": {
+      "description": "Get the timetable in a given time range.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "Start of time range"
+        },
+        "end": {
+          "name": "End",
+          "description": "End of time range"
+        },
+        "apply_filter": {
+          "name": "Activate Filter",
+          "description": "Applies the filter from the settings to the results"
+        },
+        "show_cancelled": {
+          "name": "Show Cancelled lessons",
+          "description": "Display cancelled lessons in the result"
+        },
+        "compact_result": {
+          "name": "Simplify Results",
+          "description": "Combine double lessons in the result"
+        },
+        "compact_tolerance_minutes": {
+          "name": "Tolerance for combining (minutes)",
+          "description": "Time tolerance to combine lessons as double lessons. (Only relevant if 'Simplify Results' is activated)"
         }
       },
       "user": {

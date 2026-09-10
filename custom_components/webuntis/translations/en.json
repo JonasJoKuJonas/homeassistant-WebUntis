@@ -184,15 +184,13 @@
         }
       },
       "title": "Password has been changed"
+    },
+    "live_activity_notify_missing": {
+      "title": "Live Timetable: notify target unreachable",
+      "description": "{entity_id} has no {service_id} action. Is the target an Companion App device? Please check the Live Timetable configuration."
     }
   },
   "options": {
-    "error": {
-      "not_a_dict": "Has to be a dictionary",
-      "notification_invalid": "Notification could not be sent. See logs for more information.",
-      "unknown": "Unexpected error",
-      "unknown_service": "Service ID not found."
-    },
     "step": {
       "backend": {
         "data": {
@@ -227,6 +225,28 @@
         },
         "description": "Settings to customize the calendar.",
         "title": "Calendar Settings"
+      },
+      "edit_live_activity": {
+        "title": "Live Timetable",
+        "description": "Add or edit a Live Activity for the timetable.",
+        "data": {
+          "name": "Name",
+          "platform": "Platform",
+          "entity_id": "Notify Service",
+          "start_offset": "Start before school",
+          "end_offset": "End after school"
+        },
+        "data_description": {
+          "start_offset": "Minutes before the first lesson.",
+          "end_offset": "Minutes after the last lesson."
+        }
+      },
+      "edit_live_activity_select": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activity to edit.",
+        "data": {
+          "services": "Live Activity"
+        }
       },
       "edit_notify_service": {
         "data": {
@@ -269,6 +289,7 @@
           "calendar": "Calendar",
           "filter": "Filter",
           "lesson": "Lesson Display",
+          "live_activities_menu": "Live Timetable",
           "notify_menu": "Notify Menu"
         }
       },
@@ -289,15 +310,44 @@
         "description": "Settings to customize how the lesson is displayed. \nThis will be applied to the calendar and notifications.",
         "title": "Lesson Display Settings"
       },
+      "live_activities_menu": {
+        "title": "Live Timetable (Live Activities)",
+        "menu_options": {
+          "edit_live_activity": "Add Live Timetable",
+          "edit_live_activity_select": "Edit Live Timetable",
+          "remove_live_activity": "Remove Live Timetable",
+          "test_live_activity": "Test Live Timetable"
+        }
+      },
       "notify_menu": {
         "menu_options": {
-          "edit_notify_service": "add notify service",
-          "edit_notify_service_select": "edit notify service",
-          "remove_notify_service": "remove notify service",
-          "test_notify_service": "test notify service"
+          "edit_notify_service": "Add notify service",
+          "edit_notify_service_select": "Edit notify service",
+          "remove_notify_service": "Remove notify service",
+          "test_notify_service": "Test notify service"
         },
         "title": "Notify Service"
+      },
+      "remove_live_activity": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activities to remove.",
+        "data": {
+          "services": "Live Activities"
+        }
+      },
+      "test_live_activity": {
+        "title": "Live Timetable",
+        "description": "Choose the Live Activities to send a test notification to.",
+        "data": {
+          "services": "Live Activities"
+        }
       }
+    },
+    "error": {
+      "not_a_dict": "Has to be a dictionary",
+      "notification_invalid": "Notification could not be sent. See logs for more information.",
+      "unknown": "Unexpected error",
+      "unknown_service": "Service ID not found."
     }
   },
   "selector": {
@@ -308,6 +358,11 @@
         "json": "JSON",
         "lesson_info": "Lesson Info",
         "none": "None"
+      }
+    },
+    "live_activity_platform": {
+      "options": {
+        "ios": "iOS"
       }
     },
     "homework_display": {

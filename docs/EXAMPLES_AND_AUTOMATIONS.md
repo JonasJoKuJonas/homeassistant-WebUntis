@@ -18,27 +18,14 @@ Replace `<name>` with your actual WebUntis integration device name.
 
 ## Wake-Up Alarm (Dynamic Time)
 
-```yaml
-sensor:
-  - platform: template
-    sensors:
-      webuntis_wake_time:
-        friendly_name: "WebUntis Wake-Up Time"
-        value_template: >
-          {% set datetime = states('sensor.<name>_next_lesson_to_wake_up') %}
-          {% if datetime not in ["unknown", "unavailable", None] %}
-            {{ as_datetime(datetime) - timedelta(hours=1, minutes=10) }}
-          {% else %}
-            {{ None }}
-          {% endif %}
-```
-
 Trigger automation at wake-up time:
 
 ```yaml
-trigger:
-  platform: time
-  entity_id: sensor.webuntis_wake_time
+triggers:
+  - trigger: time
+    at:
+      entity_id: sensor.<name>_next_lesson_to_wake_up
+      offset: "-0:50:0"
 action:
   # Add your wake-up actions here, e.g., switch on lights, play alarm
 ```
