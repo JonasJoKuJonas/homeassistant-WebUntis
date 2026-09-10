@@ -164,22 +164,22 @@ def _build_events(blocks: list[dict], start_offset: int, end_offset: int) -> lis
     events.append(
         {
             "time": first["start"] - timedelta(minutes=start_offset),
-            "phase": "schulbeginn",
+            "phase": "school_start",
             "block": first,
             "restart": False,
         }
     )
 
     for i, block in enumerate(blocks):
-        events.append({"time": block["start"], "phase": "unterricht", "block": block, "restart": False})
+        events.append({"time": block["start"], "phase": "lesson", "block": block, "restart": False})
         if i + 1 < len(blocks):
             following = blocks[i + 1]
             if following["start"] > block["end"]:
                 events.append(
-                    {"time": block["end"], "phase": "pause", "block": following, "restart": False}
+                    {"time": block["end"], "phase": "break", "block": following, "restart": False}
                 )
 
-    events.append({"time": last["end"], "phase": "schulende", "block": None, "restart": False})
+    events.append({"time": last["end"], "phase": "school_end", "block": None, "restart": False})
     events.append(
         {
             "time": last["end"] + timedelta(minutes=end_offset),
@@ -202,7 +202,7 @@ def _flag_restart(events: list[dict]) -> None:
         return
 
     midpoint = events[0]["time"] + span / 2
-    pauses = [e for e in events if e["phase"] == "pause"]
+    pauses = [e for e in events if e["phase"] == "break"]
     if not pauses:
         _LOGGER.warning(
             "Live Stundenplan: school day is longer than 8h and has no break to "
@@ -227,9 +227,9 @@ def _signature(event: dict) -> tuple:
     """Identifies the displayed content, so unchanged phases are not resent."""
     phase = event["phase"]
     block = event["block"]
-    if phase in ("schulbeginn", "unterricht"):
+    if phase in ("school_start", "lesson"):
         return (phase, block["start"].isoformat(), block["end"].isoformat(), block["subject"], block["room"])
-    if phase == "pause":
+    if phase == "break":
         return (phase, block["subject"], block["room"])
     return (phase,)
 
@@ -245,19 +245,19 @@ def _build_payload(
 
     when: datetime | None = None
 
-    if phase == "schulbeginn":
+    if phase == "school_start":
         title = strings["school_start_title"]
         message = "\n".join([strings["school_start_begin"].format(time=_format_time(block["start"])), lesson_text])
         icon, color, silent = ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP, "#2196F3", False
-    elif phase == "unterricht":
+    elif phase == "lesson":
         title = lesson_text
         message = " "
         icon, color, silent, when = "mdi:school", "orange", True, block["end"]
-    elif phase == "pause":
+    elif phase == "break":
         title = strings["break_title"]
         message = strings["break_next"].format(lesson=lesson_text)
         icon, color, silent, when = "mdi:school-outline", "lightgreen", False, block["start"]
-    elif phase == "schulende":
+    elif phase == "school_end":
         if next_school_day:
             day_word = _day_word(lang, next_school_day.date(), date.today())
             time_str = _format_time(next_school_day)
@@ -431,7 +431,7 @@ class LiveActivityManager:
         if self._last_sent.get(entity_id) == signature:
             return
 
-        if current["phase"] == "pause" and current["restart"]:
+        if current["phase"] == "break" and current["restart"]:
             restart_key = (entity_id, current["block"]["start"].isoformat())
             if restart_key not in self._restarted:
                 await async_notify(
@@ -440,7 +440,7 @@ class LiveActivityManager:
                 self._restarted.add(restart_key)
 
         next_school_day = (
-            self.server.next_lesson_to_wake_up if current["phase"] == "schulende" else None
+            self.server.next_lesson_to_wake_up if current["phase"] == "school_end" else None
         )
         title, message, extra = _build_payload(current, lang, next_school_day)
 
