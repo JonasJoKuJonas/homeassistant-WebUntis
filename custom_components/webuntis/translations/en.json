@@ -311,20 +311,20 @@
         "title": "Lesson Display Settings"
       },
       "live_activities_menu": {
-        "title": "Live Timetable",
+        "title": "Live Timetable (Live Activities)",
         "menu_options": {
-          "edit_live_activity": "add Live Timetable",
-          "edit_live_activity_select": "edit Live Timetable",
-          "remove_live_activity": "remove Live Timetable",
-          "test_live_activity": "test Live Timetable"
+          "edit_live_activity": "Add Live Timetable",
+          "edit_live_activity_select": "Edit Live Timetable",
+          "remove_live_activity": "Remove Live Timetable",
+          "test_live_activity": "Test Live Timetable"
         }
       },
       "notify_menu": {
         "menu_options": {
-          "edit_notify_service": "add notify service",
-          "edit_notify_service_select": "edit notify service",
-          "remove_notify_service": "remove notify service",
-          "test_notify_service": "test notify service"
+          "edit_notify_service": "Add notify service",
+          "edit_notify_service_select": "Edit notify service",
+          "remove_notify_service": "Remove notify service",
+          "test_notify_service": "Test notify service"
         },
         "title": "Notify Service"
       },

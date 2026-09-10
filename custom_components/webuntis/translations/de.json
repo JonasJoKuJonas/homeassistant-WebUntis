@@ -227,7 +227,7 @@
         "title": "Kalender-Einstellungen"
       },
       "edit_live_activity": {
-        "title": "Live Stundenplan",
+        "title": "Live-Stundenplan",
         "description": "Live Activity für den Stundenplan hinzufügen oder bearbeiten.",
         "data": {
           "name": "Name",
@@ -242,10 +242,10 @@
         }
       },
       "edit_live_activity_select": {
-        "title": "Live Stundenplan",
-        "description": "Wähle den Live Stundenplan aus, der bearbeitet werden soll.",
+        "title": "Live-Stundenplan",
+        "description": "Wähle den Live-Stundenplan aus, der bearbeitet werden soll.",
         "data": {
-          "services": "Live Stundenplan"
+          "services": "Live-Stundenplan"
         }
       },
       "edit_notify_service": {
@@ -289,8 +289,8 @@
           "calendar": "Kalender",
           "filter": "Filter",
           "lesson": "Stunden-Darstellung",
-          "live_activities_menu": "Live Stundenplan",
-          "notify_menu": "Notify Menü"
+          "live_activities_menu": "Live-Stundenplan (Live Activities)",
+          "notify_menu": "Benarichtigungen"
         }
       },
       "lesson": {
@@ -311,12 +311,12 @@
         "title": "Stunden-Darstellungs-Einstellungen"
       },
       "live_activities_menu": {
-        "title": "Live Stundenplan",
+        "title": "Live-Stundenplan",
         "menu_options": {
-          "edit_live_activity": "Live Stundenplan hinzufügen",
-          "edit_live_activity_select": "Live Stundenplan bearbeiten",
-          "remove_live_activity": "Live Stundenplan löschen",
-          "test_live_activity": "Live Stundenplan testen"
+          "edit_live_activity": "Live-Stundenplan hinzufügen",
+          "edit_live_activity_select": "Live-Stundenplan bearbeiten",
+          "remove_live_activity": "Live-Stundenplan löschen",
+          "test_live_activity": "Live-Stundenplan testen"
         }
       },
       "notify_menu": {
@@ -329,17 +329,17 @@
         "title": "Notify Dienst"
       },
       "remove_live_activity": {
-        "title": "Live Stundenplan",
-        "description": "Wähle die Live Stundenpläne aus, die entfernt werden sollen.",
+        "title": "Live-Stundenplan",
+        "description": "Wähle die Live-Stundenpläne aus, die entfernt werden sollen.",
         "data": {
-          "services": "Live Stundenpläne"
+          "services": "Live-Stundenpläne"
         }
       },
       "test_live_activity": {
-        "title": "Live Stundenplan",
-        "description": "Wähle die Live Stundenpläne aus, an die eine Testbenachrichtigung gesendet werden soll.",
+        "title": "Live-Stundenplan",
+        "description": "Wähle die Live-Stundenpläne aus, an die eine Testbenachrichtigung gesendet werden soll.",
         "data": {
-          "services": "Live Stundenpläne"
+          "services": "Live-Stundenpläne"
         }
       }
     },
