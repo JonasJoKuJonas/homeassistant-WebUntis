@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import config_validation as cv, issue_registry as ir, selector
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers import selector
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.event import async_call_later, async_track_point_in_time
 
@@ -87,7 +88,7 @@ def _day_word(lang: str, target: date, today: date) -> str:
         return strings["tomorrow"]
     if 1 < delta < 7:
         return strings["weekday"][target.weekday()]
-    return f'{strings["on_prefix"]} {target.strftime("%d.%m.")}'
+    return f"{strings['on_prefix']} {target.strftime('%d.%m.')}"
 
 
 # --------------------------------------------------------------------------
@@ -109,13 +110,17 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     try:
         lessons = server.get_timetable(start=day, end=day, sort=True)
     except Exception as error:  # pylint: disable=broad-except
-        _LOGGER.warning("Live Stundenplan: could not load timetable for %s - %s", day, error)
+        _LOGGER.warning(
+            "Live Stundenplan: could not load timetable for %s - %s", day, error
+        )
         return []
     finally:
         try:
             server.webuntis_logout()
         except Exception as error:  # pylint: disable=broad-except
-            _LOGGER.debug("Live Stundenplan: logout after timetable fetch failed - %s", error)
+            _LOGGER.debug(
+                "Live Stundenplan: logout after timetable fetch failed - %s", error
+            )
 
     tolerance = timedelta(minutes=server.lesson_compacting_tolerance)
 
@@ -171,15 +176,29 @@ def _build_events(blocks: list[dict], start_offset: int, end_offset: int) -> lis
     )
 
     for i, block in enumerate(blocks):
-        events.append({"time": block["start"], "phase": "lesson", "block": block, "restart": False})
+        events.append(
+            {
+                "time": block["start"],
+                "phase": "lesson",
+                "block": block,
+                "restart": False,
+            }
+        )
         if i + 1 < len(blocks):
             following = blocks[i + 1]
             if following["start"] > block["end"]:
                 events.append(
-                    {"time": block["end"], "phase": "break", "block": following, "restart": False}
+                    {
+                        "time": block["end"],
+                        "phase": "break",
+                        "block": following,
+                        "restart": False,
+                    }
                 )
 
-    events.append({"time": last["end"], "phase": "school_end", "block": None, "restart": False})
+    events.append(
+        {"time": last["end"], "phase": "school_end", "block": None, "restart": False}
+    )
     events.append(
         {
             "time": last["end"] + timedelta(minutes=end_offset),
@@ -228,7 +247,13 @@ def _signature(event: dict) -> tuple:
     phase = event["phase"]
     block = event["block"]
     if phase in ("school_start", "lesson"):
-        return (phase, block["start"].isoformat(), block["end"].isoformat(), block["subject"], block["room"])
+        return (
+            phase,
+            block["start"].isoformat(),
+            block["end"].isoformat(),
+            block["subject"],
+            block["room"],
+        )
     if phase == "break":
         return (phase, block["subject"], block["room"])
     return (phase,)
@@ -241,13 +266,18 @@ def _build_payload(
     phase = event["phase"]
     block = event["block"]
     strings = _STRINGS[lang]
-    lesson_text = f'{block["subject"]} - R{block["room"]}' if block else ""
+    lesson_text = f"{block['subject']} - R{block['room']}" if block else ""
 
     when: datetime | None = None
 
     if phase == "school_start":
         title = strings["school_start_title"]
-        message = "\n".join([strings["school_start_begin"].format(time=_format_time(block["start"])), lesson_text])
+        message = "\n".join(
+            [
+                strings["school_start_begin"].format(time=_format_time(block["start"])),
+                lesson_text,
+            ]
+        )
         icon, color, silent = ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP, "#2196F3", False
     elif phase == "lesson":
         title = lesson_text
@@ -256,7 +286,12 @@ def _build_payload(
     elif phase == "break":
         title = strings["break_title"]
         message = strings["break_next"].format(lesson=lesson_text)
-        icon, color, silent, when = "mdi:school-outline", "lightgreen", False, block["start"]
+        icon, color, silent, when = (
+            "mdi:school-outline",
+            "lightgreen",
+            False,
+            block["start"],
+        )
     elif phase == "school_end":
         if next_school_day:
             day_word = _day_word(lang, next_school_day.date(), date.today())
@@ -326,7 +361,11 @@ async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> boo
         @callback
         def _clear(_now: datetime) -> None:
             hass.async_create_task(
-                async_notify(hass, service_id, {"message": "clear_notification", "data": {"tag": tag}})
+                async_notify(
+                    hass,
+                    service_id,
+                    {"message": "clear_notification", "data": {"tag": tag}},
+                )
             )
 
         async_call_later(hass, TEST_ACTIVITY_DURATION.total_seconds(), _clear)
@@ -340,7 +379,6 @@ async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> boo
 
 
 class LiveActivityManager:
-
     def __init__(self, hass: HomeAssistant, server: Any) -> None:
         self.hass = hass
         self.server = server
@@ -382,13 +420,17 @@ class LiveActivityManager:
         self._unsub_timers = []
 
         today = date.today()
-        blocks = await self.hass.async_add_executor_job(_build_day_blocks, self.server, today)
+        blocks = await self.hass.async_add_executor_job(
+            _build_day_blocks, self.server, today
+        )
         lang = _language(self.hass)
         now = datetime.now().astimezone()
 
         next_time: datetime | None = None
         for target in targets.values():
-            events = _build_events(blocks, target.get("start_offset", 10), target.get("end_offset", 10))
+            events = _build_events(
+                blocks, target.get("start_offset", 10), target.get("end_offset", 10)
+            )
             _flag_restart(events)
 
             future = [e["time"] for e in events if e["time"] > now]
@@ -421,7 +463,9 @@ class LiveActivityManager:
         if current["phase"] == "clear":
             if self._cleared_dates.get(entity_id) != today:
                 await async_notify(
-                    self.hass, service_id, {"message": "clear_notification", "data": {"tag": tag}}
+                    self.hass,
+                    service_id,
+                    {"message": "clear_notification", "data": {"tag": tag}},
                 )
                 self._cleared_dates[entity_id] = today
                 self._last_sent.pop(entity_id, None)
@@ -435,12 +479,16 @@ class LiveActivityManager:
             restart_key = (entity_id, current["block"]["start"].isoformat())
             if restart_key not in self._restarted:
                 await async_notify(
-                    self.hass, service_id, {"message": "clear_notification", "data": {"tag": tag}}
+                    self.hass,
+                    service_id,
+                    {"message": "clear_notification", "data": {"tag": tag}},
                 )
                 self._restarted.add(restart_key)
 
         next_school_day = (
-            self.server.next_lesson_to_wake_up if current["phase"] == "school_end" else None
+            self.server.next_lesson_to_wake_up
+            if current["phase"] == "school_end"
+            else None
         )
         title, message, extra = _build_payload(current, lang, next_school_day)
 
@@ -464,7 +512,9 @@ class LiveActivityManager:
             if cleared_on.isoformat() >= cutoff
         }
         self._restarted = {
-            (entity_id, start_iso) for entity_id, start_iso in self._restarted if start_iso >= cutoff
+            (entity_id, start_iso)
+            for entity_id, start_iso in self._restarted
+            if start_iso >= cutoff
         }
 
 
@@ -485,7 +535,9 @@ class LiveActivityOptionsFlowMixin:
     ) -> FlowResult:
         activities = {
             entity_id: activity["name"]
-            for entity_id, activity in self._config_entry.options[CONF_LIVE_ACTIVITIES].items()
+            for entity_id, activity in self._config_entry.options[
+                CONF_LIVE_ACTIVITIES
+            ].items()
         }
 
         select = cv.multi_select if multible else vol.In
@@ -511,7 +563,9 @@ class LiveActivityOptionsFlowMixin:
                 "remove_live_activity",
                 "test_live_activity",
             ]
-        return self.async_show_menu(step_id="live_activities_menu", menu_options=options)
+        return self.async_show_menu(
+            step_id="live_activities_menu", menu_options=options
+        )
 
     async def async_step_test_live_activity(
         self,
@@ -546,12 +600,16 @@ class LiveActivityOptionsFlowMixin:
         user_input: dict[str, str] | None = None,
     ) -> FlowResult:
         if user_input is None:
-            return await self.list_live_activities("remove_live_activity", multible=True)
+            return await self.list_live_activities(
+                "remove_live_activity", multible=True
+            )
 
         live_activities = self._config_entry.options[CONF_LIVE_ACTIVITIES]
         for key in user_input["services"]:
             live_activities.pop(key, None)
-            ir.async_delete_issue(self.hass, DOMAIN, f"live_activity_notify_missing_{key}")
+            ir.async_delete_issue(
+                self.hass, DOMAIN, f"live_activity_notify_missing_{key}"
+            )
         return await self.save(
             {
                 CONF_LIVE_ACTIVITIES: live_activities,
@@ -607,7 +665,10 @@ class LiveActivityOptionsFlowMixin:
                 description={"suggested_value": options.get("start_offset", 10)},
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
-                    min=0, step=1, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
+                    min=0,
+                    step=1,
+                    unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
                 )
             ),
             vol.Optional(
@@ -616,7 +677,10 @@ class LiveActivityOptionsFlowMixin:
                 description={"suggested_value": options.get("end_offset", 10)},
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
-                    min=0, step=1, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
+                    min=0,
+                    step=1,
+                    unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
                 )
             ),
         }
