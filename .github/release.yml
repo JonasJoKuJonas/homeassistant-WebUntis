@@ -1,0 +1,14 @@
+changelog:
+  format: '* $title by @$author in $pull_request'
+  categories:
+    - title: 'New Features'
+      labels:
+        - 'enhancement'
+        - 'feature'
+    - title: 'Bug Fixes'
+      labels:
+        - 'bug'
+        - 'fix'
+    - title: "Other Changes"
+      labels:
+        - '*'
