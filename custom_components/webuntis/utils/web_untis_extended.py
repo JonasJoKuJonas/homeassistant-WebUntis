@@ -1,18 +1,23 @@
 import json
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 import time
 from typing import Any
-
 import aiohttp
 import requests
 from webuntis import errors, objects
 from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
-
+from .schoolyears import resolve_schoolyear
 from .qrLogin import QrData, async_qr_login, extract_login_result
+import logging
 
 QR_USER_AGENT = "UntisMobileAndroid"
 QR_API_VERSION = "i3.2"
+
+
+class _GetTeachersPermissionFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "no right for getTeachers()" not in record.getMessage()
 
 
 class ExtendedSession(WebUntisSession):
@@ -189,25 +194,23 @@ class ExtendedSession(WebUntisSession):
         teacher_map = {}
         try:
             result = self._request(method="getTimetable", params=params)
-
-            # Build teacher ID -> name mapping
-
-            for period in result:
-                for t in period.get("te", []):
-                    if "id" in t:
-                        if "name" in t:
-                            teacher_map[t["id"]] = t["name"]
-                        else:
-                            teacher_map[t["id"]] = (
-                                f"{t['id']}"  # no name given, use id as name to prevent errors
-                            )
-                    if "orgid" in t:
-                        if "orgname" in t:
-                            teacher_map[t["orgid"]] = t["orgname"]
-                        else:
-                            teacher_map[t["orgid"]] = (
-                                f"{t['orgid']}"  # no orgname given, use orgid as name to prevent errors
-                            )
+            if result:
+                for period in result:
+                    for t in period.get("te", []):
+                        if "id" in t:
+                            if "name" in t:
+                                teacher_map[t["id"]] = t["name"]
+                            else:
+                                teacher_map[t["id"]] = (
+                                    f"{t['id']}"  # no name given, use id as name to prevent errors
+                                )
+                        if "orgid" in t:
+                            if "orgname" in t:
+                                teacher_map[t["orgid"]] = t["orgname"]
+                            else:
+                                teacher_map[t["orgid"]] = (
+                                    f"{t['orgid']}"  # no orgname given, use orgid as name to prevent errors
+                                )
         except (
             requests.RequestException,
             errors.RemoteError,
@@ -241,6 +244,11 @@ class ExtendedSession(WebUntisSession):
         if not getattr(
             self, "teachers_forbidden", False
         ):  # only do this when we haven't already determined that fetching teachers is forbidden, otherwise we would do unnecessary requests to the server
+            # Set up a log filter to prevent misleading error messages when checking the teacher access permissions
+            upstream_logger = logging.getLogger("webuntis")
+            log_filter = _GetTeachersPermissionFilter()
+            upstream_logger.addFilter(log_filter)
+
             try:
                 result = super().teachers(**kw_args)
                 if not result:
@@ -265,7 +273,8 @@ class ExtendedSession(WebUntisSession):
                     self.teachers_forbidden = True
                 else:
                     raise  # all other exceptions should be raised as they are not related to fetching teachers being forbidden
-
+            finally:
+                upstream_logger.removeFilter(log_filter)
         if getattr(self, "teachers_forbidden", False):
             if not hasattr(self, "teacher_map"):
                 if not hasattr(self, "_last_used_timetable_source"):
@@ -279,12 +288,26 @@ class ExtendedSession(WebUntisSession):
                 )
                 # map not existing yet, call update function to create it; use the current day as the start date and fetch a 7-day window
                 # so the fallback mechanism can discover teachers from upcoming timetable entries when direct teacher retrieval is forbidden
-                self._update_teacher_mapping(
-                    start=datetime.now(),
-                    end=datetime.now() + timedelta(days=7),
-                    element_type_num=self._last_used_timetable_source[0],
-                    element_id=self._last_used_timetable_source[1],
-                )
+                # validate start and end date to be within the current school year to prevent errors
+                starttime = datetime.now(timezone.utc)
+                schoolyears = self.schoolyears()
+                if schoolyears:
+                    currentschoolyear = resolve_schoolyear(schoolyears)
+                    if currentschoolyear:
+                        starttime = max(
+                            starttime,
+                            currentschoolyear.start.replace(tzinfo=timezone.utc),
+                        )
+                        endtime = min(
+                            starttime + timedelta(days=7),
+                            currentschoolyear.end.replace(tzinfo=timezone.utc),
+                        )
+                        self._update_teacher_mapping(
+                            start=starttime,
+                            end=endtime,
+                            element_type_num=self._last_used_timetable_source[0],
+                            element_id=self._last_used_timetable_source[1],
+                        )
             # apply the mapping to build a list of teachers in the same format as the original function would return it, so that the rest of the code can work with it without needing to know about the fallback mechanism
             data = [
                 {
