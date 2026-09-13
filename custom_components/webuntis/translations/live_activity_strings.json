@@ -1,0 +1,41 @@
+{
+  "de": {
+    "weekday": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+    "tomorrow": "morgen",
+    "on_prefix": "am",
+    "break_title": "Pause",
+    "break_next": "Als Nächstes: {lesson}",
+    "school_start_title": "Schulbeginn",
+    "school_start_begin": "Beginn um {time}",
+    "school_end_title": "Schulende",
+    "school_end_next": "Schulbeginn {day} um {time} Uhr",
+    "test_title": "Test",
+    "test_message": "Testbenachrichtigung"
+  },
+  "en": {
+    "weekday": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "tomorrow": "tomorrow",
+    "on_prefix": "on",
+    "break_title": "Break",
+    "break_next": "Next: {lesson}",
+    "school_start_title": "School starting",
+    "school_start_begin": "Starts at {time}",
+    "school_end_title": "School's out",
+    "school_end_next": "School starts {day} at {time}",
+    "test_title": "Test",
+    "test_message": "Test notification"
+  },
+  "nl": {
+    "weekday": ["maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag", "zondag"],
+    "tomorrow": "morgen",
+    "on_prefix": "op",
+    "break_title": "Pauze",
+    "break_next": "Volgende: {lesson}",
+    "school_start_title": "School begint",
+    "school_start_begin": "Begint om {time}",
+    "school_end_title": "School is uit",
+    "school_end_next": "School begint {day} om {time}",
+    "test_title": "Test",
+    "test_message": "Testmelding"
+  }
+}
