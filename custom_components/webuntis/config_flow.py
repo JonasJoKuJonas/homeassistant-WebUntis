@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import datetime
 import logging
 import socket
@@ -32,6 +33,7 @@ from .const import (
     NOTIFY_OPTIONS,
     TEMPLATE_OPTIONS,
 )
+from .live_activities import LiveActivityOptionsFlowMixin
 from .notify import get_notification_data
 from .utils.errors import *
 from .utils.schoolyears import resolve_schoolyear
@@ -519,7 +521,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input["username"],
             data=user_input,
-            options=DEFAULT_OPTIONS,
+            options=copy.deepcopy(DEFAULT_OPTIONS),
         )
 
     def _show_form_user(
@@ -660,15 +662,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         current_schoolyear = resolve_schoolyear(schoolyears)
         if not current_schoolyear:
             if schoolyears:
-                day = datetime.datetime.now
+                _LOGGER.error("No current school year found")
+                day = datetime.datetime.now()
             else:
                 return {"base": "no_school_year"}
         else:
             today = datetime.datetime.now().date()
+            start = current_schoolyear.start.date()
+            end = current_schoolyear.end.date()
             day = (
-                today
-                if today >= schoolyears[0].start.date()
-                else schoolyears[0].start.date()
+                today if start <= today <= end else start
             )  # if today is after the first schoolyear, use today, otherwise use the start of the first schoolyear
 
         try:
@@ -712,11 +715,12 @@ OPTIONS_MENU = [
     "calendar",
     "lesson",
     "notify_menu",
+    "live_activities_menu",
     "backend",
 ]
 
 
-class OptionsFlowHandler(config_entries.OptionsFlow):
+class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixin):
     """Handle the option flow for WebUntis."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
