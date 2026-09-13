@@ -28,7 +28,7 @@ DEFAULT_OPTIONS = {
     "live_activities": {},
 }
 
-LIVE_ACTIVITY_TAG_SUFFIX = "live_stundenplan"
+LIVE_ACTIVITY_TAG_SUFFIX = "live_timetable"
 
 NOTIFY_OPTIONS = [
     "homework",

@@ -104,14 +104,14 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
         login_error = error
 
     if login_error:
-        _LOGGER.warning("Live Stundenplan: login failed for %s - %s", day, login_error)
+        _LOGGER.warning("Live Timetable: login failed for %s - %s", day, login_error)
         return []
 
     try:
         lessons = server.get_timetable(start=day, end=day, sort=True)
     except Exception as error:  # pylint: disable=broad-except
         _LOGGER.warning(
-            "Live Stundenplan: could not load timetable for %s - %s", day, error
+            "Live Timetable: could not load timetable for %s - %s", day, error
         )
         return []
     finally:
@@ -119,7 +119,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
             server.webuntis_logout()
         except Exception as error:  # pylint: disable=broad-except
             _LOGGER.debug(
-                "Live Stundenplan: logout after timetable fetch failed - %s", error
+                "Live Timetable: logout after timetable fetch failed - %s", error
             )
 
     tolerance = timedelta(minutes=server.lesson_compacting_tolerance)
@@ -224,7 +224,7 @@ def _flag_restart(events: list[dict]) -> None:
     pauses = [e for e in events if e["phase"] == "break"]
     if not pauses:
         _LOGGER.warning(
-            "Live Stundenplan: school day is longer than 8h and has no break to "
+            "Live Timetable: school day is longer than 8h and has no break to "
             "restart the Live Activity during - it may end early once iOS's "
             "limit is hit."
         )
@@ -284,8 +284,12 @@ def _build_payload(
         message = " "
         icon, color, silent, when = "mdi:school", "orange", True, block["end"]
     elif phase == "break":
-        title = strings["break_title"]
-        message = strings["break_next"].format(lesson=lesson_text)
+        title = (
+            strings["break_title"]
+            + " - "
+            + strings["break_next"].format(lesson=lesson_text)
+        )
+        message = " "  # iOS will replace this by the timer
         icon, color, silent, when = (
             "mdi:school-outline",
             "lightgreen",
@@ -320,7 +324,7 @@ def _build_payload(
 # Test send
 # --------------------------------------------------------------------------
 
-TEST_TAG_SUFFIX = "live_stundenplan_test"
+TEST_TAG_SUFFIX = "live_timetable_test"
 TEST_ACTIVITY_DURATION = timedelta(seconds=60)
 
 
@@ -411,6 +415,7 @@ class LiveActivityManager:
         self.hass.async_create_task(self._async_sync())
 
     async def _async_sync(self) -> None:
+        """Sync all live activities with the current timetable and schedule the next update."""
         targets = self.server.live_activities
         if not targets:
             return
@@ -450,6 +455,7 @@ class LiveActivityManager:
     async def _sync_target(
         self, target: dict, events: list[dict], now: datetime, lang: str, today: date
     ) -> None:
+        """Sync one live activity with the current timetable."""
         entity_id = target["entity_id"]
         service_id = _service_id_for_entity(self.hass, entity_id)
         if service_id is None:
