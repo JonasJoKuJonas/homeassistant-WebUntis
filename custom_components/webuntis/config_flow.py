@@ -662,15 +662,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         current_schoolyear = resolve_schoolyear(schoolyears)
         if not current_schoolyear:
             if schoolyears:
-                day = datetime.datetime.now
+                _LOGGER.error("No current school year found")
+                day = datetime.datetime.now()
             else:
                 return {"base": "no_school_year"}
         else:
             today = datetime.datetime.now().date()
+            start = current_schoolyear.start.date()
+            end = current_schoolyear.end.date()
             day = (
-                today
-                if today >= schoolyears[0].start.date()
-                else schoolyears[0].start.date()
+                today if start <= today <= end else start
             )  # if today is after the first schoolyear, use today, otherwise use the start of the first schoolyear
 
         try:
