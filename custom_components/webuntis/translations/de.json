@@ -161,6 +161,9 @@
       },
       "today_school_start": {
         "name": "Heutiger Schulbeginn"
+      },
+      "homework_list": {
+        "name": "Hausaufgabenliste"
       }
     }
   },

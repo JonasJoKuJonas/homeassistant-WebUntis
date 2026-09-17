@@ -12,15 +12,18 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import WebUntis, WebUntisEntity
 from .const import (
     DOMAIN,
+    ICON_SENSOR_HOMEWORK_LIST,
     ICON_SENSOR_NEXT_CLASS,
     ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP,
     ICON_SENSOR_TODAY_END,
     ICON_SENSOR_TODAY_START,
+    NAME_SENSOR_HOMEWORK_LIST,
     NAME_SENSOR_NEXT_CLASS,
     NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP,
     NAME_SENSOR_TODAY_END,
     NAME_SENSOR_TODAY_START,
 )
+from .utils.homework import build_homework_list
 
 
 async def async_setup_entry(
@@ -37,6 +40,7 @@ async def async_setup_entry(
         WebUntisNextLessonToWakeUpSensor(server),
         WebUntisToayStart(server),
         WebUntisToayEnd(server),
+        WebUntisHomeworkListSensor(server),
     ]
 
     # Add sensor entities.
@@ -155,3 +159,33 @@ class WebUntisToayEnd(WebUntisSensorEntity):
     async def async_update(self) -> None:
         """Update sensor data."""
         self._attr_native_value = self._server.today[-1]
+
+
+class WebUntisHomeworkListSensor(WebUntisSensorEntity):
+    """Representation of a Web Untis Homework List sensor.
+
+    Exposes the full homework list, grouped like the WebUntis "Hausaufgaben"
+    view ("due_soon", "open", "overdue", "completed"), as an attribute so it
+    can be rendered by a dashboard card.
+    """
+
+    unit: Optional[str] = None
+    device_class: Optional[str] = None
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize the Homework List sensor."""
+        super().__init__(
+            server=server,
+            name=NAME_SENSOR_HOMEWORK_LIST,
+            icon=ICON_SENSOR_HOMEWORK_LIST,
+            device_class=self.device_class,
+        )
+        self._attr_extra_state_attributes = {"homeworks": []}
+
+    async def async_update(self) -> None:
+        """Update the homework list sensor."""
+        homeworks = build_homework_list(self._server.homework_list)
+        self._attr_native_value = sum(
+            1 for homework in homeworks if not homework["completed"]
+        )
+        self._attr_extra_state_attributes = {"homeworks": homeworks}

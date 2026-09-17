@@ -4,7 +4,7 @@ import pytz  # to handle timezone conversions
 
 from homeassistant.components.calendar import CalendarEvent
 
-from custom_components.webuntis.const import DAYS_TO_CHECK
+from custom_components.webuntis.const import DAYS_TO_CHECK, HOMEWORK_DUE_SOON_DAYS
 
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
@@ -168,3 +168,47 @@ class HomeworkEventsFetcher:
 def return_homework_events(server):
     fetcher = HomeworkEventsFetcher(server)
     return fetcher._get_homework_events()
+
+
+def build_homework_list(param_list, due_soon_days=HOMEWORK_DUE_SOON_DAYS):
+    """
+    Convert the raw homework parameter list into a JSON-serializable list,
+    grouped like the WebUntis "Hausaufgaben" view:
+    "due_soon", "open" or "overdue" (completed entries are grouped as "completed").
+    """
+    today = date.today()
+    soon_cutoff = today + timedelta(days=due_soon_days)
+
+    homeworks = []
+    for homework in param_list:
+        due_date = homework.get("due_date")
+        date_assigned = homework.get("date_assigned")
+        completed = bool(homework.get("completed", False))
+
+        if completed:
+            group = "completed"
+        elif due_date is None:
+            group = "open"
+        elif due_date < today:
+            group = "overdue"
+        elif due_date <= soon_cutoff:
+            group = "due_soon"
+        else:
+            group = "open"
+
+        homeworks.append(
+            {
+                "homework_id": homework.get("homework_id"),
+                "subject": homework.get("subject"),
+                "teacher": homework.get("teacher"),
+                "student_id": homework.get("student_id"),
+                "completed": completed,
+                "date_assigned": date_assigned.isoformat() if date_assigned else None,
+                "due_date": due_date.isoformat() if due_date else None,
+                "text": homework.get("text"),
+                "group": group,
+            }
+        )
+
+    homeworks.sort(key=lambda hw: (hw["due_date"] is None, hw["due_date"]))
+    return homeworks

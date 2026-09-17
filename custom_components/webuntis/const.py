@@ -53,11 +53,13 @@ ICON_CALENDAR_HOMEWORK = "mdi:home-edit"
 ICON_CALENDAR_EXAM = "mdi:pen"
 ICON_EVENT_LESSNON_CHANGE = "mdi:calendar-clock"
 ICON_EVENT_HOMEWORK = "mdi:home-edit"
+ICON_SENSOR_HOMEWORK_LIST = "mdi:notebook-check-outline"
 
 NAME_SENSOR_NEXT_CLASS = "next_class"
 NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP = "next_lesson_to_wake_up"
 NAME_SENSOR_TODAY_START = "today_school_start"
 NAME_SENSOR_TODAY_END = "today_school_end"
+NAME_SENSOR_HOMEWORK_LIST = "homework_list"
 NAME_CALENDAR = "calendar"
 NAME_CALENDAR_HOMEWORK = "homework"
 NAME_CALENDAR_EXAM = "exam"
@@ -73,3 +75,5 @@ DAYS_TO_FUTURE = 30
 
 # Homework
 DAYS_TO_CHECK = 30
+# Days before the due date a homework entry is grouped as "due soon"
+HOMEWORK_DUE_SOON_DAYS = 3
