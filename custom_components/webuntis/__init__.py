@@ -301,6 +301,7 @@ class WebUntis:
         self.calendar_homework = []
         self.calendar_homework_ids = []
         self.calendar_homework_ids_setup = False
+        self.homework_list = []
         self.next_day_json = None
         self.day_json = None
         self.today = [None, None]
@@ -510,6 +511,7 @@ class WebUntis:
                 self.calendar_events = []
                 self.calendar_homework = []
                 self.calendar_exams = []
+                self.homework_list = []
                 self.next_day_json = None
                 self.day_json = None
                 self.today = [None, None]
@@ -757,6 +759,8 @@ class WebUntis:
             self.calendar_homework_ids = []
             for event in param_list:
                 self.calendar_homework_ids.append(event["homework_id"])
+
+            self.homework_list = param_list
 
         try:
             today = await self._async_add_executor_job_with_retry(

@@ -16,12 +16,39 @@ Replace `<name>` with your actual WebUntis integration device name.
 | `calendar.<name>`                      | `calendar.<name>`                            |
 | `calendar.<name>_exams`                | `calendar.<name>_prufungen`                  |
 | `calendar.<name>_homework`             | `calendar.<name>_hausaufgaben`               |
+| `sensor.<name>_homework_list`          | `sensor.<name>_hausaufgabenliste`            |
 | `event.<name>_lesson_change`           | `event.<name>_stundenanderung`               |
 | `event.<name>_new_homework`            | `event.<name>_neue_hausaufgabe`              |
 
 > ⚠️ **Important:**  
-> The **Exam Calendar** and **Homework Calendar** are **not available when using a parent account**.  
+> The **Exam Calendar**, **Homework Calendar** and **Homework List sensor** are **not available when using a parent account**.  
 > Please use a **student account** to access exams and homework.
+
+### `sensor.<name>_homework_list`
+
+State: number of open (not completed) homework entries.
+
+Attribute `homeworks` contains the full homework list as a list of objects, grouped the same way as the
+"Hausaufgaben" page on webuntis.com:
+
+```yaml
+homeworks:
+  - homework_id: 12345
+    subject: IT
+    teacher: Jonas
+    student_id: 42
+    completed: false
+    date_assigned: "2025-02-18"
+    due_date: "2025-02-25"
+    text: Fix all bugs in the WebUntis integration!
+    group: due_soon # one of: due_soon, open, overdue, completed
+```
+
+`group` is due within 3 days ("due_soon"), further in the future ("open"), in the past and not completed
+("overdue"), or already marked complete ("completed").
+
+See [WebUntis Homework Card](WEBUNTIS_HOMEWORK_CARD.md) for a ready-made dashboard card that renders this
+list exactly like the WebUntis "Hausaufgaben" page, including a print button.
 
 ---
 

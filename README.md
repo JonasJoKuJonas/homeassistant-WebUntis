@@ -22,6 +22,7 @@
 | **Live Timetable (Live Activities)** | Display the current timetable in a live view on your phone or tablet. (Currently only available for iOS) | [Live Activities](docs/OPTIONAL_CONFIGURATIONS.md#live-activities) |
 | **Fetch Lessons Service** | Request lessons for a specific date range. | [`webuntis.get_timetable`](docs/ENTITIES_AND_SERVICES.md#-webuntisget_timetable) |
 | **Count Lessons Service** | Count lessons by subject within a given date range. | [`webuntis.count_lessons`](docs/ENTITIES_AND_SERVICES.md#-webuntiscount_lessons) |
+| **Homework List & Dashboard Card** | Structured homework sensor plus a ready-made card that mirrors the WebUntis "Hausaufgaben" page, incl. print button. | [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) |
 
 
 ---
@@ -57,6 +58,15 @@ For a better visual experience in Home Assistant, you can use the HA-Timetable-C
 Check it out here: https://github.com/KingDando8430/HA-Timetable-Card
 
 See the [WebUntis x Timetable Card Documentation](https://github.com/KingDando8430/HA-Timetable-Card/blob/main/documentation/WebUntis.md) for more information.
+
+---
+
+## Dashboard Card for Homework
+
+A bundled custom Lovelace card renders the homework list grouped just like the WebUntis "Hausaufgaben"
+page (Bald fällig / Noch nicht abgeschlossen / Verpasst), including a print button.
+
+See [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) for installation and configuration.
 
 ---
 
