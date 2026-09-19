@@ -53,16 +53,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = CONFIG_ENTRY_VERSION
 
     def __init__(self) -> None:
-        """Initialize a single flow.
-
-        The flow state has to be kept per instance: Home Assistant creates a new
-        ConfigFlow instance for every flow, while class attributes are shared
-        between them. With the state on the class, two flows running at the same
-        time (e.g. two students) overwrite each other's input, so an entry can be
-        created with the other flow's school/username/password while keeping its
-        own unique_id - or, when the unique_id is overwritten as well, both
-        entries end up identical.
-        """
+        """Initialize a single flow."""
         self._session_temp = None
         self._qr_session_temp = None
         self._user_input_temp = {}
