@@ -23,7 +23,7 @@ type: custom:webuntis-homework-card
 entity: sensor.<name>_homework_list
 title: Hausaufgaben # optional, defaults to "Hausaufgaben" / "Homework"
 show_completed: false # optional, shows a 4th "Erledigt" group when true
-hide_overdue: false # optional, hides the "Verpasst" group entirely when true
+hide_overdue: false # optional, hides the group with overdued homework entirely when true
 due_soon_days: 3 # optional, how many days ahead counts as "due soon"
 ```
 
