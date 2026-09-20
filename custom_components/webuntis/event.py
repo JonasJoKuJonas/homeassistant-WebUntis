@@ -5,14 +5,14 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import WebUntisEntity
 from .const import (
     DOMAIN,
-    ICON_EVENT_LESSNON_CHANGE,
-    NAME_EVENT_LESSON_CHANGE,
     ICON_EVENT_HOMEWORK,
+    ICON_EVENT_LESSNON_CHANGE,
     NAME_EVENT_HOMEWORK,
+    NAME_EVENT_LESSON_CHANGE,
 )
+from .entity import WebUntisEntity
 
 
 async def async_setup_entry(
@@ -71,7 +71,15 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
             server=server,
             name=NAME_EVENT_LESSON_CHANGE,
             icon=ICON_EVENT_LESSNON_CHANGE,
-            event_types=["rooms", "teachers", "cancelled", "code", "lstext", "subject", "info"],
+            event_types=[
+                "rooms",
+                "teachers",
+                "cancelled",
+                "code",
+                "lstext",
+                "subject",
+                "info",
+            ],
         )
 
 

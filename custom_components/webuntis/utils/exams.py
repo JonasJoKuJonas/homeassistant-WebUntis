@@ -1,12 +1,13 @@
 import uuid
-from webuntis import errors
+
 from homeassistant.components.calendar import CalendarEvent
+from webuntis import errors
 from webuntis.utils.datetime_utils import parse_datetime
 
+from ..utils.schoolyears import resolve_schoolyear
 
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
-from ..utils.schoolyears import resolve_schoolyear
 
 
 class ExamEventsFetcher:

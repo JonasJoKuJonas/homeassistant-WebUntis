@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import WebUntis, WebUntisEntity
+from . import WebUntis
 from .const import (
     DOMAIN,
     ICON_SENSOR_HOMEWORK_LIST,
@@ -23,6 +21,7 @@ from .const import (
     NAME_SENSOR_TODAY_END,
     NAME_SENSOR_TODAY_START,
 )
+from .entity import WebUntisEntity
 from .utils.homework import build_homework_list
 
 
@@ -50,15 +49,15 @@ async def async_setup_entry(
 class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
     """Representation of a Web Untis sensor base entity."""
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = None
+    unit: str | None = None
+    device_class: str | None = None
 
     def __init__(
         self,
         server: WebUntis,
         name: str,
         icon: str,
-        device_class: Optional[str] = None,
+        device_class: str | None = None,
     ) -> None:
         """Initialize sensor base entity."""
         super().__init__(server, name, icon, device_class)
@@ -73,8 +72,8 @@ class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
 class WebUntisNextClassSensor(WebUntisSensorEntity):
     """Representation of a Web Untis next class sensor."""
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = "timestamp"
+    unit: str | None = None
+    device_class: str | None = "timestamp"
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize next class sensor."""
@@ -99,8 +98,8 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
 class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
     """Representation of a Web Untis next lesson to wake up sensor."""
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = "timestamp"
+    unit: str | None = None
+    device_class: str | None = "timestamp"
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize next lesson to wake up sensor."""
@@ -121,8 +120,8 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
 class WebUntisToayStart(WebUntisSensorEntity):
     """Representation of a Web Untis Today start sensor."""
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = "timestamp"
+    unit: str | None = None
+    device_class: str | None = "timestamp"
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize sensor."""
@@ -143,8 +142,8 @@ class WebUntisToayStart(WebUntisSensorEntity):
 class WebUntisToayEnd(WebUntisSensorEntity):
     """Representation of a Web Untis Today end sensor."""
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = "timestamp"
+    unit: str | None = None
+    device_class: str | None = "timestamp"
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize sensor."""
@@ -169,8 +168,8 @@ class WebUntisHomeworkListSensor(WebUntisSensorEntity):
     can be rendered by a dashboard card.
     """
 
-    unit: Optional[str] = None
-    device_class: Optional[str] = None
+    unit: str | None = None
+    device_class: str | None = None
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Homework List sensor."""

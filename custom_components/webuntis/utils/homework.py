@@ -1,14 +1,15 @@
-from datetime import date, timedelta, datetime
-from webuntis import errors
-import pytz  # to handle timezone conversions
+from datetime import date, datetime, timedelta
 
+import pytz  # to handle timezone conversions
 from homeassistant.components.calendar import CalendarEvent
+from webuntis import errors
 
 from custom_components.webuntis.const import DAYS_TO_CHECK, HOMEWORK_DUE_SOON_DAYS
 
+from ..utils.schoolyears import resolve_schoolyear
+
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
-from ..utils.schoolyears import resolve_schoolyear
 
 
 class HomeworkEventsFetcher:
