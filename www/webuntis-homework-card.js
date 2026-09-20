@@ -13,7 +13,7 @@
  *   3. Add a card to your dashboard:
  *        type: custom:webuntis-homework-card
  *        entity: sensor.<name>_homework_list
- *        hide_overdue: false # optional, hides the "Verpasst" group entirely when true
+ *        hide_overdue: false # optional, hides the overdue group entirely when true
  */
 
 const GROUP_ORDER = ["due_soon", "open", "overdue", "completed"];
