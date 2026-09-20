@@ -13,6 +13,7 @@
  *   3. Add a card to your dashboard:
  *        type: custom:webuntis-homework-card
  *        entity: sensor.<name>_homework_list
+ *        hide_overdue: false # optional, hides the overdue group entirely when true
  */
 
 const GROUP_ORDER = ["due_soon", "open", "overdue", "completed"];
@@ -62,6 +63,7 @@ class WebuntisHomeworkCard extends HTMLElement {
       ? config.due_soon_days
       : 3;
     this._showCompleted = !!config.show_completed;
+    this._hideOverdue = !!config.hide_overdue;
 
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
@@ -131,6 +133,7 @@ class WebuntisHomeworkCard extends HTMLElement {
     for (const hw of homeworks) {
       const group = this._group(hw);
       if (group === "completed" && !this._showCompleted) continue;
+      if (group === "overdue" && this._hideOverdue) continue;
       groups[group].push(hw);
     }
     for (const key of Object.keys(groups)) {
