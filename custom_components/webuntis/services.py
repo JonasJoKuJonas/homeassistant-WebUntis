@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import HomeAssistantError
@@ -24,17 +24,21 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         """Call correct WebUntis service."""
 
         entry_id = await async_extract_config_entry_ids(service_call)
-        config_entry = hass.config_entries.async_get_entry(list(entry_id)[0])
+        config_entry = hass.config_entries.async_get_entry(next(iter(entry_id)))
         webuntis_object = hass.data[DOMAIN][config_entry.unique_id]
 
         data = service_call.data
 
         if "start" in data and "end" in data:
-            start_date = datetime.strptime(data["start"], "%Y-%m-%d")
-            end_date = datetime.strptime(data["end"], "%Y-%m-%d")
+            start_date = datetime.strptime(data["start"], "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )
+            end_date = datetime.strptime(data["end"], "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )
 
             if end_date < start_date:
-                raise HomeAssistantError(f"Start date has to be before end date")
+                raise HomeAssistantError("Start date has to be before end date")
 
         await hass.async_add_executor_job(webuntis_object.webuntis_login)
 

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import copy
 import json
 import logging
 import uuid
 from collections.abc import Mapping
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from homeassistant.components.calendar import CalendarEvent
@@ -21,6 +22,7 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.util import dt as dt_util
 
 # pylint: disable=maybe-no-member
 from webuntis import errors
@@ -102,24 +104,20 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         if option not in options:
             options[option] = copy.deepcopy(default)
 
-    if config_entry.version == 14:
-        if "notify_entity_id" in options:
-            options["notify_config"][options["notify_entity_id"]] = {
-                "name": options["notify_entity_id"],
-                "entity_id": options["notify_entity_id"],
-                "target": options.get("notify_target", {}),
-                "data": options.get("notify_data", {}),
-                "options": options.get("notify_options", {}),
-            }
+    if config_entry.version == 14 and "notify_entity_id" in options:
+        options["notify_config"][options["notify_entity_id"]] = {
+            "name": options["notify_entity_id"],
+            "entity_id": options["notify_entity_id"],
+            "target": options.get("notify_target", {}),
+            "data": options.get("notify_data", {}),
+            "options": options.get("notify_options", {}),
+        }
 
     if config_entry.version == 16:
-        for notify_key, notify_value in options["notify_config"].items():
-            if "lesson change" in options["notify_config"][notify_key]["options"]:
-                options["notify_config"][notify_key]["options"][
-                    options["notify_config"][notify_key]["options"].index(
-                        "lesson change"
-                    )
-                ] = "lesson_change"
+        for notify_config in options["notify_config"].values():
+            options_list = notify_config.get("options", [])
+            if "lesson change" in options_list:
+                options_list[options_list.index("lesson change")] = "lesson_change"
 
         for key in [
             "notify_entity_id",
@@ -314,6 +312,7 @@ class WebUntis:
         # Callback for stopping periodic update.
         self._stop_periodic_update: CALLBACK_TYPE | None = None
         self._qr_session_lock = asyncio.Lock()
+        self._qr_session_created_at: datetime | None = None
 
         self.lesson_change_callback = None
         self.homework_change_callback = None
@@ -357,7 +356,7 @@ class WebUntis:
 
         try:
             return bool(config["jsessionid"])
-        except Exception:
+        except (KeyError, TypeError):
             return False
 
     async def _async_ensure_valid_session(self, force_refresh: bool = False) -> bool:
@@ -404,7 +403,7 @@ class WebUntis:
                     self.username,
                 )
                 client_session = async_get_clientsession(self._hass)
-                new_session, jsessionid = await ExtendedSession.async_create_from_qr(
+                new_session, _ = await ExtendedSession.async_create_from_qr(
                     self.qr_data,
                     client_session,
                 )
@@ -420,7 +419,7 @@ class WebUntis:
                 self._qr_session_created_at = datetime.now(timezone.utc)
 
                 return True
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
                 self._last_status_request_failed = True
                 return False
@@ -428,7 +427,7 @@ class WebUntis:
     async def _async_add_executor_job_with_retry(self, func_name, func, *args):
         try:
             return await self._hass.async_add_executor_job(func, *args)
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             _LOGGER.debug("Session vermutlich abgelaufen (%s), erneuere direkt...", err)
 
             if self.is_qr:
@@ -483,16 +482,19 @@ class WebUntis:
                 schoolyears,
             )
 
-            if not current_schoolyear and self.is_qr:
-                if await self._async_ensure_valid_session(force_refresh=True):
-                    schoolyears = await self._async_add_executor_job_with_retry(
-                        "schoolyears",
-                        lambda: self.session.schoolyears(),
-                    )
-                    current_schoolyear = await self._hass.async_add_executor_job(
-                        resolve_schoolyear,
-                        schoolyears,
-                    )
+            if (
+                not current_schoolyear
+                and self.is_qr
+                and await self._async_ensure_valid_session(force_refresh=True)
+            ):
+                schoolyears = await self._async_add_executor_job_with_retry(
+                    "schoolyears",
+                    lambda: self.session.schoolyears(),
+                )
+                current_schoolyear = await self._hass.async_add_executor_job(
+                    resolve_schoolyear,
+                    schoolyears,
+                )
 
             self.schoolyears = schoolyears
             self.current_schoolyear = current_schoolyear
@@ -798,7 +800,7 @@ class WebUntis:
             self._loged_in = True
             self.updating += 1
             return None
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             _LOGGER.error(
                 "Login failed for '%s@%s': %s", self.school, self.username, error
             )
@@ -813,13 +815,13 @@ class WebUntis:
             _LOGGER.debug(
                 "Skipping webuntis_logout for QR code session to keep JSESSIONID active"
             )
-            return None
+            return
 
         # Normal logout
         if self._loged_in:
             try:
                 self.session.logout()
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Error during WebUntis logout: %s", err)
             finally:
                 self._loged_in = False
@@ -852,10 +854,8 @@ class WebUntis:
             return []
 
         # Ensure start and end are within the school year boundaries
-        if start < self.current_schoolyear.start.date():
-            start = self.current_schoolyear.start.date()
-        if end > self.current_schoolyear.end.date():
-            end = self.current_schoolyear.end.date()
+        start = max(start, self.current_schoolyear.start.date())
+        end = min(end, self.current_schoolyear.end.date())
 
         if start > end:
             _LOGGER.debug(
@@ -882,16 +882,16 @@ class WebUntis:
 
     def _next_class(self):
         """returns time of next class."""
-        today = date.today()
+        today = dt_util.now().date()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
 
         table = self.get_timetable(start=today, end=in_x_days)
 
-        now = datetime.now()
+        now = dt_util.now()
 
         lesson_list = []
         for lesson in table:
-            if lesson.start > now and self.check_lesson(lesson):
+            if lesson.start.astimezone() > now and self.check_lesson(lesson):
                 lesson_list.append(lesson)
 
         lesson_list.sort(key=lambda e: e.start)
@@ -916,8 +916,8 @@ class WebUntis:
 
     def _next_lesson_to_wake_up(self):
         """returns time of the next lesson to weak up."""
-        today = date.today()
-        now = datetime.now()
+        today = dt_util.now().date()
+        now = dt_util.now()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
 
         table = self.get_timetable(start=today, end=in_x_days)
@@ -925,7 +925,7 @@ class WebUntis:
         time_list = []
         for lesson in table:
             if self.check_lesson(lesson):
-                time_list.append(lesson.start)
+                time_list.append(lesson.start.astimezone())
 
         day = now
         time_list_new = []
@@ -939,8 +939,8 @@ class WebUntis:
                 time_list_new.append(time)
 
         try:
-            return sorted(time_list_new)[0].astimezone()
-        except IndexError:
+            return min(time_list_new).astimezone()
+        except (IndexError, ValueError):
             if not self._no_lessons:
                 _LOGGER.info(
                     "Updating the property _next_lesson_to_wake_up of '%s@%s' failed - No lesson in the next %s days",
@@ -975,7 +975,7 @@ class WebUntis:
             return None
         if not self.generate_json:
             return "JSON data is disabled - activate it in the options"
-        day = date.today()
+        day = dt_util.now().date()
 
         table = self.get_timetable(start=day, end=day, sort=True)
 
@@ -989,7 +989,7 @@ class WebUntis:
         return json_str
 
     def _get_events(self):
-        today = date.today()
+        today = dt_util.now().date()
         in_x_days = today + timedelta(days=DAYS_TO_FUTURE)
         # Get the current school year for today
         if self.current_schoolyear:
@@ -1055,7 +1055,7 @@ class WebUntis:
 
                     # add Room as location
                     try:
-                        if lesson.rooms and not self.calendar_room == "None":
+                        if lesson.rooms and self.calendar_room != "None":
                             if self.calendar_room == "Room long name":
                                 event["location"] = lesson.rooms[0].long_name
                             elif self.calendar_room == "Room short name":
@@ -1157,7 +1157,7 @@ class WebUntis:
         return {"schoolyears": schoolyear_list}
 
     def _today(self):
-        today = date.today()
+        today = dt_util.now().date()
 
         table = self.get_timetable(start=today, end=today)
 
@@ -1173,10 +1173,10 @@ class WebUntis:
 
         try:
             return [
-                sorted(time_list_start)[0].astimezone(),
-                sorted(time_list_end)[-1].astimezone(),
+                min(time_list_start).astimezone(),
+                max(time_list_end).astimezone(),
             ]
-        except IndexError:
+        except (IndexError, ValueError):
             return [None, None]
 
     def check_lesson(self, lesson, ignor_cancelled=False) -> bool:
@@ -1188,7 +1188,7 @@ class WebUntis:
             try:
                 if not lesson.subjects:
                     return False
-            except IndexError:
+            except (IndexError, AttributeError):
                 return False
 
         for filter_description in self.filter_description:
@@ -1202,38 +1202,38 @@ class WebUntis:
             try:
                 lesson_klassen = [k.name for k in lesson.klassen]
                 lesson_klassen_long = [k.long_name for k in lesson.klassen]
-            except Exception:
+            except (AttributeError, TypeError):
                 lesson_klassen = []
                 lesson_klassen_long = []
 
-            if self.filter_mode == "Blacklist":
-                if any(
-                    filter_klasse in lesson_klassen
-                    or filter_klasse in lesson_klassen_long
-                    for filter_klasse in self.filter_klassen
-                ):
-                    return False
+            if self.filter_mode == "Blacklist" and any(
+                filter_klasse in lesson_klassen
+                or filter_klasse in lesson_klassen_long
+                for filter_klasse in self.filter_klassen
+            ):
+                return False
 
-            if self.filter_mode == "Whitelist":
-                if not any(
-                    filter_klasse in lesson_klassen
-                    or filter_klasse in lesson_klassen_long
-                    for filter_klasse in self.filter_klassen
-                ):
-                    return False
+            if self.filter_mode == "Whitelist" and not any(
+                filter_klasse in lesson_klassen
+                or filter_klasse in lesson_klassen_long
+                for filter_klasse in self.filter_klassen
+            ):
+                return False
 
         try:
-            if self.filter_mode == "Blacklist":
-                if any(
+            if self.filter_mode == "Blacklist" and any(
+                subject.name in self.filter_subjects for subject in lesson.subjects
+            ):
+                return False
+            if (
+                self.filter_mode == "Whitelist"
+                and self.filter_subjects
+                and not any(
                     subject.name in self.filter_subjects for subject in lesson.subjects
-                ):
-                    return False
-            if self.filter_mode == "Whitelist" and self.filter_subjects:
-                if not any(
-                    subject.name in self.filter_subjects for subject in lesson.subjects
-                ):
-                    return False
-        except IndexError:
+                )
+            ):
+                return False
+        except (IndexError, AttributeError):
             pass
 
         return True
@@ -1250,23 +1250,15 @@ class WebUntis:
         else:
             dic["start"] = lesson.start.astimezone()
             dic["end"] = lesson.end.astimezone()
-        try:
+        with contextlib.suppress(AttributeError, TypeError, ValueError):
             dic["id"] = int(lesson.id)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["info"] = str(lesson.info)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["code"] = str(lesson.code)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["type"] = str(lesson.type)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError, TypeError):
             dic["subjects"] = [
                 {
                     "name": str(subject.name),
@@ -1275,42 +1267,34 @@ class WebUntis:
                 }
                 for subject in lesson.subjects
             ]
-        except Exception:
-            pass
 
-        try:
+        with contextlib.suppress(AttributeError):
             dic["lstext"] = str(lesson.lstext)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["substText"] = str(lesson.substText)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError, TypeError, ValueError):
             dic["lsnumber"] = str(lesson.lsnumber)
-        except Exception:
-            pass
 
         try:
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             _LOGGER.debug("Unable to populate 'rooms' for lesson %s: %s", lesson, err)
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             _LOGGER.debug("Unable to populate 'klassen' for lesson %s: %s", lesson, err)
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             _LOGGER.debug(
                 "Unable to populate 'original_rooms' for lesson %s: %s", lesson, err
             )
@@ -1330,7 +1314,7 @@ class WebUntis:
                     )
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 _LOGGER.debug(
                     "Unable to populate 'teachers' for lesson %s: %s",
                     lesson,
@@ -1342,7 +1326,7 @@ class WebUntis:
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.original_teachers
                 ]
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 _LOGGER.debug(
                     "Unable to populate 'original_teachers' for lesson %s: %s",
                     lesson,
@@ -1367,55 +1351,39 @@ class WebUntis:
         dic["end"] = lesson.end.astimezone()
 
         dic["subject_id"] = "None"  # Defaultwert setzen
-        try:
+        with contextlib.suppress(AttributeError, IndexError):
             subjects = getattr(lesson, "subjects", [])
             if subjects:  # nur wenn nicht leer
                 dic["subject_id"] = subjects[0].id
-        except Exception:
-            pass
 
         dic["id"] = int(lesson.id)
         dic["lsnumber"] = int(lesson.lsnumber)
 
-        try:
+        with contextlib.suppress(AttributeError):
             dic["code"] = str(lesson.code)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["info"] = str(lesson.info)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["lstext"] = str(lesson.lstext)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError):
             dic["type"] = str(lesson.type)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(AttributeError, TypeError):
             dic["subjects"] = [
                 {"name": str(subject.name), "long_name": str(subject.long_name)}
                 for subject in lesson.subjects
             ]
-        except Exception:
-            pass
 
-        try:
+        with contextlib.suppress(AttributeError, TypeError):
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except Exception:
-            pass
 
-        try:
+        with contextlib.suppress(AttributeError, TypeError):
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except Exception:
-            pass
 
         if "teachers" not in self.exclude_data:
             try:
@@ -1427,7 +1395,7 @@ class WebUntis:
                 if "no right for getTeachers()" in str(error):
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001
                 _LOGGER.debug(
                     "Unable to populate 'teachers' for lesson %s: %s",
                     lesson,
@@ -1439,7 +1407,7 @@ class WebUntis:
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.original_teachers
                 ]
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 _LOGGER.debug(
                     "Unable to populate 'original_teachers' for lesson %s: %s",
                     lesson,

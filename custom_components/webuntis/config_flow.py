@@ -3,28 +3,23 @@
 from __future__ import annotations
 
 import copy
-import datetime
 import logging
 import socket
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 import voluptuous as vol
-
-# pylint: disable=maybe-no-member
-import webuntis
-
-from urllib.parse import urlparse
-
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.util import dt as dt_util
 
-from .utils.qrLogin import parse_qr_code
-from .utils.web_untis_extended import ExtendedSession
+# pylint: disable=maybe-no-member
+import webuntis
 
 from .const import (
     CONFIG_ENTRY_VERSION,
@@ -36,10 +31,12 @@ from .const import (
 from .live_activities import LiveActivityOptionsFlowMixin
 from .notify import get_notification_data
 from .utils.errors import *
+from .utils.qrLogin import parse_qr_code
 from .utils.schoolyears import resolve_schoolyear
+from .utils.search_schools import search_schools
 from .utils.utils import async_notify, is_service
 from .utils.web_untis import get_timetable_object
-from .utils.search_schools import search_schools
+from .utils.web_untis_extended import ExtendedSession
 
 # import webuntis.session
 
@@ -265,7 +262,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except webuntis.errors.NotLoggedInError:
                 errors["base"] = "invalid_auth"
                 _LOGGER.error("QR login failed: Not logged in error")
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 _LOGGER.error("QR login failed: %s", err)
                 errors["base"] = "cannot_connect"
 
@@ -481,8 +478,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._session_temp.klassen
                 )
                 try:
-                    source = klassen.filter(name=user_input["klasse"])[0]
-                except Exception as exc:
+                    klassen.filter(name=user_input["klasse"])[0]
+                except (IndexError, KeyError):
                     errors = {"base": "class_not_found"}
 
                 self._user_input_temp.update(
@@ -612,7 +609,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         try:
             socket.gethostbyname(hostname)
-        except Exception as exc:
+        except OSError as exc:
             _LOGGER.error("Cannot resolve hostname(%s): %s", credentials["server"], exc)
             errors["base"] = "cannot_connect"
             return errors, None
@@ -642,9 +639,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.error("webuntis.Session connection error: %s", exc)
             errors["base"] = "cannot_connect"
-        except webuntis.errors.RemoteError as exc:  # pylint: disable=no-member
+        except webuntis.errors.RemoteError:  # pylint: disable=no-member
             errors["school"] = "school_not_found"
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             _LOGGER.error("webuntis.Session unknown error: %s", exc)
             errors["base"] = "unknown"
 
@@ -665,11 +662,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if not current_schoolyear:
             if schoolyears:
                 _LOGGER.error("No current school year found")
-                day = datetime.datetime.now()
+                day = dt_util.now().date()
             else:
                 return {"base": "no_school_year"}
         else:
-            today = datetime.datetime.now().date()
+            today = dt_util.now().date()
             start = current_schoolyear.start.date()
             end = current_schoolyear.end.date()
             day = (
@@ -696,7 +693,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
                 self._source_id = timetable_object[user_input["timetable_source"]].id
 
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             if str(exc) == "'Student not found'":
                 return {"base": "student_not_found"}
             elif str(exc) == "no right for timetable":
@@ -744,12 +741,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         _LOGGER.debug("New options: %s", options)
         return self.async_create_entry(title="", data=options)
 
-    async def async_step_filter(self, user_input: dict[str, str] = None) -> FlowResult:
+    async def async_step_filter(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Manage the filter options."""
         if user_input is not None:
-            if not "filter_description" in user_input:
+            if "filter_description" not in user_input:
                 user_input["filter_description"] = []
-            if not "filter_klassen" in user_input:
+            if "filter_klassen" not in user_input:
                 user_input["filter_klassen"] = []
 
             # Only disable filter mode if no filter criteria are selected.
@@ -834,7 +833,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         )
 
     async def async_step_calendar(
-        self, user_input: dict[str, str] = None
+        self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage the calendar options."""
         errors = {}
@@ -928,7 +927,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
             ),
         )
 
-    async def async_step_lesson(self, user_input: dict[str, str] = None) -> FlowResult:
+    async def async_step_lesson(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Manage the lesson options."""
         errors = {}
         if user_input is not None:
@@ -1002,7 +1003,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_backend(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the backend options."""
@@ -1036,8 +1037,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         )
 
     async def list_notify_services(
-        self, step_id, multible=False, required=True, errors={}
+        self, step_id, multible=False, required=True, errors=None
     ):
+        if errors is None:
+            errors = {}
         services = {
             id: service["name"]
             for id, service in self._config_entry.options["notify_config"].items()
@@ -1058,7 +1061,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_notify_menu(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the notify_menu options."""
@@ -1078,7 +1081,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_edit_notify_service_select(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the test options."""
@@ -1091,7 +1094,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_remove_notify_service(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the test options."""
@@ -1112,7 +1115,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_test_notify_service(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
     ) -> FlowResult:
         """Manage the test options."""
@@ -1129,13 +1132,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                     "target": config.get("target", {}),
                 }
 
+                now = dt_util.now()
                 changes = {
                     "change": "test",
                     "title": "Test Notification",
                     "subject": "Math",
-                    "date": datetime.datetime.now().strftime("%d.%m.%Y"),
-                    "time_start": datetime.datetime.now().strftime("%H:%M:%S"),
-                    "time_end": datetime.datetime.now().strftime("%H:%M:%S"),
+                    "date": now.strftime("%d.%m.%Y"),
+                    "time_start": now.strftime("%H:%M:%S"),
+                    "time_end": now.strftime("%H:%M:%S"),
                 }
 
                 dic, notify_data = get_notification_data(
@@ -1161,7 +1165,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_edit_notify_service(
         self,
-        user_input: dict[str, str] = None,
+        user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
         edit=None,
     ) -> FlowResult:
@@ -1264,7 +1268,7 @@ def _create_klasse_list(server):
     """Create a list of classes/ klassen"""
     try:
         klassen = server.klassen
-    except Exception:
+    except Exception:  # noqa: BLE001
         return []
 
     return [klasse.name for klasse in klassen]

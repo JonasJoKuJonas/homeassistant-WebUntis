@@ -57,7 +57,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         return []
 
     @property
-    def event(self) -> CalendarEvent:
+    def event(self) -> CalendarEvent | None:
         """Return the next upcoming event."""
         return self._event
 
@@ -110,10 +110,10 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
 
         if self.events:
             self.events.sort(key=lambda e: e.end)
-            now = datetime.datetime.now()
+            now = dt_util.now()
 
             for event in self.events:
-                if event.end_datetime_local.astimezone() > now.astimezone():
+                if event.end_datetime_local.astimezone() > now:
                     self._event = event
                     break
         else:

@@ -1,15 +1,17 @@
 import json
-from datetime import datetime, timedelta, date, timezone
+import logging
 import time
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
+
 import aiohttp
 import requests
 from webuntis import errors, objects
-from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
-from .schoolyears import resolve_schoolyear
+from webuntis.utils import log  # pylint: disable=no-name-in-module
+
 from .qrLogin import QrData, async_qr_login, extract_login_result
-import logging
+from .schoolyears import resolve_schoolyear
 
 QR_USER_AGENT = "UntisMobileAndroid"
 QR_API_VERSION = "i3.2"

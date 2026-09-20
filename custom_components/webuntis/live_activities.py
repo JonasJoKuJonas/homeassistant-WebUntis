@@ -17,6 +17,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers import selector
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.event import async_call_later, async_track_point_in_time
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_LIVE_ACTIVITIES,
@@ -100,7 +101,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     """Fetch, filter and merge today's lessons into blocks."""
     try:
         login_error = server.webuntis_login()
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
         login_error = error
 
     if login_error:
@@ -109,7 +110,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
 
     try:
         lessons = server.get_timetable(start=day, end=day, sort=True)
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
         _LOGGER.warning(
             "Live Timetable: could not load timetable for %s - %s", day, error
         )
@@ -117,7 +118,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     finally:
         try:
             server.webuntis_logout()
-        except Exception as error:  # pylint: disable=broad-except
+        except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
             _LOGGER.debug(
                 "Live Timetable: logout after timetable fetch failed - %s", error
             )
@@ -298,7 +299,7 @@ def _build_payload(
         )
     elif phase == "school_end":
         if next_school_day:
-            day_word = _day_word(lang, next_school_day.date(), date.today())
+            day_word = _day_word(lang, next_school_day.date(), dt_util.now().date())
             time_str = _format_time(next_school_day)
         else:
             day_word = time_str = "?"
@@ -424,7 +425,7 @@ class LiveActivityManager:
             unsub()
         self._unsub_timers = []
 
-        today = date.today()
+        today = dt_util.now().date()
         blocks = await self.hass.async_add_executor_job(
             _build_day_blocks, self.server, today
         )
