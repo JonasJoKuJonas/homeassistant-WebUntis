@@ -99,7 +99,7 @@ class HomeworkEventsFetcher:
                 # Fetch the teacher ID from the record
                 teacher_id = record.get("teacherId") if record else None
 
-                student_id = record.get("elementIds", [])[0]
+                student_id = record.get("elementIds", [])[0] if record else None
 
                 # Get the teacher's name using the teacher ID
                 teacher = teacher_map.get(teacher_id, {})
@@ -109,7 +109,8 @@ class HomeworkEventsFetcher:
                 lesson = next((l for l in lessons if l["id"] == lesson_id), {})
                 subject = lesson.get("subject", "Unknown Subject")
 
-                summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
+                teacher_name = teachers[0]["name"] if teachers else "Unknown Teacher"
+                summary = get_lesson_name_str(self.server, subject, teacher_name)
 
                 # Create a calendar event for each homework entry.
                 event_start = (
