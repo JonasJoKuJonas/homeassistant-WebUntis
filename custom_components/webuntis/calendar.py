@@ -2,22 +2,23 @@ from __future__ import annotations
 
 import datetime
 
-from homeassistant.util import dt as dt_util
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 
-from . import WebUntis, WebUntisEntity  # pylint: disable=no-name-in-module
+from . import WebUntis  # pylint: disable=no-name-in-module
 from .const import (
     DOMAIN,
     ICON_CALENDAR,
+    ICON_CALENDAR_EXAM,
     ICON_CALENDAR_HOMEWORK,
     NAME_CALENDAR,
-    NAME_CALENDAR_HOMEWORK,
-    ICON_CALENDAR_EXAM,
     NAME_CALENDAR_EXAM,
+    NAME_CALENDAR_HOMEWORK,
 )
+from .entity import WebUntisEntity
 
 
 async def async_setup_entry(
@@ -108,7 +109,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         self.events = self._get_events()
 
         if self.events:
-            self.events.sort(key=lambda e: (e.end))
+            self.events.sort(key=lambda e: e.end)
             now = datetime.datetime.now()
 
             for event in self.events:

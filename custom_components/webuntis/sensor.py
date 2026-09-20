@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import WebUntis, WebUntisEntity
+from . import WebUntis
 from .const import (
     DOMAIN,
     ICON_SENSOR_HOMEWORK_LIST,
@@ -23,6 +23,7 @@ from .const import (
     NAME_SENSOR_TODAY_END,
     NAME_SENSOR_TODAY_START,
 )
+from .entity import WebUntisEntity
 from .utils.homework import build_homework_list
 
 
