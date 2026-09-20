@@ -6,33 +6,24 @@ import asyncio
 import copy
 import json
 import logging
-from collections.abc import Callable, Mapping
+import uuid
+from collections.abc import Mapping
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
-import uuid
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
+from homeassistant.core import CALLBACK_TYPE, HomeAssistant
 from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
     async_dispatcher_send,
 )
-from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 # pylint: disable=maybe-no-member
 from webuntis import errors
-from .utils.web_untis_extended import ExtendedSession
-from .utils.qrLogin import QrData, parse_qr_code
-from .utils.homework import return_homework_events
-from .utils.exams import return_exam_events
-from .utils.schoolyears import resolve_schoolyear
-from .utils.web_untis import get_lesson_name
-
 
 from .const import (
     CONF_LIVE_ACTIVITIES,
@@ -40,17 +31,21 @@ from .const import (
     DAYS_TO_FUTURE,
     DEFAULT_OPTIONS,
     DOMAIN,
+    NAME_EVENT_HOMEWORK,
+    NAME_EVENT_LESSON_CHANGE,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
-    NAME_EVENT_LESSON_CHANGE,
-    NAME_EVENT_HOMEWORK,
 )
 from .live_activities import LiveActivityManager
 from .notify import *
 from .services import async_setup_services
-from .utils.utils import compact_list, async_notify
-
-from .utils.web_untis import get_timetable_object
+from .utils.exams import return_exam_events
+from .utils.homework import return_homework_events
+from .utils.qrLogin import QrData, parse_qr_code
+from .utils.schoolyears import resolve_schoolyear
+from .utils.utils import async_notify, compact_list
+from .utils.web_untis import get_lesson_name, get_timetable_object
+from .utils.web_untis_extended import ExtendedSession
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR, Platform.EVENT]
 
@@ -258,7 +253,6 @@ class WebUntis:
         self.notify = any(
             config.get("options") for config in self.notify_config.values()
         )
-
 
         self.live_activities = config.options.get(CONF_LIVE_ACTIVITIES, {})
         self.live_activity_manager = None
@@ -1537,48 +1531,3 @@ class WebUntis:
 
         self.event_list_old = self.event_list
         self.unfiltered_event_list_old = self.unfiltered_event_list
-
-
-class WebUntisEntity(Entity):
-    """Representation of a Web Untis base entity."""
-
-    _attr_has_entity_name = True
-    _attr_should_poll = False
-
-    def __init__(
-        self,
-        server: WebUntis,
-        name: str,
-        icon: str,
-        device_class: str | None,
-    ) -> None:
-        """Initialize base entity."""
-        self._server = server
-        self._attr_icon = icon
-        self._attr_translation_key = name
-        self._attr_unique_id = f"{self._server.unique_id}_{name}"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._server.unique_id)},
-            manufacturer="Web Untis",
-            model=f"{self._server.school}@{self._server.username}",
-            name=self._server.username,
-        )
-        self._attr_device_class = device_class
-        self._extra_state_attributes = None
-        self._disconnect_dispatcher: CALLBACK_TYPE | None = None
-
-    async def async_added_to_hass(self) -> None:
-        """Connect dispatcher to signal from server."""
-        self._disconnect_dispatcher = async_dispatcher_connect(
-            self.hass, self._server.signal_name, self._update_callback
-        )
-
-    async def async_will_remove_from_hass(self) -> None:
-        """Disconnect dispatcher before removal."""
-        if self._disconnect_dispatcher:
-            self._disconnect_dispatcher()
-
-    @callback
-    def _update_callback(self) -> None:
-        """Triggers update of properties after receiving signal from server."""
-        self.async_schedule_update_ha_state(force_refresh=True)
