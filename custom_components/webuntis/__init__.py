@@ -37,11 +37,13 @@ from .utils.web_untis import get_lesson_name
 
 
 from .const import (
+    CONF_FRONTEND_CARD_REGISTERED,
     CONF_LIVE_ACTIVITIES,
     CONFIG_ENTRY_VERSION,
     DAYS_TO_FUTURE,
     DEFAULT_OPTIONS,
     DOMAIN,
+    FRONTEND_CARD_URL_PATH,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
     NAME_EVENT_LESSON_CHANGE,
@@ -60,9 +62,6 @@ QR_SESSION_REFRESH_INTERVAL = timedelta(minutes=5)
 
 _LOGGER = logging.getLogger(__name__)
 
-CARD_URL_PATH = "/webuntis_files/webuntis-homework-card.js"
-_FRONTEND_CARD_REGISTERED = "frontend_card_registered"
-
 
 async def _async_register_frontend_card(hass: HomeAssistant) -> None:
     """Serve the bundled homework card and add it as a Lovelace resource.
@@ -72,9 +71,9 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
     accounts) and registering the same static path twice raises.
     """
     domain_data = hass.data.setdefault(DOMAIN, {})
-    if domain_data.get(_FRONTEND_CARD_REGISTERED):
+    if domain_data.get(CONF_FRONTEND_CARD_REGISTERED):
         return
-    domain_data[_FRONTEND_CARD_REGISTERED] = True
+    domain_data[CONF_FRONTEND_CARD_REGISTERED] = True
 
     card_path = Path(__file__).parent / "www" / "webuntis-homework-card.js"
 
@@ -83,15 +82,15 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
             from homeassistant.components.http import StaticPathConfig
 
             await hass.http.async_register_static_paths(
-                [StaticPathConfig(CARD_URL_PATH, str(card_path), False)]
+                [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
             )
         except ImportError:
             # Home Assistant < 2024.7 fallback
             hass.http.register_static_path(
-                CARD_URL_PATH, str(card_path), cache_headers=False
+                FRONTEND_CARD_URL_PATH, str(card_path), cache_headers=False
             )
 
-        add_extra_js_url(hass, CARD_URL_PATH)
+        add_extra_js_url(hass, FRONTEND_CARD_URL_PATH)
     except Exception as error:  # noqa: BLE001
         # The homework card is a nice-to-have; never fail integration setup over it.
         _LOGGER.warning("Could not register the WebUntis homework card: %s", error)
