@@ -11,12 +11,13 @@ button.
 
 ## Installation
 
-1. Copy [`www/webuntis-homework-card.js`](../www/webuntis-homework-card.js) from this repository into
-   your Home Assistant `<config>/www/` folder (create the folder if it doesn't exist yet).
-2. In Home Assistant, go to **Settings → Dashboards → ⋮ (top right) → Resources → Add Resource**.
-   - URL: `/local/webuntis-homework-card.js`
-   - Resource type: `JavaScript Module`
-3. Add the card to a dashboard (via the card picker "WebUntis Homework Card", or as YAML):
+No manual steps needed. The integration bundles the card and automatically serves it and registers it
+as a Lovelace resource once it starts up (no `<config>/www/` copy, no manual "Add Resource" step).
+
+After installing/updating the integration via HACS, restart Home Assistant once, then hard-reload your
+browser (Ctrl+Shift+R) so it picks up the card instead of a cached page without it.
+
+Add the card to a dashboard (via the card picker "WebUntis Homework Card", or as YAML):
 
 ```yaml
 type: custom:webuntis-homework-card

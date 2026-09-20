@@ -8,10 +8,12 @@ import json
 import logging
 from collections.abc import Callable, Mapping
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 import uuid
 
 from homeassistant.components.calendar import CalendarEvent
+from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
@@ -35,11 +37,13 @@ from .utils.web_untis import get_lesson_name
 
 
 from .const import (
+    CONF_FRONTEND_CARD_REGISTERED,
     CONF_LIVE_ACTIVITIES,
     CONFIG_ENTRY_VERSION,
     DAYS_TO_FUTURE,
     DEFAULT_OPTIONS,
     DOMAIN,
+    FRONTEND_CARD_URL_PATH,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
     NAME_EVENT_LESSON_CHANGE,
@@ -59,6 +63,39 @@ QR_SESSION_REFRESH_INTERVAL = timedelta(minutes=5)
 _LOGGER = logging.getLogger(__name__)
 
 
+async def _async_register_frontend_card(hass: HomeAssistant) -> None:
+    """Serve the bundled homework card and add it as a Lovelace resource.
+
+    Runs at most once per HA process, guarded via hass.data, since
+    async_setup_entry runs once per config entry (e.g. multiple WebUntis
+    accounts) and registering the same static path twice raises.
+    """
+    domain_data = hass.data.setdefault(DOMAIN, {})
+    if domain_data.get(CONF_FRONTEND_CARD_REGISTERED):
+        return
+    domain_data[CONF_FRONTEND_CARD_REGISTERED] = True
+
+    card_path = Path(__file__).parent / "www" / "webuntis-homework-card.js"
+
+    try:
+        try:
+            from homeassistant.components.http import StaticPathConfig
+
+            await hass.http.async_register_static_paths(
+                [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
+            )
+        except ImportError:
+            # Home Assistant < 2024.7 fallback
+            hass.http.register_static_path(
+                FRONTEND_CARD_URL_PATH, str(card_path), cache_headers=False
+            )
+
+        add_extra_js_url(hass, FRONTEND_CARD_URL_PATH)
+    except Exception as error:  # noqa: BLE001
+        # The homework card is a nice-to-have; never fail integration setup over it.
+        _LOGGER.warning("Could not register the WebUntis homework card: %s", error)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WebUntis from a config entry."""
     domain_data = hass.data.setdefault(DOMAIN, {})
@@ -74,6 +111,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     server = WebUntis(hass, unique_id, entry)
     domain_data[unique_id] = server
+
+    await _async_register_frontend_card(hass)
 
     # Set up platforms.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
