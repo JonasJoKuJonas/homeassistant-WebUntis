@@ -1,3 +1,5 @@
+""" Utility functions for working with WebUntis data. """
+
 def get_timetable_object(timetable_source_id, timetable_source, session):
     """return the object to request the timetable"""
 
@@ -11,15 +13,11 @@ def get_timetable_object(timetable_source_id, timetable_source, session):
         source = klassen.filter(name=timetable_source_id)[0]
     elif timetable_source == "teacher":
         source = session.get_teacher(timetable_source_id[1], timetable_source_id[0])
-    elif timetable_source == "subject":
-        pass
-    elif timetable_source == "room":
+    elif timetable_source in ("subject", "room"):
         pass
 
     return {timetable_source: source}
 
-
-from datetime import datetime
 
 
 def get_lesson_name(server, lesson):

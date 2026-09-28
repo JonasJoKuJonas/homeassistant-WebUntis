@@ -2,22 +2,23 @@ from __future__ import annotations
 
 import datetime
 
-from homeassistant.util import dt as dt_util
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 
-from . import WebUntis, WebUntisEntity  # pylint: disable=no-name-in-module
+from . import WebUntis  # pylint: disable=no-name-in-module
 from .const import (
     DOMAIN,
     ICON_CALENDAR,
+    ICON_CALENDAR_EXAM,
     ICON_CALENDAR_HOMEWORK,
     NAME_CALENDAR,
-    NAME_CALENDAR_HOMEWORK,
-    ICON_CALENDAR_EXAM,
     NAME_CALENDAR_EXAM,
+    NAME_CALENDAR_HOMEWORK,
 )
+from .entity import WebUntisEntity
 
 
 async def async_setup_entry(
@@ -26,9 +27,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Web Untis calendar platform."""
+    assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
 
-    entities = [UntisCalendar(server)]
+    entities: list[CalendarEntity] = [UntisCalendar(server)]
 
     if server.timetable_source != "teacher":
         entities.append(HomeworkCalendar(server))
@@ -49,14 +51,14 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
             icon=icon,
             device_class=None,
         )
-        self.events = self._get_events
+        self.events: list[CalendarEvent] = []
         self._event = None
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
         return []
 
     @property
-    def event(self) -> CalendarEvent:
+    def event(self) -> CalendarEvent | None:
         """Return the next upcoming event."""
         return self._event
 
@@ -108,11 +110,11 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
         self.events = self._get_events()
 
         if self.events:
-            self.events.sort(key=lambda e: (e.end))
-            now = datetime.datetime.now()
+            self.events.sort(key=lambda e: e.end)
+            now = dt_util.now()
 
             for event in self.events:
-                if event.end_datetime_local.astimezone() > now.astimezone():
+                if event.end_datetime_local.astimezone() > now:
                     self._event = event
                     break
         else:
@@ -128,7 +130,7 @@ class UntisCalendar(BaseUntisCalendar):
         """Initialize the Untis Calendar."""
         super().__init__(server=server, name=NAME_CALENDAR, icon=ICON_CALENDAR)
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
         return self._server.calendar_events
 
 
@@ -141,7 +143,7 @@ class HomeworkCalendar(BaseUntisCalendar):
             server=server, name=NAME_CALENDAR_HOMEWORK, icon=ICON_CALENDAR_HOMEWORK
         )
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
 
         return self._server.calendar_homework
 
@@ -155,6 +157,6 @@ class ExamCalendar(BaseUntisCalendar):
             server=server, name=NAME_CALENDAR_EXAM, icon=ICON_CALENDAR_EXAM
         )
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
 
         return self._server.calendar_exams

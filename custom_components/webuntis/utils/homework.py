@@ -1,14 +1,19 @@
-from datetime import date, timedelta, datetime
-from webuntis import errors
-import pytz  # to handle timezone conversions
+from datetime import datetime, timedelta, timezone
 
+import pytz  # to handle timezone conversions
 from homeassistant.components.calendar import CalendarEvent
+from webuntis import errors
 
 from custom_components.webuntis.const import DAYS_TO_CHECK, HOMEWORK_DUE_SOON_DAYS
 
+from ..utils.schoolyears import resolve_schoolyear
+
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
-from ..utils.schoolyears import resolve_schoolyear
+
+
+class HomeworkAuthenticationError(Exception):
+    """Raised when homework data is requested without an authenticated session."""
 
 
 class HomeworkEventsFetcher:
@@ -30,7 +35,7 @@ class HomeworkEventsFetcher:
         """
         Fetch homework events from the WebUntis API and return them as a list of calendar events.
         """
-        today = date.today()
+        today = datetime.now(timezone.utc).date()
         start = today - timedelta(days=DAYS_TO_CHECK)
         end = today + timedelta(days=DAYS_TO_CHECK)
 
@@ -51,7 +56,9 @@ class HomeworkEventsFetcher:
                 end=end,
             )
         except errors.NotLoggedInError:
-            raise Exception("You are not logged in. Please log in and try again.")
+            raise HomeworkAuthenticationError(
+                "You are not logged in. Please log in and try again."
+            ) from None
 
         # Process the homework data and extract the homework events
         homework_events = self._process_homework_data(homework_data)
@@ -88,8 +95,10 @@ class HomeworkEventsFetcher:
 
                 date_assigned = datetime.strptime(
                     str(date_assigned_int), "%Y%m%d"
-                ).date()
-                due_date = datetime.strptime(str(due_date_int), "%Y%m%d").date()
+                ).replace(tzinfo=timezone.utc).date()
+                due_date = datetime.strptime(
+                    str(due_date_int), "%Y%m%d"
+                ).replace(tzinfo=timezone.utc).date()
 
                 # Find the corresponding record to get the teacher ID
                 record = next(
@@ -99,7 +108,8 @@ class HomeworkEventsFetcher:
                 # Fetch the teacher ID from the record
                 teacher_id = record.get("teacherId") if record else None
 
-                student_id = record.get("elementIds", [])[0] if record else None
+                student_ids = (record or {}).get("elementIds") or []
+                student_id = student_ids[0] if student_ids else None
 
                 # Get the teacher's name using the teacher ID
                 teacher = teacher_map.get(teacher_id, {})
@@ -160,7 +170,7 @@ class HomeworkEventsFetcher:
                     event_list.append(CalendarEvent(**event))
 
                     param_list.append(parameters)
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 # Log the error and continue processing other homework entries
                 print(f"Error processing homework entry: {homework}. Error: {e!s}")
                 continue
@@ -180,7 +190,7 @@ def build_homework_list(param_list, due_soon_days=HOMEWORK_DUE_SOON_DAYS):
     grouped like the WebUntis "Hausaufgaben" view:
     "due_soon", "open" or "overdue" (completed entries are grouped as "completed").
     """
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     soon_cutoff = today + timedelta(days=due_soon_days)
 
     homeworks = []

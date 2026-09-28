@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import date
+import logging
+from datetime import datetime, timezone
 from typing import Any
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def resolve_schoolyear(schoolyears: Any):
@@ -18,7 +21,7 @@ def resolve_schoolyear(schoolyears: Any):
     if not schoolyears:
         return None
 
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     schoolyear_list = list(schoolyears)
     current_schoolyears = []
     future_schoolyears = []
@@ -29,6 +32,9 @@ def resolve_schoolyear(schoolyears: Any):
             start = schoolyear.start.date()
             end = schoolyear.end.date()
         except Exception:
+            _LOGGER.warning(
+                "Failed to parse schoolyear start/end dates: %s", schoolyear
+            )
             continue
 
         if start <= today <= end:
@@ -39,12 +45,12 @@ def resolve_schoolyear(schoolyears: Any):
             past_schoolyears.append(schoolyear)
 
     if current_schoolyears:
-        return sorted(current_schoolyears, key=lambda item: item.start)[0]
+        return min(current_schoolyears, key=lambda item: item.start)
 
     if future_schoolyears:
-        return sorted(future_schoolyears, key=lambda item: item.start)[0]
+        return min(future_schoolyears, key=lambda item: item.start)
 
     if past_schoolyears:
-        return sorted(past_schoolyears, key=lambda item: item.end)[-1]
+        return max(past_schoolyears, key=lambda item: item.end)
 
     return schoolyear_list[0] if schoolyear_list else None

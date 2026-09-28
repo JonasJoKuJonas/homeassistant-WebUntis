@@ -5,14 +5,14 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import WebUntisEntity
 from .const import (
     DOMAIN,
-    ICON_EVENT_LESSNON_CHANGE,
-    NAME_EVENT_LESSON_CHANGE,
     ICON_EVENT_HOMEWORK,
+    ICON_EVENT_LESSNON_CHANGE,
     NAME_EVENT_HOMEWORK,
+    NAME_EVENT_LESSON_CHANGE,
 )
+from .entity import WebUntisEntity
 
 
 async def async_setup_entry(
@@ -21,8 +21,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Example sensor based on a config entry."""
+    assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
-    entities = [LessonChangeEventEntity(server)]
+    entities: list[EventEntity] = [LessonChangeEventEntity(server)]
     if server.timetable_source != "teacher":
         entities.append(HomeworkEventEntity(server))
     async_add_entities(
@@ -71,7 +72,15 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
             server=server,
             name=NAME_EVENT_LESSON_CHANGE,
             icon=ICON_EVENT_LESSNON_CHANGE,
-            event_types=["rooms", "teachers", "cancelled", "code", "lstext", "subject", "info"],
+            event_types=[
+                "rooms",
+                "teachers",
+                "cancelled",
+                "code",
+                "lstext",
+                "subject",
+                "info",
+            ],
         )
 
 

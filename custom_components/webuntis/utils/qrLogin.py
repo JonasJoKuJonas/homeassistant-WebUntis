@@ -160,15 +160,6 @@ def _qr_endpoint(credentials: QrData, method: str) -> str:
     )
 
 
-def _qr_auth_block(credentials: QrData) -> dict[str, Any]:
-    """Generate auth block with TOTP for QR login."""
-    return {
-        "user": credentials.user,
-        "otp": pyotp.TOTP(credentials.key).now(),
-        "clientTime": int(time.time() * 1000),
-    }
-
-
 def parse_qr_code(payload: str) -> QrData:
     """Parse the untis:// QR payload."""
     payload = payload.strip()

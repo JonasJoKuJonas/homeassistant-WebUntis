@@ -1,15 +1,16 @@
 import json
-from datetime import datetime, timedelta, date, timezone
-import time
-from typing import Any
+import logging
+from datetime import date, datetime, timedelta, timezone
+from typing import ClassVar
+
 import aiohttp
 import requests
 from webuntis import errors, objects
-from webuntis.utils import log  # pylint: disable=no-name-in-module
 from webuntis.session import Session as WebUntisSession
-from .schoolyears import resolve_schoolyear
+from webuntis.utils.logger import log
+
 from .qrLogin import QrData, async_qr_login, extract_login_result
-import logging
+from .schoolyears import resolve_schoolyear
 
 QR_USER_AGENT = "UntisMobileAndroid"
 QR_API_VERSION = "i3.2"
@@ -59,8 +60,9 @@ class ExtendedSession(WebUntisSession):
         self.config["jsessionid"] = jsessionid
         self.login_result = extract_login_result(user_data)
 
-        if hasattr(self, "_session") and self._session is not None:
-            self._session.cookies.set("JSESSIONID", jsessionid)
+        session = getattr(self, "_session", None)
+        if session is not None:
+            session.cookies.set("JSESSIONID", jsessionid)
 
     def _request(self, method, params=None, use_login_repeat=None):
         if use_login_repeat is None and (
@@ -69,7 +71,7 @@ class ExtendedSession(WebUntisSession):
             use_login_repeat = False
 
         try:
-            return super()._request(
+            return super()._request(  # type: ignore[attr-defined]
                 method, params=params, use_login_repeat=use_login_repeat
             )
         except errors.RemoteError as err:
@@ -322,7 +324,7 @@ class ExtendedSession(WebUntisSession):
             result = objects.TeacherList(session=self, data=data)
         return result
 
-    _ELEMENT_TYPE_TABLE = {
+    _ELEMENT_TYPE_TABLE: ClassVar[dict[str, int]] = {
         "klasse": 1,
         "teacher": 2,
         "subject": 3,
@@ -395,7 +397,7 @@ class ExtendedSession(WebUntisSession):
                 "keyword: " + (", ".join(self._ELEMENT_TYPE_TABLE.keys()))
             )
 
-        element_type, element_id = list(type_and_id.items())[0]
+        element_type, element_id = next(iter(type_and_id.items()))
         result = super().timetable_extended(start=start, end=end, **type_and_id)
         self._ensure_teacher_mapping(
             result,
@@ -437,7 +439,7 @@ class ExtendedSession(WebUntisSession):
                 "keyword: " + (", ".join(self._ELEMENT_TYPE_TABLE.keys()))
             )
 
-        element_type, element_id = list(type_and_id.items())[0]
+        element_type, element_id = next(iter(type_and_id.items()))
         result = super().timetable(start=start, end=end, **type_and_id)
         self._ensure_teacher_mapping(
             result,

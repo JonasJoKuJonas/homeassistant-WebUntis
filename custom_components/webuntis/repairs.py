@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import voluptuous as vol
-
 from homeassistant import data_entry_flow
-from homeassistant.components.repairs import ConfirmRepairFlow, RepairsFlow
+from homeassistant.components.repairs import RepairsFlow
 from homeassistant.core import HomeAssistant
-
 
 from .config_flow import ConfigFlow
 
@@ -42,14 +40,14 @@ class IssueChangePassword(RepairsFlow):
 
             if not errors:
                 entry = self.hass.config_entries.async_get_entry(self._entry_id)
+                assert entry is not None
                 self.hass.config_entries.async_update_entry(entry, data=data)
                 return self.async_create_entry(title="", data={})
 
             errors["base"] = next(iter(errors.values()))
 
         entry = self.hass.config_entries.async_get_entry(self._entry_id)
-        if entry and entry.data:
-            username = entry.data["username"]
+        username = entry.data.get("username", "") if entry and entry.data else ""
 
         return self.async_show_form(
             step_id="confirm",

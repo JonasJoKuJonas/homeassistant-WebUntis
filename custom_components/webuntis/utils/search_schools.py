@@ -1,7 +1,9 @@
+import json
 import time
+
 import requests
 from webuntis import errors
-import json
+
 
 def search_schools(query: str) -> dict:
     """Search for schools using the WebUntis school search API."""

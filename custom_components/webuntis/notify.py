@@ -1,6 +1,5 @@
 from .const import TEMPLATE_OPTIONS
-
-from .utils.web_untis import get_lesson_name_str, get_lesson_name
+from .utils.web_untis import get_lesson_name, get_lesson_name_str
 
 
 def compare_timetables(old_timetable, new_timetable) -> list:
@@ -26,32 +25,22 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         if new_lesson == old_lesson:
             continue
 
-        checked_fields = [
-            "rooms",
-            "subject_id",
-            "subjects",
-            "teachers",
-            "lstext",
-            "code",
-            "info",
-        ]
-
         # compare lesson rooms
-        if new_lesson.get("code", "None") != "cancelled":
-            if (
-                (
-                    "rooms" in new_lesson
-                    and "rooms" in old_lesson
-                    and new_lesson["rooms"]
-                    and old_lesson["rooms"]
-                    and new_lesson["rooms"] != old_lesson["rooms"] 
-                ) or (
-                    "rooms" not in new_lesson
-                    and "rooms" in old_lesson
-                    and old_lesson["rooms"]
-                )
-            ):
-                updated_items.append(["rooms", new_lesson, old_lesson])
+        if new_lesson.get("code", "None") != "cancelled" and (
+            (
+                "rooms" in new_lesson
+                and "rooms" in old_lesson
+                and new_lesson["rooms"]
+                and old_lesson["rooms"]
+                and new_lesson["rooms"] != old_lesson["rooms"]
+            )
+            or (
+                "rooms" not in new_lesson
+                and "rooms" in old_lesson
+                and old_lesson["rooms"]
+            )
+        ):
+            updated_items.append(["rooms", new_lesson, old_lesson])
 
         # compare lesson subject
         if (
@@ -64,21 +53,21 @@ def compare_timetables(old_timetable, new_timetable) -> list:
             updated_items.append(["subject", new_lesson, old_lesson])
 
         # compare lesson teachers
-        if new_lesson.get("code", "None") != "cancelled":
-            if (
-                (
-                    "teachers" in new_lesson
-                    and "teachers" in old_lesson
-                    and new_lesson["teachers"]
-                    and old_lesson["teachers"]
-                    and new_lesson["teachers"] != old_lesson["teachers"]
-                ) or (
-                    "teachers" not in new_lesson
-                    and "teachers" in old_lesson
-                    and old_lesson["teachers"]
-                )
-            ):
-                updated_items.append(["teachers", new_lesson, old_lesson])
+        if new_lesson.get("code", "None") != "cancelled" and (
+            (
+                "teachers" in new_lesson
+                and "teachers" in old_lesson
+                and new_lesson["teachers"]
+                and old_lesson["teachers"]
+                and new_lesson["teachers"] != old_lesson["teachers"]
+            )
+            or (
+                "teachers" not in new_lesson
+                and "teachers" in old_lesson
+                and old_lesson["teachers"]
+            )
+        ):
+            updated_items.append(["teachers", new_lesson, old_lesson])
 
         # compare lesson text
         old_lstext = old_lesson.get("lstext", "") or ""
