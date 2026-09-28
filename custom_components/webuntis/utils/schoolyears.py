@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from custom_components.webuntis import _LOGGER
+_LOGGER = logging.getLogger(__name__)
 
 
 def resolve_schoolyear(schoolyears: Any):
