@@ -64,9 +64,10 @@ See the [WebUntis x Timetable Card Documentation](https://github.com/KingDando84
 ## Dashboard Card for Homework
 
 A bundled custom Lovelace card renders the homework list grouped just like the WebUntis "Hausaufgaben"
-page (Bald fällig / Noch nicht abgeschlossen / Verpasst), including a print button.
+page (Bald fällig / Noch nicht abgeschlossen / Verpasst), including a print button. The integration
+registers it automatically — no manual file copying or Lovelace resource setup required.
 
-See [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) for installation and configuration.
+See [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) for configuration options.
 
 ---
 

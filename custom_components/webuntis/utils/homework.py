@@ -119,7 +119,11 @@ class HomeworkEventsFetcher:
                 lesson = next((l for l in lessons if l["id"] == lesson_id), {})
                 subject = lesson.get("subject", "Unknown Subject")
 
-                summary = get_lesson_name_str(self.server, subject, teachers[0]["name"])
+                summary = get_lesson_name_str(
+                    self.server,
+                    subject,
+                    (teachers[0]["name"] if teachers else "Unknown Teacher"),
+                )
 
                 # Create a calendar event for each homework entry.
                 event_start = (

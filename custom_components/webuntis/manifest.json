@@ -6,6 +6,7 @@
     "@mrtncode"
   ],
   "config_flow": true,
+  "dependencies": ["http", "frontend"],
   "documentation": "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/",
   "integration_type": "device",
   "iot_class": "cloud_polling",
