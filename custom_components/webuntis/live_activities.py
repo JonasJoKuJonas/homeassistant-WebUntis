@@ -533,6 +533,12 @@ class LiveActivityManager:
 class LiveActivityOptionsFlowMixin:
     """Mixed into OptionsFlowHandler; expects self._config_entry/self.hass/self.save."""
 
+    _config_entry: Any
+    hass: HomeAssistant
+    async_show_form: Any
+    async_show_menu: Any
+    save: Any
+
     async def list_live_activities(
         self,
         step_id: str,
