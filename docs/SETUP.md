@@ -19,19 +19,6 @@ This page provides instructions to install and configure the WebUntis integratio
 2. Restart Home Assistant.
 3. Add the integration via the [Home Assistant UI](https://my.home-assistant.io/redirect/integrations/) or click [here](https://my.home-assistant.io/redirect/config_flow_start/?domain=webuntis).
 
-### Docker Users
-
-If Home Assistant is running in Docker, make sure to set your local timezone.
-
-**Option 1: Mount `/etc/localtime`**
-
-```yaml
-volumes:
-  - /etc/localtime:/etc/localtime:ro
-```
-
-**Option 2: Environment variable**
-TZ=Europe/Berlin
 
 ## Configuration via UI
 Just follow the config flow. The integration uses the untis school search to search your school details based on a search term. You only need your username and your password.
