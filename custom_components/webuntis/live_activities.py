@@ -135,8 +135,8 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
             room = ""
         items.append(
             {
-                "start": lesson.start.astimezone(),
-                "end": lesson.end.astimezone(),
+                "start": dt_util.as_local(lesson.start),
+                "end": dt_util.as_local(lesson.end),
                 "lsnumber": getattr(lesson, "lsnumber", None),
                 "subject": get_lesson_name(server, lesson),
                 "room": room,
@@ -341,7 +341,7 @@ async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> boo
         return False
     tag = _build_test_tag(entity_id)
     strings = _STRINGS[lang]
-    now = datetime.now().astimezone()
+    now = dt_util.now()
 
     success = await async_notify(
         hass,
@@ -430,7 +430,7 @@ class LiveActivityManager:
             _build_day_blocks, self.server, today
         )
         lang = _language(self.hass)
-        now = datetime.now().astimezone()
+        now = dt_util.now()
 
         next_time: datetime | None = None
         for target in targets.values():

@@ -904,7 +904,7 @@ class WebUntis:
 
         lesson_list = []
         for lesson in table:
-            if lesson.start.astimezone() > now and self.check_lesson(lesson):
+            if dt_util.as_local(lesson.start) > now and self.check_lesson(lesson):
                 lesson_list.append(lesson)
 
         lesson_list.sort(key=lambda e: e.start)
@@ -925,7 +925,7 @@ class WebUntis:
 
         self.next_class_json = self.get_lesson_json(lesson)
 
-        return lesson.start.astimezone()
+        return dt_util.as_local(lesson.start)
 
     def _next_lesson_to_wake_up(self):
         """returns time of the next lesson to weak up."""
@@ -938,7 +938,7 @@ class WebUntis:
         time_list = []
         for lesson in table:
             if self.check_lesson(lesson):
-                time_list.append(lesson.start.astimezone())
+                time_list.append(dt_util.as_local(lesson.start))
 
         day = now
         time_list_new = []
@@ -952,7 +952,7 @@ class WebUntis:
                 time_list_new.append(time)
 
         try:
-            return min(time_list_new).astimezone()
+            return dt_util.as_local(min(time_list_new))
         except (IndexError, ValueError):
             if not self._no_lessons:
                 _LOGGER.info(
@@ -1046,8 +1046,8 @@ class WebUntis:
                     for key, value in self.calendar_replace_name.items():
                         event["summary"] = event["summary"].replace(key, value)
 
-                    event["start"] = lesson.start.astimezone()
-                    event["end"] = lesson.end.astimezone()
+                    event["start"] = dt_util.as_local(lesson.start)
+                    event["end"] = dt_util.as_local(lesson.end)
                     if self.calendar_description == "json":
                         event["description"] = self.get_lesson_json(lesson, True)
                     elif self.calendar_description == "lesson_info":
@@ -1123,6 +1123,10 @@ class WebUntis:
                 self.lesson_compacting_parallel,
             )
 
+        for event in events:
+            event["start"] = dt_util.as_local(event["start"]).isoformat()
+            event["end"] = dt_util.as_local(event["end"]).isoformat()
+
         return events
 
     def _count_lessons(self, start, end, filter_on, count_cancelled=False):
@@ -1186,8 +1190,8 @@ class WebUntis:
 
         try:
             return [
-                min(time_list_start).astimezone(),
-                max(time_list_end).astimezone(),
+                dt_util.as_local(min(time_list_start)),
+                dt_util.as_local(max(time_list_end)),
             ]
         except (IndexError, ValueError):
             return [None, None]
@@ -1256,11 +1260,11 @@ class WebUntis:
             return "JSON data is disabled - activate it in the options"
         dic = {}
         if output_str:
-            dic["start"] = str(lesson.start.astimezone())
-            dic["end"] = str(lesson.end.astimezone())
+            dic["start"] = str(dt_util.as_local(lesson.start))
+            dic["end"] = str(dt_util.as_local(lesson.end))
         else:
-            dic["start"] = lesson.start.astimezone()
-            dic["end"] = lesson.end.astimezone()
+            dic["start"] = dt_util.as_local(lesson.start)
+            dic["end"] = dt_util.as_local(lesson.end)
         with contextlib.suppress(AttributeError, TypeError, ValueError):
             dic["id"] = int(lesson.id)
         with contextlib.suppress(AttributeError):
@@ -1358,8 +1362,8 @@ class WebUntis:
         """returns info about for notify test"""
         dic = {}
 
-        dic["start"] = lesson.start.astimezone()
-        dic["end"] = lesson.end.astimezone()
+        dic["start"] = dt_util.as_local(lesson.start)
+        dic["end"] = dt_util.as_local(lesson.end)
 
         dic["subject_id"] = "None"  # Defaultwert setzen
         with contextlib.suppress(AttributeError, IndexError):
@@ -1471,9 +1475,17 @@ class WebUntis:
                 lesson["name"] = get_lesson_name(self, lesson)
 
                 if self.lesson_change_callback:
+                    event_lesson = dict(lesson)
+                    event_lesson_old = dict(lesson_old)
+                    for event_data in (event_lesson, event_lesson_old):
+                        for key in ("start", "end"):
+                            if isinstance(event_data.get(key), datetime):
+                                event_data[key] = dt_util.as_local(
+                                    event_data[key]
+                                ).isoformat()
                     self.lesson_change_callback(
                         change,
-                        {"old_lesson": lesson_old, "new_lesson": lesson},
+                        {"old_lesson": event_lesson_old, "new_lesson": event_lesson},
                     )
             updated_items = compact_list(
                 updated_items,
