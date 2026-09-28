@@ -5,7 +5,12 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
+from homeassistant.core import (
+    HomeAssistant,
+    ServiceCall,
+    ServiceResponse,
+    SupportsResponse,
+)
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.service import async_extract_config_entry_ids
 
@@ -20,11 +25,15 @@ async def async_setup_services(hass: HomeAssistant) -> None:
     if hass.services.has_service(DOMAIN, "get_timetable"):
         return
 
-    async def async_call_webuntis_service(service_call: ServiceCall) -> None:
+    async def async_call_webuntis_service(
+        service_call: ServiceCall,
+    ) -> ServiceResponse | None:
         """Call correct WebUntis service."""
 
         entry_id = await async_extract_config_entry_ids(service_call)
         config_entry = hass.config_entries.async_get_entry(next(iter(entry_id)))
+        assert config_entry is not None
+        assert config_entry.unique_id is not None
         webuntis_object = hass.data[DOMAIN][config_entry.unique_id]
 
         data = service_call.data
@@ -42,7 +51,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
         await hass.async_add_executor_job(webuntis_object.webuntis_login)
 
-        result = None
+        result: ServiceResponse | None = None
 
         if service_call.service == "get_timetable":
             lesson_list = await hass.async_add_executor_job(

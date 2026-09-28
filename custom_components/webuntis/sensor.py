@@ -31,6 +31,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Web Untis sensor platform."""
+    assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
 
     # Create entities list.
