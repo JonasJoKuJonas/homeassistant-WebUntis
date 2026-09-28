@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import logging
 import socket
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlparse
 
 import requests
@@ -43,6 +43,8 @@ from .utils.web_untis_extended import ExtendedSession
 
 _LOGGER = logging.getLogger(__name__)
 
+FlowResultType = FlowResult | config_entries.ConfigFlowResult
+
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for webuntisnew."""
@@ -72,7 +74,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> config_entries.ConfigFlowResult | FlowResult:
+    ) -> FlowResultType:
         """Handle reconfiguration of an existing entry."""
         self._reconfigure = True
         # During reconfigure only allow changing password and timetable source (otherwise the entity id is deprecated)
@@ -105,7 +107,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Step 1: Auswahl zwischen manuellem Login und QR-Code Login."""
         return self.async_show_menu(
             step_id="user",
@@ -115,7 +117,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_qr_menu(
         self,
         user_input: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Step 2: Untermenü für die zwei QR-Code Optionen."""
         return self.async_show_menu(
             step_id="qr_menu",
@@ -124,14 +126,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_choose_qr_string(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Nutzer hat QR-Code gewählt -> Flagge setzen und weiterleiten."""
         self._login_method = "qr_string"
         return await self.async_step_qr_login()
 
     async def async_step_choose_qr_manual(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Nutzer hat manuelle Eingabe gewählt -> Flagge setzen und weiterleiten."""
         self._login_method = "qr_manual"
         return await self.async_step_qr_login()
@@ -140,7 +142,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle the school search and username/password login flow."""
         errors = errors or {}
 
@@ -217,7 +219,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle QR-code based login with dynamic UI fields."""
         errors = errors or {}
 
@@ -253,18 +255,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "qr_payload": payload,
                     "jsessionid": jsessionid,
                 }
-                if session.login_result:
+                if getattr(session, "login_result", None):
                     self._user_input_temp.update(session.login_result)
 
                 return await self.async_step_timetable_source()
             except ValueError:
                 errors["base"] = "invalid_qr_format"
-            except webuntis.errors.NotLoggedInError:
-                errors["base"] = "invalid_auth"
-                _LOGGER.error("QR login failed: Not logged in error")
             except Exception as err:  # noqa: BLE001
-                _LOGGER.error("QR login failed: %s", err)
-                errors["base"] = "cannot_connect"
+                error_name = type(err).__name__
+                if error_name == "NotLoggedInError":
+                    errors["base"] = "invalid_auth"
+                    _LOGGER.error("QR login failed: Not logged in error")
+                else:
+                    _LOGGER.error("QR login failed: %s", err)
+                    errors["base"] = "cannot_connect"
 
         user_input = user_input or {}
 
@@ -299,7 +303,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Authenticate with username/password after school is chosen."""
         errors = errors or {}
 
@@ -314,10 +318,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         user_input = user_input or {}
 
+        school_name = (self._selected_school or {}).get("name", "")
         return self.async_show_form(
             step_id="auth",
             description_placeholders={
-                "school_name": self._selected_school["name"],
+                "school_name": school_name,
             },
             data_schema=vol.Schema(
                 {
@@ -334,7 +339,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_timetable_source(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -354,8 +359,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_pick_teacher()
 
             elif user_input["timetable_source"] == "klasse":
+                session_obj = cast(Any, self._session_temp)
                 schoolyears = await self.hass.async_add_executor_job(
-                    self._session_temp.schoolyears
+                    session_obj.schoolyears
                 )
 
                 current_schoolyear = await self.hass.async_add_executor_job(
@@ -390,7 +396,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_student(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -428,7 +434,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_teacher(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -465,7 +471,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_pick_klasse(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
@@ -474,9 +480,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not user_input.get("klasse"):
                 errors = {"base": "class_not_found"}
             else:
-                klassen = await self.hass.async_add_executor_job(
-                    self._session_temp.klassen
-                )
+                session_obj = cast(Any, self._session_temp)
+                klassen = await self.hass.async_add_executor_job(session_obj.klassen)
                 try:
                     klassen.filter(name=user_input["klasse"])[0]
                 except (IndexError, KeyError):
@@ -527,7 +532,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult | config_entries.ConfigFlowResult:
+    ) -> FlowResultType:
         if user_input is None:
             user_input = {}
 
@@ -553,7 +558,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                                 "teacher",
                             ],  # "subject", "room"
                             translation_key="timetable_source",
-                            mode="dropdown",
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     ),
                     vol.Required(
@@ -567,7 +572,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def validate_login(
         self, credentials: dict[str, Any]
-    ) -> dict[str, Any] | tuple[dict[Any, Any], Any]:
+    ) -> tuple[dict[str, Any], Any | None]:
         hass: HomeAssistant = self.hass
 
         errors = {}
@@ -615,7 +620,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return errors, None
 
         try:
-            session = webuntis.Session(
+            session_cls = cast(Any, webuntis).Session
+            session = session_cls(
                 server=credentials["server"],
                 school=credentials["school"],
                 username=credentials.get("username", ""),
@@ -632,25 +638,27 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await hass.async_add_executor_job(session.schoolyears)
             else:
                 await hass.async_add_executor_job(session.login)
-        except webuntis.errors.BadCredentialsError:
-            errors["base"] = "bad_credentials"
-        except webuntis.errors.NotLoggedInError:
-            errors["base"] = "invalid_auth"
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.error("webuntis.Session connection error: %s", exc)
             errors["base"] = "cannot_connect"
-        except webuntis.errors.RemoteError:  # pylint: disable=no-member
-            errors["school"] = "school_not_found"
         except Exception as exc:  # noqa: BLE001
-            _LOGGER.error("webuntis.Session unknown error: %s", exc)
-            errors["base"] = "unknown"
+            error_name = type(exc).__name__
+            if error_name == "BadCredentialsError":
+                errors["base"] = "bad_credentials"
+            elif error_name == "NotLoggedInError":
+                errors["base"] = "invalid_auth"
+            elif error_name == "RemoteError":
+                errors["school"] = "school_not_found"
+            else:
+                _LOGGER.error("webuntis.Session unknown error: %s", exc)
+                errors["base"] = "unknown"
 
         return errors, session
 
     def test_timetable(self):
         """test if timetable is allowed to be fetched"""
 
-        session: webuntis.Session = self._session_temp
+        session = cast(Any, self._session_temp)
         user_input = self._user_input_temp
 
         _LOGGER.error(
@@ -691,7 +699,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     end=day,
                     **timetable_object,
                 )
-                self._source_id = timetable_object[user_input["timetable_source"]].id
+                timetable_source = user_input["timetable_source"]
+                source_obj = timetable_object.get(timetable_source)
+                if source_obj is None:
+                    return {"base": "unknown"}
+                self._source_id = source_obj.id
 
         except Exception as exc:  # noqa: BLE001
             if str(exc) == "'Student not found'":
@@ -729,7 +741,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
     async def async_step_init(
         self,
         user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the options."""
         return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
 
@@ -743,7 +755,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_filter(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the filter options."""
         if user_input is not None:
             if "filter_description" not in user_input:
@@ -760,11 +772,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                 user_input["filter_mode"] = "None"
 
             if user_input["filter_description"]:
-                user_input["filter_description"] = user_input[
-                    "filter_description"
-                ].split(",")
+                if isinstance(user_input["filter_description"], str):
+                    user_input["filter_description"] = user_input[
+                        "filter_description"
+                    ].split(",")
                 user_input["filter_description"] = [
-                    s.strip() for s in user_input["filter_description"] if s != ""
+                    str(s).strip()
+                    for s in user_input["filter_description"]
+                    if str(s).strip() != ""
                 ]
 
             return await self.save(user_input)
@@ -785,7 +800,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                                 "Blacklist",
                                 "Whitelist",
                             ],
-                            mode="dropdown",
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         ),
                     ),
                     vol.Required(
@@ -812,7 +827,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                         "filter_description",
                         description={
                             "suggested_value": ", ".join(
-                                self._config_entry.options.get("filter_description")
+                                str(item)
+                                for item in (
+                                    self._config_entry.options.get(
+                                        "filter_description", []
+                                    )
+                                    or []
+                                )
                             )
                         },
                     ): selector.TextSelector(
@@ -834,7 +855,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_calendar(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the calendar options."""
         errors = {}
         if user_input is not None:
@@ -883,7 +904,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                                 "class_name_long",
                             ],
                             translation_key="calendar_description",
-                            mode="dropdown",
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     ),
                     vol.Required(
@@ -897,7 +918,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                                 "Room short-long name",
                                 "None",
                             ],
-                            mode="dropdown",
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     ),
                     vol.Required(
@@ -912,7 +933,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                                 "due_date",
                             ],
                             translation_key="homework_display",
-                            mode="dropdown",
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     ),
                     vol.Optional(
@@ -929,7 +950,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_lesson(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the lesson options."""
         errors = {}
         if user_input is not None:
@@ -1005,7 +1026,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the backend options."""
         if user_input is not None:
             return await self.save(user_input)
@@ -1038,7 +1059,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def list_notify_services(
         self, step_id, multible=False, required=True, errors=None
-    ):
+    ) -> FlowResultType:
         if errors is None:
             errors = {}
         services = {
@@ -1063,7 +1084,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the notify_menu options."""
 
         if not self._config_entry.options["notify_config"]:
@@ -1083,7 +1104,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the test options."""
         if user_input is None:
             return await self.list_notify_services("edit_notify_service_select")
@@ -1096,7 +1117,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the test options."""
         if user_input is None:
             return await self.list_notify_services(
@@ -1117,7 +1138,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         self,
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         """Manage the test options."""
         if user_input is None:
             return await self.list_notify_services(
@@ -1168,7 +1189,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
         user_input: dict[str, Any] | None = None,
         errors: dict[str, Any] | None = None,
         edit=None,
-    ) -> FlowResult:
+    ) -> FlowResultType:
         options = {}
         if edit:
             options = self._config_entry.options["notify_config"].get(edit)

@@ -1,4 +1,4 @@
-"""The Web Untis integration."""
+"""The Untis integration."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ import copy
 import json
 import logging
 import uuid
-from collections.abc import Mapping
-from datetime import datetime, timedelta, timezone
-from typing import Any
+from collections.abc import Callable, Mapping
+from datetime import date, datetime, timedelta, timezone
+from typing import Any, cast
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.config_entries import ConfigEntry
@@ -78,8 +78,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await server.async_update()
     server.start_periodic_update()
 
-    server.live_activity_manager = LiveActivityManager(hass, server)
-    server.live_activity_manager.start()
+    live_activity_manager = LiveActivityManager(hass, server)
+    server.live_activity_manager = live_activity_manager
+    live_activity_manager.start()
 
     # Register update listener.
     entry.async_on_unload(entry.add_update_listener(async_update_entry))
@@ -145,6 +146,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unique_id = config_entry.unique_id
+    assert unique_id is not None
     server = hass.data[DOMAIN][unique_id]
 
     # Unload platforms.
@@ -167,32 +169,33 @@ class WebUntis:
         self,
         hass: HomeAssistant,
         unique_id: str,
-        config: Mapping[str, Any],
+        config: ConfigEntry,
     ) -> None:
         """Initialize client instance."""
         self._hass = hass
-        self._config = config
+        self._config: ConfigEntry = config
+        config_data = config.data
 
         # Server data
         self.unique_id = unique_id
-        self.server = config.data["server"]
-        self.school = config.data["school"]
-        self.username = config.data["username"]
-        self.password = config.data.get("password", "")
-        self.is_qr = config.data.get("login_method") == "qr"
+        self.server = config_data["server"]
+        self.school = config_data["school"]
+        self.username = config_data["username"]
+        self.password = config_data.get("password", "")
+        self.is_qr = config_data.get("login_method") == "qr"
         self.qr_data = None
         if self.is_qr:
-            if config.data.get("qr_key"):
+            if config_data.get("qr_key"):
                 self.qr_data = QrData(
                     server=self.server.removeprefix("https://").removeprefix("http://"),
                     school=self.school,
                     user=self.username,
-                    key=config.data["qr_key"],
-                    school_number=config.data.get("qr_school_number"),
+                    key=config_data["qr_key"],
+                    school_number=config_data.get("qr_school_number"),
                 )
-            elif config.data.get("qr_payload"):
+            elif config_data.get("qr_payload"):
                 try:
-                    self.qr_data = parse_qr_code(config.data["qr_payload"])
+                    self.qr_data = parse_qr_code(config_data["qr_payload"])
                 except ValueError:
                     _LOGGER.error(
                         "Stored QR login data for '%s@%s' is invalid; reconfigure the integration",
@@ -205,8 +208,8 @@ class WebUntis:
                     self.school,
                     self.username,
                 )
-        self.timetable_source = config.data["timetable_source"]
-        self.timetable_source_id = config.data["timetable_source_id"]
+        self.timetable_source = config_data["timetable_source"]
+        self.timetable_source_id = config_data["timetable_source_id"]
         self.title = config.title
 
         self.calendar_show_cancelled_lessons = config.options[
@@ -247,13 +250,13 @@ class WebUntis:
 
         self.notify_config = {}
 
-        self.notify_config = config.options.get("notify_config")
+        self.notify_config = config.options.get("notify_config", {})
         self.notify = any(
             config.get("options") for config in self.notify_config.values()
         )
 
         self.live_activities = config.options.get(CONF_LIVE_ACTIVITIES, {})
-        self.live_activity_manager = None
+        self.live_activity_manager: LiveActivityManager | None = None
 
         session_kwargs = {
             "username": self.username,
@@ -262,17 +265,17 @@ class WebUntis:
             "useragent": "foo",
             "school": self.school,
         }
-        if config.data.get("jsessionid") and not self.is_qr:
-            session_kwargs["jsessionid"] = config.data["jsessionid"]
+        if config_data.get("jsessionid") and not self.is_qr:
+            session_kwargs["jsessionid"] = config_data["jsessionid"]
 
         self.session = ExtendedSession(**session_kwargs)
-        if config.data.get("jsessionid") and not self.is_qr:
+        if config_data.get("jsessionid") and not self.is_qr:
             self.session.login_result = {
-                key: config.data[key]
+                key: config_data[key]
                 for key in ("personType", "personId", "klasseId")
-                if key in config.data
+                if key in config_data
             }
-        self._loged_in = bool(config.data.get("jsessionid"))
+        self._loged_in = bool(config_data.get("jsessionid"))
 
         self._last_status_request_failed = False
         self._no_lessons = False
@@ -314,8 +317,8 @@ class WebUntis:
         self._qr_session_lock = asyncio.Lock()
         self._qr_session_created_at: datetime | None = None
 
-        self.lesson_change_callback = None
-        self.homework_change_callback = None
+        self.lesson_change_callback: Callable[..., None] | None = None
+        self.homework_change_callback: Callable[..., None] | None = None
 
     def event_entity_listen(self, callback, id) -> None:
         """Listen for lesson change events."""
@@ -460,11 +463,14 @@ class WebUntis:
                         is_fixable=True,
                         severity=ir.IssueSeverity.ERROR,
                         translation_key="bad_credentials",
-                        data={
-                            "unique_id": self.unique_id,
-                            "config_data": dict(self._config.data),
-                            "entry_id": self._config.entry_id,
-                        },
+                        data=cast(
+                            Any,
+                            {
+                                "unique_id": self.unique_id,
+                                "config_data": dict(self._config.data),
+                                "entry_id": self._config.entry_id,
+                            },
+                        ),
                     )
                 return
             elif self.issue:
@@ -723,9 +729,10 @@ class WebUntis:
                     if event["homework_id"] not in self.calendar_homework_ids:
                         self.calendar_homework_ids.append(event["homework_id"])
 
-                        self.homework_change_callback(
-                            "homework", {"homework_data": event}
-                        )
+                        if self.homework_change_callback:
+                            self.homework_change_callback(
+                                "homework", {"homework_data": event}
+                            )
 
                         for service in self.notify_config.values():
                             if "homework" in service.get("options", []):
@@ -833,46 +840,52 @@ class WebUntis:
             )
             return student.id
 
-    def get_timetable(self, start, end: datetime, sort=False):
+    def get_timetable(self, start: date | datetime, end: date | datetime, sort=False):
         """Get the timetable for the given time period"""
-        timetable_object = None
+        timetable_object: Mapping[str, Any] = {}
         if self.timetable_source != "personal":
-            timetable_object = get_timetable_object(
-                self.timetable_source_id, self.timetable_source, self.session
+            timetable_object = cast(
+                Mapping[str, Any],
+                get_timetable_object(
+                    self.timetable_source_id, self.timetable_source, self.session
+                ),
             )
 
-        if isinstance(start, datetime):
-            start = start.date()
-        if isinstance(end, datetime):
-            end = end.date()
+        start_date = start.date() if isinstance(start, datetime) else start
+        end_date = end.date() if isinstance(end, datetime) else end
 
         if not self.current_schoolyear:
             _LOGGER.debug(
                 "No valid school year found for start date %s. Returning empty timetable.",
-                start,
+                start_date,
             )
             return []
 
         # Ensure start and end are within the school year boundaries
-        start = max(start, self.current_schoolyear.start.date())
-        end = min(end, self.current_schoolyear.end.date())
+        start_date = max(start_date, self.current_schoolyear.start.date())
+        end_date = min(end_date, self.current_schoolyear.end.date())
 
-        if start > end:
+        if start_date > end_date:
             _LOGGER.debug(
                 "Requested timetable range %s-%s is outside school year %s-%s. Returning empty timetable.",
-                start,
-                end,
+                start_date,
+                end_date,
                 self.current_schoolyear.start.date(),
                 self.current_schoolyear.end.date(),
             )
             return []
 
-        result = []
+        result: list[Any]
         if self.timetable_source == "personal":
-            result = self.session.my_timetable(start=start, end=end)
+            result = cast(
+                list[Any], self.session.my_timetable(start=start_date, end=end_date)
+            )
         else:
-            result = self.session.timetable_extended(
-                start=start, end=end, **timetable_object
+            result = cast(
+                list[Any],
+                self.session.timetable_extended(
+                    start=start_date, end=end_date, **timetable_object
+                ),
             )
 
         if sort:
@@ -1016,7 +1029,7 @@ class WebUntis:
                 lesson, ignor_cancelled=self.calendar_show_cancelled_lessons
             ):
                 try:
-                    event = {"uid": uuid.uuid4()}
+                    event: dict[str, Any] = {"uid": str(uuid.uuid4())}
 
                     prefix = ""
                     if self.calendar_show_room_change and lesson.original_rooms:
@@ -1207,15 +1220,13 @@ class WebUntis:
                 lesson_klassen_long = []
 
             if self.filter_mode == "Blacklist" and any(
-                filter_klasse in lesson_klassen
-                or filter_klasse in lesson_klassen_long
+                filter_klasse in lesson_klassen or filter_klasse in lesson_klassen_long
                 for filter_klasse in self.filter_klassen
             ):
                 return False
 
             if self.filter_mode == "Whitelist" and not any(
-                filter_klasse in lesson_klassen
-                or filter_klasse in lesson_klassen_long
+                filter_klasse in lesson_klassen or filter_klasse in lesson_klassen_long
                 for filter_klasse in self.filter_klassen
             ):
                 return False
@@ -1459,10 +1470,11 @@ class WebUntis:
                 lesson_old["name"] = get_lesson_name(self, lesson_old)
                 lesson["name"] = get_lesson_name(self, lesson)
 
-                self.lesson_change_callback(
-                    change,
-                    {"old_lesson": lesson_old, "new_lesson": lesson},
-                )
+                if self.lesson_change_callback:
+                    self.lesson_change_callback(
+                        change,
+                        {"old_lesson": lesson_old, "new_lesson": lesson},
+                    )
             updated_items = compact_list(
                 updated_items,
                 "notify",
