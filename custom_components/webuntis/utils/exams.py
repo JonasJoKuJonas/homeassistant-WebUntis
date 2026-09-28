@@ -10,6 +10,14 @@ from ..utils.schoolyears import resolve_schoolyear
 from ..utils.web_untis import get_lesson_name_str
 
 
+class ExamAuthenticationError(Exception):
+    """Raised when exam data is requested without an authenticated session."""
+
+
+class ExamDataError(Exception):
+    """Raised when exam data cannot be fetched from WebUntis."""
+
+
 class ExamEventsFetcher:
     def __init__(self, server, timezone_str="UTC"):
         self.server = server
@@ -38,9 +46,11 @@ class ExamEventsFetcher:
                 end=schoolyear_end,
             )
         except errors.NotLoggedInError:
-            raise Exception("You are not logged in. Please log in and try again.")
+            raise ExamAuthenticationError(
+                "You are not logged in. Please log in and try again."
+            ) from None
         except errors.RemoteError as e:
-            raise Exception(f"Error fetching exam data: {e}")
+            raise ExamDataError(f"Error fetching exam data: {e}") from e
 
         # Process the exam data and extract exam events
         exam_events = self._process_exam_data(exam_data)
@@ -62,7 +72,6 @@ class ExamEventsFetcher:
                 name = exam.get("name", "No Name")
                 subject = exam.get("subject", "Unknown Subject")
                 text = exam.get("text", "")
-                grade = exam.get("grade", "")
 
                 assigned_students = exam.get("assignedStudents", [])
                 if assigned_students:  # Checks if the list is not empty
@@ -117,7 +126,7 @@ class ExamEventsFetcher:
                     or self.server.student_id == student_id
                 ):
                     event_list.append(CalendarEvent(**event))
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 # Log the error and continue processing other exam entries
                 print(f"Error processing exam entry: {exam}. Error: {e!s}")
                 continue
