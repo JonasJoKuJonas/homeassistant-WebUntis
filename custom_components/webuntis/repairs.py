@@ -40,6 +40,7 @@ class IssueChangePassword(RepairsFlow):
 
             if not errors:
                 entry = self.hass.config_entries.async_get_entry(self._entry_id)
+                assert entry is not None
                 self.hass.config_entries.async_update_entry(entry, data=data)
                 return self.async_create_entry(title="", data={})
 

@@ -21,8 +21,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Example sensor based on a config entry."""
+    assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
-    entities = [LessonChangeEventEntity(server)]
+    entities: list[EventEntity] = [LessonChangeEventEntity(server)]
     if server.timetable_source != "teacher":
         entities.append(HomeworkEventEntity(server))
     async_add_entities(

@@ -27,9 +27,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Web Untis calendar platform."""
+    assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
 
-    entities = [UntisCalendar(server)]
+    entities: list[CalendarEntity] = [UntisCalendar(server)]
 
     if server.timetable_source != "teacher":
         entities.append(HomeworkCalendar(server))
@@ -50,10 +51,10 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
             icon=icon,
             device_class=None,
         )
-        self.events = self._get_events
+        self.events: list[CalendarEvent] = []
         self._event = None
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
         return []
 
     @property
@@ -129,7 +130,7 @@ class UntisCalendar(BaseUntisCalendar):
         """Initialize the Untis Calendar."""
         super().__init__(server=server, name=NAME_CALENDAR, icon=ICON_CALENDAR)
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
         return self._server.calendar_events
 
 
@@ -142,7 +143,7 @@ class HomeworkCalendar(BaseUntisCalendar):
             server=server, name=NAME_CALENDAR_HOMEWORK, icon=ICON_CALENDAR_HOMEWORK
         )
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
 
         return self._server.calendar_homework
 
@@ -156,6 +157,6 @@ class ExamCalendar(BaseUntisCalendar):
             server=server, name=NAME_CALENDAR_EXAM, icon=ICON_CALENDAR_EXAM
         )
 
-    def _get_events(self):
+    def _get_events(self) -> list[CalendarEvent]:
 
         return self._server.calendar_exams
