@@ -288,9 +288,10 @@ customElements.define("webuntis-homework-card", WebuntisHomeworkCard);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "my-card",
-  name: "My Card",
-  description: "Something",
+  type: "webuntis-homework-card",
+  name: "WebUntis Homework Card",
+  description:
+    "Zeigt die WebUntis-Hausaufgabenliste gruppiert (Bald fällig / Noch nicht abgeschlossen / Verpasst) inkl. Druckfunktion an.",
   getEntitySuggestion: (hass, entityId) => {
     const entry = hass && hass.entities && hass.entities[entityId];
     if (!entry || entry.platform !== "webuntis") return null;
