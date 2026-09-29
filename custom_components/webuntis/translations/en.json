@@ -475,6 +475,28 @@
         }
       },
       "name": "Get Timetable"
+    },
+    "get_rest_timetable": {
+      "name": "Get REST timetable",
+      "description": "Get WebUntis timetable via the REST API (includes exams and lesson info)",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        },
+        "start": {
+          "name": "Start",
+          "description": "First day"
+        },
+        "end": {
+          "name": "End",
+          "description": "Last day"
+        },
+        "raw": {
+          "name": "Raw response",
+          "description": "Return the unprocessed API response"
+        }
+      }
     }
   }
 }
