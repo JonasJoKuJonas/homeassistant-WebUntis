@@ -12,9 +12,26 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         for lesson in old_timetable
     }
 
-    new_lesson_keys = {
-        (lesson["lsnumber"], lesson["start"])
-        for lesson in new_timetable
+    # Pre-pass 1: find start times where a lesson is transitioning to cancelled.
+    cancelled_start_times = {
+        new_lesson["start"]
+        for new_lesson in new_timetable
+        if (new_lesson["lsnumber"], new_lesson["start"]) in old_lessons_map
+        and new_lesson.get("code") == "cancelled"
+        and old_lessons_map[
+            (new_lesson["lsnumber"], new_lesson["start"])
+        ].get("code") != "cancelled"
+    }
+
+    # Pre-pass 2: find which of those cancelled start times have a replacement
+    # lesson — a new timetable entry (not present in the old snapshot) at the
+    # same time. When a replacement exists the "cancelled" event is suppressed
+    # in favour of the more informative "replacement" event fired below.
+    start_times_with_replacement = {
+        new_lesson["start"]
+        for new_lesson in new_timetable
+        if (new_lesson["lsnumber"], new_lesson["start"]) not in old_lessons_map
+        and new_lesson["start"] in cancelled_start_times
     }
 
     for new_lesson in new_timetable:
@@ -92,7 +109,11 @@ def compare_timetables(old_timetable, new_timetable) -> list:
 
         if new_code != old_code:
             if old_code == "None" and new_code == "cancelled":
-                updated_items.append(["cancelled", new_lesson, old_lesson])
+                # Suppress "cancelled" when a replacement lesson exists at this
+                # time slot — the "replacement" event fired below carries the
+                # full picture and avoids sending two notifications for one change.
+                if new_lesson["start"] not in start_times_with_replacement:
+                    updated_items.append(["cancelled", new_lesson, old_lesson])
             elif old_code == "None" and new_code == "irregular":
                 updated_items.append(["code", new_lesson, old_lesson])
             else:
