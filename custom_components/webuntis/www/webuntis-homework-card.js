@@ -292,4 +292,19 @@ window.customCards.push({
   name: "WebUntis Homework Card",
   description:
     "Zeigt die WebUntis-Hausaufgabenliste gruppiert (Bald fällig / Noch nicht abgeschlossen / Verpasst) inkl. Druckfunktion an.",
+  documentationURL: "https://github.com/JonasJoKuJonas/homeassistant-WebUntis/blob/main/docs/WEBUNTIS_HOMEWORK_CARD.md",
+  getEntitySuggestion: (hass, entityId) => {
+    const entry = hass && hass.entities && hass.entities[entityId];
+    if (!entry || entry.platform !== "webuntis") return null;
+
+    const id = String(entityId).toLowerCase();
+    if (!id.includes("homework_list") && !id.includes("hausaufgabenliste")) return null;
+
+    return {
+      config: {
+        type: "custom:webuntis-homework-card",
+        entity: entityId,
+      },
+    };
+  },
 });
