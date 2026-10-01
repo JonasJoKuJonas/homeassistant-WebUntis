@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-import pytz  # to handle timezone conversions
 from homeassistant.components.calendar import CalendarEvent
+from homeassistant.util import dt as dt_util
 from webuntis import errors
 
 from custom_components.webuntis.const import DAYS_TO_CHECK, HOMEWORK_DUE_SOON_DAYS
@@ -29,13 +29,13 @@ class HomeworkEventsFetcher:
         self.calendar_description = calendar_description
         self.calendar_room = calendar_room
         self.event_list = []
-        self.timezone = pytz.timezone(timezone)
+        self.timezone = timezone
 
     def _get_homework_events(self):
         """
         Fetch homework events from the WebUntis API and return them as a list of calendar events.
         """
-        today = datetime.now(timezone.utc).date()
+        today = dt_util.now().date()
         start = today - timedelta(days=DAYS_TO_CHECK)
         end = today + timedelta(days=DAYS_TO_CHECK)
 
@@ -93,12 +93,16 @@ class HomeworkEventsFetcher:
                 text = homework.get("text")
                 completed = homework.get("completed", False)
 
-                date_assigned = datetime.strptime(
-                    str(date_assigned_int), "%Y%m%d"
-                ).replace(tzinfo=timezone.utc).date()
-                due_date = datetime.strptime(
-                    str(due_date_int), "%Y%m%d"
-                ).replace(tzinfo=timezone.utc).date()
+                date_assigned = (
+                    datetime.strptime(str(date_assigned_int), "%Y%m%d")
+                    .replace(tzinfo=timezone.utc)
+                    .date()
+                )
+                due_date = (
+                    datetime.strptime(str(due_date_int), "%Y%m%d")
+                    .replace(tzinfo=timezone.utc)
+                    .date()
+                )
 
                 # Find the corresponding record to get the teacher ID
                 record = next(
@@ -190,7 +194,7 @@ def build_homework_list(param_list, due_soon_days=HOMEWORK_DUE_SOON_DAYS):
     grouped like the WebUntis "Hausaufgaben" view:
     "due_soon", "open" or "overdue" (completed entries are grouped as "completed").
     """
-    today = datetime.now(timezone.utc).date()
+    today = dt_util.now().date()
     soon_cutoff = today + timedelta(days=due_soon_days)
 
     homeworks = []
