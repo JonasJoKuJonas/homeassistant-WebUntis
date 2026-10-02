@@ -1,10 +1,21 @@
+import logging
 import uuid
+from datetime import date, datetime, timedelta
 
+import requests
 from homeassistant.components.calendar import CalendarEvent
 from webuntis import errors
 from webuntis.utils.datetime_utils import parse_datetime
 
+from ..utils.rest_timetable import RestTimetableError, get_rest_lessons
 from ..utils.schoolyears import resolve_schoolyear
+
+_LOGGER = logging.getLogger(__name__)
+
+# Window of the REST timetable scanned for exams marked on lessons
+REST_EXAM_DAYS_BACK = 7
+REST_EXAM_DAYS_AHEAD = 84
+REST_CHUNK_DAYS = 28
 
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
@@ -54,7 +65,80 @@ class ExamEventsFetcher:
 
         # Process the exam data and extract exam events
         exam_events = self._process_exam_data(exam_data)
+
+        # Many schools only mark exams on the lesson itself, which the exam
+        # endpoint does not return; add those from the REST timetable.
+        try:
+            rest_events = self._get_rest_exam_events(schoolyear_start, schoolyear_end)
+        except Exception:
+            # Optional data source: never let it break the integration setup
+            _LOGGER.warning("Could not add exams from the REST timetable", exc_info=True)
+            rest_events = []
+        known = {(event.start, event.summary) for event in exam_events}
+        for event in rest_events:
+            if (event.start, event.summary) not in known:
+                exam_events.append(event)
         return exam_events
+
+    def _get_rest_exam_events(self, schoolyear_start, schoolyear_end):
+        """Return exams marked on lessons in the REST timetable."""
+        today = date.today()
+        start = max(schoolyear_start, today - timedelta(days=REST_EXAM_DAYS_BACK))
+        end = min(schoolyear_end, today + timedelta(days=REST_EXAM_DAYS_AHEAD))
+
+        lessons = []
+        chunk_start = start
+        while chunk_start <= end:
+            chunk_end = min(end, chunk_start + timedelta(days=REST_CHUNK_DAYS - 1))
+            try:
+                lessons.extend(get_rest_lessons(self.session, chunk_start, chunk_end))
+            except (RestTimetableError, requests.RequestException) as err:
+                _LOGGER.debug("REST timetable not available for exams: %s", err)
+                return []
+            except Exception:
+                # Optional data source: never let it break the integration setup
+                _LOGGER.warning(
+                    "Unexpected error reading exams from the REST timetable",
+                    exc_info=True,
+                )
+                return []
+            chunk_start = chunk_end + timedelta(days=1)
+
+        event_list = []
+        for lesson in lessons:
+            if not lesson["is_exam"]:
+                continue
+            subject = lesson["subjects"][0]["name"] if lesson["subjects"] else ""
+            teacher = ", ".join(t["name"] for t in lesson["teachers"])
+            summary = (
+                get_lesson_name_str(self.server, subject, teacher)
+                if subject
+                else lesson["name"] or "Exam"
+            )
+            # lessonInfo is usually repeated in texts; keep each text once
+            description = "\n".join(
+                dict.fromkeys(
+                    text
+                    for text in (
+                        lesson["name"],
+                        lesson["lesson_info"],
+                        lesson["lesson_text"],
+                        *lesson["texts"],
+                    )
+                    if text
+                )
+            )
+            event_list.append(
+                CalendarEvent(
+                    uid=str(uuid.uuid4()),
+                    summary=summary,
+                    start=datetime.fromisoformat(lesson["start"]),
+                    end=datetime.fromisoformat(lesson["end"]),
+                    description=description or None,
+                    location=", ".join(r["long_name"] for r in lesson["rooms"]) or None,
+                )
+            )
+        return event_list
 
     def _process_exam_data(self, response_data):
         """

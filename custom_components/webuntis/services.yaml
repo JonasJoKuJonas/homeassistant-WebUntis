@@ -76,3 +76,26 @@ get_schoolyears:
         device:
           filter:
             - integration: webuntis
+
+get_rest_timetable:
+  description: Get WebUntis timetable via the REST API (includes exams and lesson info)
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          filter:
+            - integration: webuntis
+    start:
+      required: true
+      selector:
+        date:
+    end:
+      required: true
+      selector:
+        date:
+    raw:
+      required: false
+      default: false
+      selector:
+        boolean:

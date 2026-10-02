@@ -432,6 +432,28 @@
       },
       "name": "Count Hours"
     },
+    "get_rest_timetable": {
+      "description": "Get WebUntis timetable via the REST API (includes exams and lesson info)",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "Select an instance"
+        },
+        "end": {
+          "name": "End",
+          "description": "Last day"
+        },
+        "raw": {
+          "name": "Raw response",
+          "description": "Return the unprocessed API response"
+        },
+        "start": {
+          "name": "Start",
+          "description": "First day"
+        }
+      },
+      "name": "Get REST timetable"
+    },
     "get_schoolyears": {
       "description": "Get WebUntis schoolyears",
       "fields": {
