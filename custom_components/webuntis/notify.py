@@ -11,7 +11,29 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         (lesson["lsnumber"], lesson["start"]): lesson 
         for lesson in old_timetable
     }
-    
+
+    # Pre-pass 1: find start times where a lesson is transitioning to cancelled.
+    cancelled_start_times = {
+        new_lesson["start"]
+        for new_lesson in new_timetable
+        if (new_lesson["lsnumber"], new_lesson["start"]) in old_lessons_map
+        and new_lesson.get("code") == "cancelled"
+        and old_lessons_map[
+            (new_lesson["lsnumber"], new_lesson["start"])
+        ].get("code") != "cancelled"
+    }
+
+    # Pre-pass 2: find which of those cancelled start times have a replacement
+    # lesson — a new timetable entry (not present in the old snapshot) at the
+    # same time. When a replacement exists the "cancelled" event is suppressed
+    # in favour of the more informative "replacement" event fired below.
+    start_times_with_replacement = {
+        new_lesson["start"]
+        for new_lesson in new_timetable
+        if (new_lesson["lsnumber"], new_lesson["start"]) not in old_lessons_map
+        and new_lesson["start"] in cancelled_start_times
+    }
+
     for new_lesson in new_timetable:
         # Look up the corresponding old lesson using the key
         key = (new_lesson["lsnumber"], new_lesson["start"])
@@ -87,11 +109,48 @@ def compare_timetables(old_timetable, new_timetable) -> list:
 
         if new_code != old_code:
             if old_code == "None" and new_code == "cancelled":
-                updated_items.append(["cancelled", new_lesson, old_lesson])
+                # Suppress "cancelled" when a replacement lesson exists at this
+                # time slot — the "replacement" event fired below carries the
+                # full picture and avoids sending two notifications for one change.
+                if new_lesson["start"] not in start_times_with_replacement:
+                    updated_items.append(["cancelled", new_lesson, old_lesson])
             elif old_code == "None" and new_code == "irregular":
                 updated_items.append(["code", new_lesson, old_lesson])
             else:
                 updated_items.append(["code", new_lesson, old_lesson])
+
+    # Detect replacement lessons: new entries in the timetable that did not exist
+    # before, appearing at the same start time as a lesson that was just cancelled.
+    # In Untis, a replacement subject gets a brand-new lsnumber, so it is invisible
+    # to the existing comparison loop above which only matches on (lsnumber, start).
+
+    # Build a map of lessons that transitioned to cancelled in this update cycle,
+    # keyed by start time so we can correlate them with potential replacements.
+    newly_cancelled_by_start = {}
+    for new_lesson in new_timetable:
+        key = (new_lesson["lsnumber"], new_lesson["start"])
+        if key not in old_lessons_map:
+            continue
+        old_lesson = old_lessons_map[key]
+        if (
+            new_lesson.get("code") == "cancelled"
+            and old_lesson.get("code") != "cancelled"
+        ):
+            start = new_lesson["start"]
+            newly_cancelled_by_start.setdefault(start, []).append(new_lesson)
+
+    # Any lesson whose key was not in the old timetable at all is a genuinely new
+    # entry. If it shares a start time with a newly-cancelled lesson it is a
+    # replacement; fire a dedicated "replacement" event so automations can tell the
+    # user which subject is taking over rather than only that one was cancelled.
+    for new_lesson in new_timetable:
+        key = (new_lesson["lsnumber"], new_lesson["start"])
+        if key in old_lessons_map:
+            continue  # already handled above
+        start = new_lesson["start"]
+        if start in newly_cancelled_by_start:
+            for cancelled_lesson in newly_cancelled_by_start[start]:
+                updated_items.append(["replacement", new_lesson, cancelled_lesson])
 
     return updated_items
 
@@ -254,7 +313,8 @@ def get_changes(change, lesson, lesson_old, server):
         "teachers": "Teacher changed",
         "lstext": "Lesson text changed",
         "subject": "Subject changed",
-        "info": "Info text changed"
+        "info": "Info text changed",
+        "replacement": "Lesson replaced",
     }[change]
 
     changes["subject"] = get_lesson_name(server, lesson)
@@ -297,5 +357,10 @@ def get_changes(change, lesson, lesson_old, server):
                 "new": lesson.get("teachers", [{}])[0].get("name", ""),
             }
         )
+    elif change == "replacement":
+        old_subjects = lesson_old.get("subjects", [])
+        new_subjects = lesson.get("subjects", [])
+        changes["old"] = old_subjects[0].get("long_name", "") if old_subjects else ""
+        changes["new"] = new_subjects[0].get("long_name", "") if new_subjects else ""
 
     return changes

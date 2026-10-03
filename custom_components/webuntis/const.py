@@ -42,6 +42,7 @@ NOTIFY_OPTIONS = [
     "lstext",
     "subject",
     "info",
+    "replacement",
 ]
 
 TEMPLATE_OPTIONS = ["message_title", "message", "discord", "telegram"]

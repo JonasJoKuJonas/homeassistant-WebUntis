@@ -155,6 +155,7 @@
           "cancelled": "Lesson is cancelled",
           "code": "Lesson status changed",
           "homework": "Homework added",
+          "replacement": "Lesson replaced by another subject",
           "rooms": "Room changed",
           "teachers": "Teacher changed"
         }
@@ -337,7 +338,8 @@
         "code": "Lesson status changed",
         "rooms": "Room changed",
         "teachers": "Teacher changed",
-        "cancelled": "Lesson is cancelled"
+        "cancelled": "Lesson is cancelled",
+        "replacement": "Lesson replaced by another subject"
       }
     },
     "timetable_source": {

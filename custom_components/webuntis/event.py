@@ -80,6 +80,7 @@ class LessonChangeEventEntity(BaseUntisEventEntity):
                 "lstext",
                 "subject",
                 "info",
+                "replacement",
             ],
         )
 
