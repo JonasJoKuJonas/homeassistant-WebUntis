@@ -10,15 +10,15 @@ from webuntis.utils.datetime_utils import parse_datetime
 from ..utils.rest_timetable import RestTimetableError, get_rest_lessons
 from ..utils.schoolyears import resolve_schoolyear
 
-_LOGGER = logging.getLogger(__name__)
-
-# Window of the REST timetable scanned for exams marked on lessons
-REST_EXAM_DAYS_BACK = 7
-REST_EXAM_DAYS_AHEAD = 84
-REST_CHUNK_DAYS = 28
-
 # pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
+
+_LOGGER = logging.getLogger(__name__)
+
+# Window of the REST timetable scanned for exams marked on lessons,
+# fetched with a single request
+REST_EXAM_DAYS_BACK = 7
+REST_EXAM_DAYS_AHEAD = 56
 
 
 class ExamAuthenticationError(Exception):
@@ -86,23 +86,13 @@ class ExamEventsFetcher:
         start = max(schoolyear_start, today - timedelta(days=REST_EXAM_DAYS_BACK))
         end = min(schoolyear_end, today + timedelta(days=REST_EXAM_DAYS_AHEAD))
 
-        lessons = []
-        chunk_start = start
-        while chunk_start <= end:
-            chunk_end = min(end, chunk_start + timedelta(days=REST_CHUNK_DAYS - 1))
-            try:
-                lessons.extend(get_rest_lessons(self.session, chunk_start, chunk_end))
-            except (RestTimetableError, requests.RequestException) as err:
-                _LOGGER.debug("REST timetable not available for exams: %s", err)
-                return []
-            except Exception:
-                # Optional data source: never let it break the integration setup
-                _LOGGER.warning(
-                    "Unexpected error reading exams from the REST timetable",
-                    exc_info=True,
-                )
-                return []
-            chunk_start = chunk_end + timedelta(days=1)
+        # One request for the whole window (unexpected errors are handled by
+        # the caller, so this optional source never breaks the setup)
+        try:
+            lessons = get_rest_lessons(self.session, start, end)
+        except (RestTimetableError, requests.RequestException) as err:
+            _LOGGER.debug("REST timetable not available for exams: %s", err)
+            return []
 
         event_list = []
         for lesson in lessons:
