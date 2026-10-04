@@ -431,6 +431,28 @@
       },
       "name": "Stunden zählen"
     },
+    "get_rest_timetable": {
+      "description": "WebUntis-Stundenplan über die REST-API abrufen (inklusive Prüfungen und Stundeninformationen).",
+      "fields": {
+        "device_id": {
+          "description": "Eine Instanz auswählen",
+          "name": "Gerät"
+        },
+        "end": {
+          "description": "Ende des Zeitraums",
+          "name": "Ende"
+        },
+        "raw": {
+          "description": "Die unverarbeitete API-Antwort zurückgeben",
+          "name": "Rohdaten"
+        },
+        "start": {
+          "description": "Start des Zeitraums",
+          "name": "Start"
+        }
+      },
+      "name": "REST-Stundenplan abrufen"
+    },
     "get_schoolyears": {
       "description": "WebUntis Schuljahre abrufen.",
       "fields": {
