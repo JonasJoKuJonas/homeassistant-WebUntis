@@ -114,7 +114,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
             now = dt_util.now()
 
             for event in self.events:
-                if event.end_datetime_local.astimezone() > now:
+                if event.end_datetime_local > now:
                     self._event = event
                     break
         else:

@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 
 import requests
 from homeassistant.components.calendar import CalendarEvent
+from homeassistant.util import dt as dt_util
 from webuntis import errors
 from webuntis.utils.datetime_utils import parse_datetime
 
@@ -159,13 +160,13 @@ class ExamEventsFetcher:
                 end_time = exam.get("endTime", 0)
 
                 # Combine date and time for start and end datetime objects, ensuring they are timezone-aware
-                start_datetime = parse_datetime(
-                    date=exam_date, time=start_time
-                ).astimezone()
+                start_datetime = dt_util.as_local(
+                    parse_datetime(date=exam_date, time=start_time)
+                )
 
-                end_datetime = parse_datetime(
-                    date=exam_date, time=end_time
-                ).astimezone()
+                end_datetime = dt_util.as_local(
+                    parse_datetime(date=exam_date, time=end_time)
+                )
 
                 if end_datetime < start_datetime:
                     # Log a warning if the end datetime is before the start datetime
