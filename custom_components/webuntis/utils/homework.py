@@ -7,8 +7,6 @@ from webuntis import errors
 from custom_components.webuntis.const import DAYS_TO_CHECK, HOMEWORK_DUE_SOON_DAYS
 
 from ..utils.schoolyears import resolve_schoolyear
-
-# pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
 
 

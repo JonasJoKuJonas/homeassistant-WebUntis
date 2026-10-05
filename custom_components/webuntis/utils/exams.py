@@ -10,8 +10,6 @@ from webuntis.utils.datetime_utils import parse_datetime
 
 from ..utils.rest_timetable import RestTimetableError, get_rest_lessons
 from ..utils.schoolyears import resolve_schoolyear
-
-# pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
 
 _LOGGER = logging.getLogger(__name__)

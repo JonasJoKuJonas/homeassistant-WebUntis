@@ -101,7 +101,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     """Fetch, filter and merge today's lessons into blocks."""
     try:
         login_error = server.webuntis_login()
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:
         login_error = error
 
     if login_error:
@@ -564,7 +564,7 @@ class LiveActivityOptionsFlowMixin:
 
     async def async_step_live_activities_menu(
         self,
-        user_input: dict[str, str] | None = None,  # pylint: disable=unused-argument
+        user_input: dict[str, str] | None = None,
     ) -> FlowResult:
         """Manage the live_activities_menu options."""
         if not self._config_entry.options[CONF_LIVE_ACTIVITIES]:

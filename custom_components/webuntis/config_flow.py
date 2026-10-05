@@ -18,7 +18,6 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
-# pylint: disable=maybe-no-member
 import webuntis
 
 from .const import (
@@ -740,7 +739,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
 
     async def async_step_init(
         self,
-        user_input: dict[str, Any] | None = None,  # pylint: disable=unused-argument
+        user_input: dict[str, Any] | None = None,
     ) -> FlowResultType:
         """Manage the options."""
         return self.async_show_menu(step_id="init", menu_options=OPTIONS_MENU)
