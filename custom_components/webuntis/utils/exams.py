@@ -83,7 +83,7 @@ class ExamEventsFetcher:
 
     def _get_rest_exam_events(self, schoolyear_start, schoolyear_end):
         """Return exams marked on lessons in the REST timetable."""
-        today = datetime.now(tz=dt_util.get_time_zone(self.server.timezone)).date()
+        today = dt_util.now().date()
         start = max(schoolyear_start, today - timedelta(days=REST_EXAM_DAYS_BACK))
         end = min(schoolyear_end, today + timedelta(days=REST_EXAM_DAYS_AHEAD))
 
