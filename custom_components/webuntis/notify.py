@@ -4,12 +4,11 @@ from .utils.web_untis import get_lesson_name, get_lesson_name_str
 
 def compare_timetables(old_timetable, new_timetable) -> list:
     updated_items = []
-    
+
     # Create a dictionary for lookup of old lessons
     # Using (lsnumber, start) as the key for matching
     old_lessons_map = {
-        (lesson["lsnumber"], lesson["start"]): lesson 
-        for lesson in old_timetable
+        (lesson["lsnumber"], lesson["start"]): lesson for lesson in old_timetable
     }
 
     # Pre-pass 1: find start times where a lesson is transitioning to cancelled.
@@ -18,15 +17,11 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         for new_lesson in new_timetable
         if (new_lesson["lsnumber"], new_lesson["start"]) in old_lessons_map
         and new_lesson.get("code") == "cancelled"
-        and old_lessons_map[
-            (new_lesson["lsnumber"], new_lesson["start"])
-        ].get("code") != "cancelled"
+        and old_lessons_map[(new_lesson["lsnumber"], new_lesson["start"])].get("code")
+        != "cancelled"
     }
 
-    # Pre-pass 2: find which of those cancelled start times have a replacement
-    # lesson — a new timetable entry (not present in the old snapshot) at the
-    # same time. When a replacement exists the "cancelled" event is suppressed
-    # in favour of the more informative "replacement" event fired below.
+    # Pre-pass 2: find which of those cancelled start times have a replacement lesson
     start_times_with_replacement = {
         new_lesson["start"]
         for new_lesson in new_timetable
@@ -37,12 +32,12 @@ def compare_timetables(old_timetable, new_timetable) -> list:
     for new_lesson in new_timetable:
         # Look up the corresponding old lesson using the key
         key = (new_lesson["lsnumber"], new_lesson["start"])
-        
+
         if key not in old_lessons_map:
             continue
-        
+
         old_lesson = old_lessons_map[key]
-        
+
         # if compared lessons are the same
         if new_lesson == old_lesson:
             continue
@@ -96,7 +91,7 @@ def compare_timetables(old_timetable, new_timetable) -> list:
         new_lstext = new_lesson.get("lstext", "") or ""
         if new_lstext != old_lstext:
             updated_items.append(["lstext", new_lesson, old_lesson])
-        
+
         # compare lesson info (text that the teacher wrote for students)
         old_info = old_lesson.get("info", "") or ""
         new_info = new_lesson.get("info", "") or ""
@@ -121,8 +116,6 @@ def compare_timetables(old_timetable, new_timetable) -> list:
 
     # Detect replacement lessons: new entries in the timetable that did not exist
     # before, appearing at the same start time as a lesson that was just cancelled.
-    # In Untis, a replacement subject gets a brand-new lsnumber, so it is invisible
-    # to the existing comparison loop above which only matches on (lsnumber, start).
 
     # Build a map of lessons that transitioned to cancelled in this update cycle,
     # keyed by start time so we can correlate them with potential replacements.

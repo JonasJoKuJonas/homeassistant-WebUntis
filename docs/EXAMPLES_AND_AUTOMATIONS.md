@@ -106,10 +106,6 @@ There can be different event_type's
 - lstext
 - replacement
 
-The `replacement` event fires when a lesson is cancelled and a different subject takes its
-place in the same time slot. `old_lesson` is the cancelled lesson and `new_lesson` is the
-replacement. In this case no separate `cancelled` event is fired for that lesson.
-
 Available lesson change Attributes
 
 ```yaml
