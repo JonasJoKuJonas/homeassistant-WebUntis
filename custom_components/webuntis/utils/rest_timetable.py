@@ -121,10 +121,13 @@ def fetch_rest_timetable(session, start: date, end: date) -> dict:
 def _element(item: dict | None) -> dict | None:
     if not item:
         return None
-    return {
+    element = {
         "name": item.get("shortName") or item.get("displayName") or "",
         "long_name": item.get("longName") or item.get("displayName") or "",
     }
+    if item.get("id") is not None:
+        element["id"] = item["id"]
+    return element
 
 
 def _parse_time(value: str | None) -> datetime | None:
