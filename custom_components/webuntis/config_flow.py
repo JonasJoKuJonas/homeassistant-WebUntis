@@ -261,7 +261,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_timetable_source()
             except ValueError:
                 errors["base"] = "invalid_qr_format"
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 error_name = type(err).__name__
                 if error_name == "NotLoggedInError":
                     errors["base"] = "invalid_auth"
@@ -641,7 +641,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except requests.exceptions.ConnectionError as exc:
             _LOGGER.error("webuntis.Session connection error: %s", exc)
             errors["base"] = "cannot_connect"
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error_name = type(exc).__name__
             if error_name == "BadCredentialsError":
                 errors["base"] = "bad_credentials"
@@ -705,7 +705,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return {"base": "unknown"}
                 self._source_id = source_obj.id
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if str(exc) == "'Student not found'":
                 return {"base": "student_not_found"}
             elif str(exc) == "no right for timetable":
@@ -1289,7 +1289,7 @@ def _create_klasse_list(server):
     """Create a list of classes/ klassen"""
     try:
         klassen = server.klassen
-    except Exception:  # noqa: BLE001
+    except Exception:
         return []
 
     return [klasse.name for klasse in klassen]

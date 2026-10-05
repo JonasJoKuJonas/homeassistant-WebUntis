@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import requests
 from homeassistant.components.calendar import CalendarEvent
@@ -73,7 +73,9 @@ class ExamEventsFetcher:
             rest_events = self._get_rest_exam_events(schoolyear_start, schoolyear_end)
         except Exception:
             # Optional data source: never let it break the integration setup
-            _LOGGER.warning("Could not add exams from the REST timetable", exc_info=True)
+            _LOGGER.warning(
+                "Could not add exams from the REST timetable", exc_info=True
+            )
             rest_events = []
         known = {(event.start, event.summary) for event in exam_events}
         for event in rest_events:
@@ -83,7 +85,7 @@ class ExamEventsFetcher:
 
     def _get_rest_exam_events(self, schoolyear_start, schoolyear_end):
         """Return exams marked on lessons in the REST timetable."""
-        today = date.today()
+        today = datetime.now(tz=dt_util.get_time_zone(self.server.timezone)).date()
         start = max(schoolyear_start, today - timedelta(days=REST_EXAM_DAYS_BACK))
         end = min(schoolyear_end, today + timedelta(days=REST_EXAM_DAYS_AHEAD))
 

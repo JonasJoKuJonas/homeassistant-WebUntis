@@ -13,7 +13,6 @@ import logging
 from datetime import date, datetime
 
 import requests
-
 from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,6 +74,8 @@ def fetch_rest_timetable(session, start: date, end: date) -> dict:
     login_result = getattr(session, "login_result", None) or {}
     person_type = login_result.get("personType")
     person_id = login_result.get("personId")
+    if not isinstance(person_type, int) or not isinstance(person_id, int):
+        raise RestTimetableError("No valid login result found, please log in first")
     resource_type = RESOURCE_TYPES.get(person_type)
     if person_id is None or resource_type is None:
         raise RestTimetableError(
@@ -160,7 +161,9 @@ def parse_rest_timetable(data: dict) -> list[dict]:
                     if (el := _element(removed)) is not None:
                         group["removed"].append(el)
 
-            def elements(kind: str, which: str = "current") -> list:
+            def elements(
+                kind: str, which: str = "current", groups: dict = groups
+            ) -> list:
                 return groups.get(kind, {}).get(which, [])
 
             entry_type = entry.get("type") or ""
