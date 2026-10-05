@@ -473,6 +473,10 @@ class ExtendedSession(WebUntisSession):
             )
             if not fallback:
                 continue
+            if not data.get("lstext"):
+                data["lstext"] = fallback["lesson_text"] or fallback["lesson_info"]
+            if not data.get("substText"):
+                data["substText"] = fallback["substitution_text"]
             for jsonrpc_key, rest_key in (
                 ("su", "subjects"),
                 ("te", "teachers"),

@@ -1,0 +1,17 @@
+name: Ruff Code Quality Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ruff check
+        uses: astral-sh/ruff-action@v4.1.0

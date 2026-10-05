@@ -26,7 +26,6 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
-# pylint: disable=maybe-no-member
 from webuntis import errors
 
 from .const import (
@@ -377,7 +376,6 @@ class WebUntis:
         if self._stop_periodic_update:
             self._stop_periodic_update()
 
-    # pylint: disable=unused-argument
     async def async_update(self, now: datetime | None = None) -> None:
         """Get server data from 3rd party library and update properties."""
 
@@ -1292,7 +1290,6 @@ class WebUntis:
 
         return True
 
-    # pylint: disable=bare-except
     def get_lesson_json(self, lesson, force=False, output_str=True) -> str | dict:
         """returns info about lesson in json"""
         if (not self.generate_json) and (not force):

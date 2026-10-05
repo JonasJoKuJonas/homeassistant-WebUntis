@@ -10,8 +10,6 @@ from webuntis.utils.datetime_utils import parse_datetime
 
 from ..utils.rest_timetable import RestTimetableError, get_rest_lessons
 from ..utils.schoolyears import resolve_schoolyear
-
-# pylint: disable=relative-beyond-top-level
 from ..utils.web_untis import get_lesson_name_str
 
 _LOGGER = logging.getLogger(__name__)
@@ -85,7 +83,7 @@ class ExamEventsFetcher:
 
     def _get_rest_exam_events(self, schoolyear_start, schoolyear_end):
         """Return exams marked on lessons in the REST timetable."""
-        today = datetime.now(tz=dt_util.get_time_zone(self.server.timezone)).date()
+        today = dt_util.now().date()
         start = max(schoolyear_start, today - timedelta(days=REST_EXAM_DAYS_BACK))
         end = min(schoolyear_end, today + timedelta(days=REST_EXAM_DAYS_AHEAD))
 
