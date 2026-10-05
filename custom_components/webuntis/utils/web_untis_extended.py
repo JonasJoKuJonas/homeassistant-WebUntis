@@ -10,6 +10,7 @@ from webuntis.session import Session as WebUntisSession
 from webuntis.utils.logger import log
 
 from .qrLogin import QrData, async_qr_login, extract_login_result
+from .rest_timetable import RestTimetableError, get_rest_lessons
 from .schoolyears import resolve_schoolyear
 
 QR_USER_AGENT = "UntisMobileAndroid"
@@ -377,6 +378,7 @@ class ExtendedSession(WebUntisSession):
 
     def my_timetable(self, end, start):
         result = super().my_timetable(end=end, start=start)
+        self._add_rest_fallbacks(result, start, end)
         self._ensure_teacher_mapping(
             result,
             start=start,
@@ -449,3 +451,59 @@ class ExtendedSession(WebUntisSession):
             element_id=element_id,
         )
         return result
+
+    def _add_rest_fallbacks(self, result, start, end):
+        """Fill empty JSON-RPC lesson fields from the REST timetable."""
+        try:
+            rest_lessons = get_rest_lessons(self, start, end)
+        except (RestTimetableError, requests.RequestException) as err:
+            log("debug", f"REST timetable fallbacks unavailable: {err}")
+            return
+
+        rest_by_time = {
+            self._time_key(lesson["start"], lesson["end"]): lesson
+            for lesson in rest_lessons
+        }
+        for lesson in result:
+            data = getattr(lesson, "_data", None)
+            if not data:
+                continue
+            fallback = rest_by_time.get(
+                self._time_key(lesson.start.isoformat(), lesson.end.isoformat())
+            )
+            if not fallback:
+                continue
+            for jsonrpc_key, rest_key in (
+                ("su", "subjects"),
+                ("te", "teachers"),
+                ("ro", "rooms"),
+                ("kl", "klassen"),
+            ):
+                rest_elements = [
+                    element for element in fallback[rest_key] if element.get("id") is not None
+                ]
+                existing_elements = data.setdefault(jsonrpc_key, [])
+                existing_by_id = {
+                    element.get("id"): element
+                    for element in existing_elements
+                    if element.get("id") is not None
+                }
+                for element in rest_elements:
+                    existing = existing_by_id.get(element["id"])
+                    if existing is None:
+                        existing_elements.append(
+                            {
+                                "id": element["id"],
+                                "name": element["name"],
+                                "longName": element["long_name"],
+                            }
+                        )
+                        continue
+                    if not existing.get("name") and element["name"]:
+                        existing["name"] = element["name"]
+                    if not existing.get("longName") and element["long_name"]:
+                        existing["longName"] = element["long_name"]
+
+    @staticmethod
+    def _time_key(start, end):
+        return tuple(value[:19] for value in (start, end))

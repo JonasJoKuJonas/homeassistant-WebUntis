@@ -101,7 +101,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     """Fetch, filter and merge today's lessons into blocks."""
     try:
         login_error = server.webuntis_login()
-    except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
+    except Exception as error:  # pylint: disable=broad-except
         login_error = error
 
     if login_error:
@@ -110,7 +110,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
 
     try:
         lessons = server.get_timetable(start=day, end=day, sort=True)
-    except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
+    except Exception as error:
         _LOGGER.warning(
             "Live Timetable: could not load timetable for %s - %s", day, error
         )
@@ -118,7 +118,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     finally:
         try:
             server.webuntis_logout()
-        except Exception as error:  # noqa: BLE001  # pylint: disable=broad-except
+        except Exception as error:
             _LOGGER.debug(
                 "Live Timetable: logout after timetable fetch failed - %s", error
             )

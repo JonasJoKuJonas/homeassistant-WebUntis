@@ -10,10 +10,8 @@ import logging
 import uuid
 from collections.abc import Callable, Mapping
 from datetime import date, datetime, timedelta, timezone
-from typing import Any, cast
 from pathlib import Path
-from typing import Any
-import uuid
+from typing import Any, cast
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.components.frontend import add_extra_js_url
@@ -38,9 +36,9 @@ from .const import (
     DAYS_TO_FUTURE,
     DEFAULT_OPTIONS,
     DOMAIN,
+    FRONTEND_CARD_URL_PATH,
     NAME_EVENT_HOMEWORK,
     NAME_EVENT_LESSON_CHANGE,
-    FRONTEND_CARD_URL_PATH,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
 )
@@ -78,19 +76,19 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
 
     try:
         try:
-            from homeassistant.components.http import StaticPathConfig
+            from homeassistant.components.http.server import StaticPathConfig
 
             await hass.http.async_register_static_paths(
                 [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
             )
         except ImportError:
             # Home Assistant < 2024.7 fallback
-            hass.http.register_static_path(
-                FRONTEND_CARD_URL_PATH, str(card_path), cache_headers=False
+            await hass.http.async_register_static_paths(
+                [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
             )
 
         add_extra_js_url(hass, FRONTEND_CARD_URL_PATH)
-    except Exception as error:  # noqa: BLE001
+    except Exception as error:
         # The homework card is a nice-to-have; never fail integration setup over it.
         _LOGGER.warning("Could not register the WebUntis homework card: %s", error)
 
@@ -463,7 +461,7 @@ class WebUntis:
                 self._qr_session_created_at = datetime.now(timezone.utc)
 
                 return True
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.error("QR-Code Re-Authentication fehlgeschlagen: %s", err)
                 self._last_status_request_failed = True
                 return False
@@ -471,7 +469,7 @@ class WebUntis:
     async def _async_add_executor_job_with_retry(self, func_name, func, *args):
         try:
             return await self._hass.async_add_executor_job(func, *args)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Session vermutlich abgelaufen (%s), erneuere direkt...", err)
 
             if self.is_qr:
@@ -848,7 +846,7 @@ class WebUntis:
             self._loged_in = True
             self.updating += 1
             return None
-        except Exception as error:  # noqa: BLE001
+        except Exception as error:
             _LOGGER.error(
                 "Login failed for '%s@%s': %s", self.school, self.username, error
             )
@@ -869,7 +867,7 @@ class WebUntis:
         if self._loged_in:
             try:
                 self.session.logout()
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.warning("Error during WebUntis logout: %s", err)
             finally:
                 self._loged_in = False
@@ -1336,21 +1334,21 @@ class WebUntis:
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Unable to populate 'rooms' for lesson %s: %s", lesson, err)
         try:
             dic["klassen"] = [
                 {"name": str(klasse.name), "long_name": str(klasse.long_name)}
                 for klasse in lesson.klassen
             ]
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug("Unable to populate 'klassen' for lesson %s: %s", lesson, err)
         try:
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
             ]
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.debug(
                 "Unable to populate 'original_rooms' for lesson %s: %s", lesson, err
             )
@@ -1370,7 +1368,7 @@ class WebUntis:
                     )
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
-            except Exception as error:  # noqa: BLE001
+            except Exception as error:
                 _LOGGER.debug(
                     "Unable to populate 'teachers' for lesson %s: %s",
                     lesson,
@@ -1382,7 +1380,7 @@ class WebUntis:
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.original_teachers
                 ]
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.debug(
                     "Unable to populate 'original_teachers' for lesson %s: %s",
                     lesson,
@@ -1451,7 +1449,7 @@ class WebUntis:
                 if "no right for getTeachers()" in str(error):
                     self.exclude_data_run.append("teachers")
                     self.exclude_data.append("teachers")
-            except Exception as error:  # noqa: BLE001
+            except Exception as error:
                 _LOGGER.debug(
                     "Unable to populate 'teachers' for lesson %s: %s",
                     lesson,
@@ -1463,7 +1461,7 @@ class WebUntis:
                     {"name": str(teacher.name), "long_name": str(teacher.long_name)}
                     for teacher in lesson.original_teachers
                 ]
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.debug(
                     "Unable to populate 'original_teachers' for lesson %s: %s",
                     lesson,
