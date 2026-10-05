@@ -14,4 +14,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run ruff check
-        uses: astral-sh/ruff-action@v4
+        uses: astral-sh/ruff-action@v4.1.0
