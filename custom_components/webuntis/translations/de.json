@@ -131,6 +131,7 @@
               "code": "Stunden-Status Änderung",
               "info": "Info-Text Änderung",
               "lstext": "Stundentext Änderung",
+              "replacement": "Stunde ausgetauscht",
               "rooms": "Raum Änderung",
               "subject": "Fach Änderung",
               "teachers": "Lehrer Änderung"
@@ -381,6 +382,7 @@
         "homework": "Hausaufgaben hinzugefügt",
         "info": "Stundeninfo Änderung",
         "lstext": "Stundentext Änderung",
+        "replacement": "Stunde durch anderes Fach ersetzt",
         "rooms": "Raum Änderung",
         "subject": "Fach Änderung",
         "teachers": "Lehrer Änderung"

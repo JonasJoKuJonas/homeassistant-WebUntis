@@ -131,6 +131,7 @@
               "code": "Lesson status changed",
               "info": "Info text changed",
               "lstext": "Lesson text changed",
+              "replacement": "Lesson replaced",
               "rooms": "Room changed",
               "subject": "Subject changed",
               "teachers": "Teacher changed"
@@ -381,6 +382,7 @@
         "homework": "Homework added",
         "info": "Info text changed",
         "lstext": "Lesson text changed",
+        "replacement": "Lesson replaced by another subject",
         "rooms": "Room changed",
         "subject": "Subject changed",
         "teachers": "Teacher changed"
