@@ -1309,7 +1309,7 @@ class WebUntis:
             dic["code"] = str(lesson.code)
         with contextlib.suppress(AttributeError):
             dic["type"] = str(lesson.type)
-        with contextlib.suppress(AttributeError, TypeError):
+        with contextlib.suppress(AttributeError, TypeError, IndexError):
             dic["subjects"] = [
                 {
                     "name": str(subject.name),
@@ -1418,19 +1418,19 @@ class WebUntis:
             dic["lstext"] = str(lesson.lstext)
         with contextlib.suppress(AttributeError):
             dic["type"] = str(lesson.type)
-        with contextlib.suppress(AttributeError, TypeError):
+        with contextlib.suppress(AttributeError, TypeError, IndexError):
             dic["subjects"] = [
                 {"name": str(subject.name), "long_name": str(subject.long_name)}
                 for subject in lesson.subjects
             ]
 
-        with contextlib.suppress(AttributeError, TypeError):
+        with contextlib.suppress(AttributeError, TypeError, IndexError):
             dic["rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.rooms
             ]
 
-        with contextlib.suppress(AttributeError, TypeError):
+        with contextlib.suppress(AttributeError, TypeError, IndexError):
             dic["original_rooms"] = [
                 {"name": str(room.name), "long_name": str(room.long_name)}
                 for room in lesson.original_rooms
