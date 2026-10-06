@@ -30,14 +30,17 @@ def get_lesson_name(server, lesson):
             return obj.get(attr, default)
         return default
 
+    short_name = None
     try:
         subjects = get_attr(lesson, "subjects", [])
         first_subject = subjects[0] if subjects else None
         if first_subject:
+            # lesson_add_teacher stores short names, also with lesson_long_name
+            short_name = get_attr(first_subject, "name", None)
             if server.lesson_long_name:
                 subject = get_attr(first_subject, "long_name", None)
             else:
-                subject = get_attr(first_subject, "name", None)
+                subject = short_name
         else:
             subject = None
     except IndexError:
@@ -48,7 +51,7 @@ def get_lesson_name(server, lesson):
 
     name = server.lesson_replace_name.get(subject, subject)
 
-    if subject in server.lesson_add_teacher:
+    if (short_name or subject) in server.lesson_add_teacher:
 
         teachers = get_attr(lesson, "teachers", [])
         if teachers:
