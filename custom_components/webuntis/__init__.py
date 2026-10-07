@@ -1069,8 +1069,14 @@ class WebUntis:
                     event: dict[str, Any] = {"uid": str(uuid.uuid4())}
 
                     prefix = ""
-                    if self.calendar_show_room_change and lesson.original_rooms:
-                        prefix = "Room change: "
+                    if self.calendar_show_room_change:
+                        try:
+                            if lesson.original_rooms:
+                                prefix = "Room change: "
+                        except IndexError:
+                            # server does not return original rooms -> drop the
+                            # "Room change" marker, keep the calendar entry
+                            pass
                     if lesson.code == "cancelled":
                         prefix = "Cancelled: "
                     if lesson.code == "irregular":
