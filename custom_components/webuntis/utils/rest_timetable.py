@@ -22,7 +22,11 @@ TIMETABLE_ENDPOINT = "/WebUntis/api/rest/view/v1/timetable/entries"
 REQUEST_TIMEOUT = 20
 
 # JSON-RPC person types (login_result["personType"]) -> REST resource types
-RESOURCE_TYPES = {2: "TEACHER", 5: "STUDENT"}
+RESOURCE_TYPES = {
+    2: "TEACHER",
+    5: "STUDENT",
+    12: "STUDENT",
+}  # 12 is parent which also access the student timetable
 
 
 class RestTimetableError(Exception):
