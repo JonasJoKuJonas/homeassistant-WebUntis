@@ -1,7 +1,7 @@
 import json
 import logging
 from collections.abc import Iterable
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import ClassVar
 
 import aiohttp
@@ -393,7 +393,7 @@ class ExtendedSession(WebUntisSession):
                     f"{self._last_used_timetable_source[1]}.",
                 )
 
-                starttime = datetime.now(timezone.utc)
+                starttime = datetime.now(UTC)
                 schoolyears = self.schoolyears()
 
                 if schoolyears:
@@ -402,11 +402,11 @@ class ExtendedSession(WebUntisSession):
                     if currentschoolyear:
                         starttime = max(
                             starttime,
-                            currentschoolyear.start.replace(tzinfo=timezone.utc),
+                            currentschoolyear.start.replace(tzinfo=UTC),
                         )
                         endtime = min(
                             starttime + timedelta(days=7),
-                            currentschoolyear.end.replace(tzinfo=timezone.utc),
+                            currentschoolyear.end.replace(tzinfo=UTC),
                         )
 
                         self._update_teacher_mapping(

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from homeassistant.components.calendar import CalendarEvent
 from homeassistant.util import dt as dt_util
@@ -93,12 +93,12 @@ class HomeworkEventsFetcher:
 
                 date_assigned = (
                     datetime.strptime(str(date_assigned_int), "%Y%m%d")
-                    .replace(tzinfo=timezone.utc)
+                    .replace(tzinfo=UTC)
                     .date()
                 )
                 due_date = (
                     datetime.strptime(str(due_date_int), "%Y%m%d")
-                    .replace(tzinfo=timezone.utc)
+                    .replace(tzinfo=UTC)
                     .date()
                 )
 

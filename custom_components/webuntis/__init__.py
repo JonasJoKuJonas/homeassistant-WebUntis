@@ -9,7 +9,7 @@ import json
 import logging
 import uuid
 from collections.abc import Callable, Mapping
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
@@ -419,7 +419,7 @@ class WebUntis:
             and getattr(self, "session", None)
             and self._session_has_jsessionid()
             and self._qr_session_created_at is not None
-            and datetime.now(timezone.utc) - self._qr_session_created_at
+            and datetime.now(UTC) - self._qr_session_created_at
             < QR_SESSION_REFRESH_INTERVAL
         ):
             return True
@@ -431,7 +431,7 @@ class WebUntis:
                 and getattr(self, "session", None)
                 and self._session_has_jsessionid()
                 and self._qr_session_created_at is not None
-                and datetime.now(timezone.utc) - self._qr_session_created_at
+                and datetime.now(UTC) - self._qr_session_created_at
                 < QR_SESSION_REFRESH_INTERVAL
             ):
                 return True
@@ -456,7 +456,7 @@ class WebUntis:
                 # Only assign after async_create_from_qr finished successfully.
                 self.session = new_session
                 self._loged_in = True
-                self._qr_session_created_at = datetime.now(timezone.utc)
+                self._qr_session_created_at = datetime.now(UTC)
 
                 return True
             except Exception as err:
