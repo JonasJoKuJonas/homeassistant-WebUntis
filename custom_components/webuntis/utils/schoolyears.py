@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ def resolve_schoolyear(schoolyears: Any):
     if not schoolyears:
         return None
 
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     schoolyear_list = list(schoolyears)
     current_schoolyears = []
     future_schoolyears = []

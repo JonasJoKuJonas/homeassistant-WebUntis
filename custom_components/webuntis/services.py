@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import cast
 
 from homeassistant.core import (
     HomeAssistant,
@@ -48,11 +49,9 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
         if "start" in data and "end" in data:
             start_date = datetime.strptime(data["start"], "%Y-%m-%d").replace(
-                tzinfo=timezone.utc
+                tzinfo=UTC
             )
-            end_date = datetime.strptime(data["end"], "%Y-%m-%d").replace(
-                tzinfo=timezone.utc
-            )
+            end_date = datetime.strptime(data["end"], "%Y-%m-%d").replace(tzinfo=UTC)
 
             if end_date < start_date:
                 raise HomeAssistantError("Start date has to be before end date")
@@ -76,7 +75,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                         data["compact_result"],
                         data.get("compact_tolerance_minutes", 0),
                     )
-                    result = {"lessons": lesson_list}
+                    result = cast(ServiceResponse, {"lessons": lesson_list})
 
                 elif service_call.service == "count_lessons":
                     result = await hass.async_add_executor_job(
@@ -108,7 +107,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                                 start_date.date(),
                                 end_date.date(),
                             )
-                            result = {"lessons": lessons}
+                            result = cast(ServiceResponse, {"lessons": lessons})
                     except RestTimetableError as err:
                         raise HomeAssistantError(str(err)) from err
             finally:
