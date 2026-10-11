@@ -1,2 +1,4 @@
+required-version = "0.17.0"
+
 [lint]
 ignore = ["EXE002", "BLE001"]
