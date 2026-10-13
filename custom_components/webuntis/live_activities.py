@@ -306,9 +306,7 @@ def _build_payload(
         if break_timer:
             message = " "  # iOS will replace this by the timer
             when = block["start"]
-            critical_text = strings["break_next"].format(
-                "{block['subject_short']} - R{block['room']}"
-            )
+            critical_text = f"→ {block['subject_short']} - R{block['room']}"
         else:
             message = "\n".join(
                 [
