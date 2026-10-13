@@ -155,7 +155,6 @@
           "cancelled": "Lesson is cancelled",
           "code": "Lesson status changed",
           "homework": "Homework added",
-          "replacement": "Lesson replaced by another subject",
           "rooms": "Room changed",
           "teachers": "Teacher changed"
         }
@@ -306,11 +305,13 @@
           "platform": "Platform",
           "entity_id": "Notify Service",
           "start_offset": "Start before school",
-          "end_offset": "End after school"
+          "end_offset": "End after school",
+          "break_timer": "Timer during break"
         },
         "data_description": {
           "start_offset": "Minutes before the first lesson.",
-          "end_offset": "Minutes after the last lesson."
+          "end_offset": "Minutes after the last lesson.",
+          "break_timer": "Show a countdown to the next lesson during breaks."
         }
       },
       "notify_menu": {
@@ -338,8 +339,7 @@
         "code": "Lesson status changed",
         "rooms": "Room changed",
         "teachers": "Teacher changed",
-        "cancelled": "Lesson is cancelled",
-        "replacement": "Lesson replaced by another subject"
+        "cancelled": "Lesson is cancelled"
       }
     },
     "timetable_source": {
