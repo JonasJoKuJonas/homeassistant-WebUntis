@@ -566,7 +566,7 @@ class ExtendedSession(WebUntisSession):
         """Fill empty JSON-RPC lesson fields from the REST timetable."""
         try:
             rest_lessons = get_rest_lessons(
-                self, start, end, resource_id=self.server.student_id
+                self, start, end, resource_id=self.login_result["personId"]
             )
         except (RestTimetableError, requests.RequestException) as err:
             log(
