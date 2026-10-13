@@ -73,7 +73,9 @@ def _get_token(session) -> str:
     return response.text.strip().strip('"')
 
 
-def fetch_rest_timetable(session, start: date, end: date) -> dict:
+def fetch_rest_timetable(
+    session, start: date, end: date, resource_id: int | None = None
+) -> dict:
     """Return the raw REST timetable response for the logged-in person."""
     login_result = getattr(session, "login_result", None) or {}
     person_type = login_result.get("personType")
@@ -81,10 +83,16 @@ def fetch_rest_timetable(session, start: date, end: date) -> dict:
     if not isinstance(person_type, int) or not isinstance(person_id, int):
         raise RestTimetableError("No valid login result found, please log in first")
     resource_type = RESOURCE_TYPES.get(person_type)
-    if person_id is None or resource_type is None:
+    if resource_type is None:
         raise RestTimetableError(
             f"Unsupported account for REST timetable (personType={person_type})"
         )
+    if person_type == 12:
+        if not isinstance(resource_id, int):
+            raise RestTimetableError(
+                "No student resource found for parent account"
+            )
+        person_id = resource_id
 
     token = _get_token(session)
     headers = {
@@ -207,6 +215,10 @@ def parse_rest_timetable(data: dict) -> list[dict]:
     return lessons
 
 
-def get_rest_lessons(session, start: date, end: date) -> list[dict]:
+def get_rest_lessons(
+    session, start: date, end: date, resource_id: int | None = None
+) -> list[dict]:
     """Fetch and parse the REST timetable."""
-    return parse_rest_timetable(fetch_rest_timetable(session, start, end))
+    return parse_rest_timetable(
+        fetch_rest_timetable(session, start, end, resource_id=resource_id)
+    )

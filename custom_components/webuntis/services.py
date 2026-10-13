@@ -99,6 +99,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                                 webuntis_object.session,
                                 start_date.date(),
                                 end_date.date(),
+                                webuntis_object.student_id,
                             )
                         else:
                             lessons = await hass.async_add_executor_job(
@@ -106,6 +107,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                                 webuntis_object.session,
                                 start_date.date(),
                                 end_date.date(),
+                                webuntis_object.student_id,
                             )
                             result = cast(ServiceResponse, {"lessons": lessons})
                     except RestTimetableError as err:
