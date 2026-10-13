@@ -43,7 +43,7 @@ Since v3.1.0 it is possible to login with iServ or Office365. You can select the
 
 ### Timetable Source
 
-Select from witch source the intigration should pull the data.
+Select from which source the integration should pull the data.
 
 If the student or teacher is not found try
 
