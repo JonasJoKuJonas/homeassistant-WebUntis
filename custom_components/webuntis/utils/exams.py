@@ -90,7 +90,12 @@ class ExamEventsFetcher:
         # One request for the whole window (unexpected errors are handled by
         # the caller, so this optional source never breaks the setup)
         try:
-            lessons = get_rest_lessons(self.session, start, end)
+            lessons = get_rest_lessons(
+                self.session,
+                start,
+                end,
+                resource_id=self.server.student_id,
+            )
         except (RestTimetableError, requests.RequestException) as err:
             _LOGGER.debug("REST timetable not available for exams: %s", err)
             return []
