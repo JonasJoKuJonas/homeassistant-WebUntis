@@ -101,7 +101,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     """Fetch, filter and merge today's lessons into blocks."""
     try:
         login_error = server.webuntis_login()
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:
         login_error = error
 
     if login_error:
@@ -110,7 +110,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
 
     try:
         lessons = server.get_timetable(start=day, end=day, sort=True)
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:
         _LOGGER.warning(
             "Live Timetable: could not load timetable for %s - %s", day, error
         )
@@ -118,7 +118,7 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
     finally:
         try:
             server.webuntis_logout()
-        except Exception as error:  # pylint: disable=broad-except
+        except Exception as error:
             _LOGGER.debug(
                 "Live Timetable: logout after timetable fetch failed - %s", error
             )
@@ -140,8 +140,8 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
             subject_short = ""
         items.append(
             {
-                "start": lesson.start.astimezone(),
-                "end": lesson.end.astimezone(),
+                "start": dt_util.as_local(lesson.start),
+                "end": dt_util.as_local(lesson.end),
                 "lsnumber": getattr(lesson, "lsnumber", None),
                 "subject": subject,
                 "subject_short": subject_short or subject,
@@ -362,7 +362,7 @@ async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> boo
         return False
     tag = _build_test_tag(entity_id)
     strings = _STRINGS[lang]
-    now = datetime.now().astimezone()
+    now = dt_util.now()
 
     success = await async_notify(
         hass,
@@ -451,7 +451,7 @@ class LiveActivityManager:
             _build_day_blocks, self.server, today
         )
         lang = _language(self.hass)
-        now = datetime.now().astimezone()
+        now = dt_util.now()
 
         next_time: datetime | None = None
         for target in targets.values():
@@ -588,7 +588,7 @@ class LiveActivityOptionsFlowMixin:
 
     async def async_step_live_activities_menu(
         self,
-        user_input: dict[str, str] | None = None,  # pylint: disable=unused-argument
+        user_input: dict[str, str] | None = None,
     ) -> FlowResult:
         """Manage the live_activities_menu options."""
         if not self._config_entry.options[CONF_LIVE_ACTIVITIES]:
