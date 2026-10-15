@@ -238,11 +238,13 @@
           "platform": "Plattform",
           "entity_id": "Notify-Dienst",
           "start_offset": "Start vor Schulbeginn",
-          "end_offset": "Ende nach Schulschluss"
+          "end_offset": "Ende nach Schulschluss",
+          "break_timer": "Timer in der Pause"
         },
         "data_description": {
           "start_offset": "Minuten vor der ersten Stunde.",
-          "end_offset": "Minuten nach der letzten Stunde."
+          "end_offset": "Minuten nach der letzten Stunde.",
+          "break_timer": "Zeigt in Pausen einen Countdown bis zur nächsten Stunde."
         }
       },
       "edit_live_activity_select": {
