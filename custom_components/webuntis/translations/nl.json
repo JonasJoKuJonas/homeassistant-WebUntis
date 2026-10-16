@@ -306,11 +306,13 @@
           "platform": "Platform",
           "entity_id": "Notify Service",
           "start_offset": "Start before school",
-          "end_offset": "End after school"
+          "end_offset": "End after school",
+          "break_timer": "Timer during break"
         },
         "data_description": {
           "start_offset": "Minutes before the first lesson.",
-          "end_offset": "Minutes after the last lesson."
+          "end_offset": "Minutes after the last lesson.",
+          "break_timer": "Show a countdown to the next lesson during breaks."
         }
       },
       "notify_menu": {

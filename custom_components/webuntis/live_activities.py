@@ -133,12 +133,18 @@ def _build_day_blocks(server: Any, day: date) -> list[dict]:
             room = lesson.rooms[0].name if lesson.rooms else ""
         except (IndexError, AttributeError):
             room = ""
+        subject = get_lesson_name(server, lesson)
+        try:
+            subject_short = lesson.subjects[0].name if lesson.subjects else ""
+        except (IndexError, AttributeError):
+            subject_short = ""
         items.append(
             {
                 "start": dt_util.as_local(lesson.start),
                 "end": dt_util.as_local(lesson.end),
                 "lsnumber": getattr(lesson, "lsnumber", None),
-                "subject": get_lesson_name(server, lesson),
+                "subject": subject,
+                "subject_short": subject_short or subject,
                 "room": room,
             }
         )
@@ -243,7 +249,7 @@ def _current_phase(events: list[dict], now: datetime) -> dict | None:
     return max(past, key=lambda e: e["time"])
 
 
-def _signature(event: dict) -> tuple:
+def _signature(event: dict, break_timer: bool = False) -> tuple:
     """Identifies the displayed content, so unchanged phases are not resent."""
     phase = event["phase"]
     block = event["block"]
@@ -256,12 +262,21 @@ def _signature(event: dict) -> tuple:
             block["room"],
         )
     if phase == "break":
-        return (phase, block["subject"], block["room"])
+        return (
+            phase,
+            block["start"].isoformat(),
+            block["subject"],
+            block["room"],
+            break_timer,
+        )
     return (phase,)
 
 
 def _build_payload(
-    event: dict, lang: str, next_school_day: datetime | None
+    event: dict,
+    lang: str,
+    next_school_day: datetime | None,
+    break_timer: bool = False,
 ) -> tuple[str, str, dict]:
     """Build the (title, message, extra_data) triple for one phase."""
     phase = event["phase"]
@@ -270,6 +285,7 @@ def _build_payload(
     lesson_text = f"{block['subject']} - R{block['room']}" if block else ""
 
     when: datetime | None = None
+    critical_text: str | None = None
 
     if phase == "school_start":
         title = strings["school_start_title"]
@@ -285,18 +301,21 @@ def _build_payload(
         message = " "
         icon, color, silent, when = "mdi:school", "orange", True, block["end"]
     elif phase == "break":
-        title = (
-            strings["break_title"]
-            + " - "
-            + strings["break_next"].format(lesson=lesson_text)
-        )
-        message = " "  # iOS will replace this by the timer
-        icon, color, silent, when = (
-            "mdi:school-outline",
-            "lightgreen",
-            False,
-            block["start"],
-        )
+        title = strings["break_title"]
+        icon, color, silent = "mdi:school-outline", "lightgreen", False
+        if break_timer:
+            message = " "  # iOS will replace this by the timer
+            when = block["start"]
+            critical_text = f"→ {block['subject_short']} - R{block['room']}"
+        else:
+            message = "\n".join(
+                [
+                    strings["school_start_begin"].format(
+                        time=_format_time(block["start"])
+                    ),
+                    strings["break_next"].format(lesson=lesson_text),
+                ]
+            )
     elif phase == "school_end":
         if next_school_day:
             day_word = _day_word(lang, next_school_day.date(), dt_util.now().date())
@@ -317,6 +336,8 @@ def _build_payload(
     if when is not None:
         extra["chronometer"] = True
         extra["when"] = int(when.timestamp())
+    if critical_text:
+        extra["critical_text"] = critical_text
 
     return title, message, extra
 
@@ -478,7 +499,8 @@ class LiveActivityManager:
                 self._last_sent.pop(entity_id, None)
             return
 
-        signature = _signature(current)
+        break_timer = bool(target.get("break_timer", False))
+        signature = _signature(current, break_timer)
         if self._last_sent.get(entity_id) == signature:
             return
 
@@ -497,7 +519,9 @@ class LiveActivityManager:
             if current["phase"] == "school_end"
             else None
         )
-        title, message, extra = _build_payload(current, lang, next_school_day)
+        title, message, extra = _build_payload(
+            current, lang, next_school_day, break_timer
+        )
 
         await async_notify(
             self.hass,
@@ -696,6 +720,11 @@ class LiveActivityOptionsFlowMixin:
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            vol.Optional(
+                "break_timer",
+                default=False,
+                description={"suggested_value": options.get("break_timer", False)},
+            ): selector.BooleanSelector(),
         }
 
         return self.async_show_form(
