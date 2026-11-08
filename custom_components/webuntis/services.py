@@ -63,7 +63,15 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         lock = service_locks.setdefault(config_entry.unique_id, asyncio.Lock())
         async with lock:
             was_logged_in = bool(getattr(webuntis_object, "_loged_in", False))
-            await hass.async_add_executor_job(webuntis_object.webuntis_login)
+            login_error = await hass.async_add_executor_job(
+                webuntis_object.webuntis_login
+            )
+            if login_error:
+                # Don't query WebUntis without a session: the result would be
+                # empty or partial and look like a successful response.
+                raise HomeAssistantError(
+                    f"Login to WebUntis failed: {login_error}"
+                ) from login_error
             try:
                 if service_call.service == "get_timetable":
                     lesson_list = await hass.async_add_executor_job(
