@@ -1050,7 +1050,7 @@ class WebUntis:
             )
         else:
             week_start = today - timedelta(days=today.weekday())
-        table = self.get_timetable(start=week_start, end=in_x_days)
+        table = self.get_timetable(start=week_start, end=in_x_days, sort=True)
 
         event_list = []
         self.event_list = []
