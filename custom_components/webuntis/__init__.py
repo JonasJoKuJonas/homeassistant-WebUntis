@@ -339,7 +339,8 @@ class WebUntis:
         self.calendar_homework_ids_setup = False
         self.homework_list = []
         # Messages ("Mitteilungen"); disabled when the account has no access
-        self.messages_available = True
+        self.messages_enabled = config.options.get("messages", False)
+        self.messages_available = self.messages_enabled
         self.messages = []
         self.messages_unread = None
         self.messages_ids = []

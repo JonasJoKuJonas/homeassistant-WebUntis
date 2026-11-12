@@ -47,8 +47,9 @@ async def async_setup_entry(
         WebUntisToayStart(server),
         WebUntisToayEnd(server),
         WebUntisHomeworkListSensor(server),
-        WebUntisMessagesSensor(server),
     ]
+    if server.messages_enabled:
+        entities.append(WebUntisMessagesSensor(server))
 
     # Add sensor entities.
     async_add_entities(entities, True)

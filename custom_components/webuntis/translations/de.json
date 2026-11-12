@@ -309,6 +309,7 @@
           "filter": "Filter",
           "lesson": "Stunden-Darstellung",
           "live_activities_menu": "Live-Stundenplan (Live Activities)",
+          "messages": "Mitteilungen",
           "notify_menu": "Benachrichtigungen"
         }
       },
@@ -337,6 +338,16 @@
           "remove_live_activity": "Live-Stundenplan löschen",
           "test_live_activity": "Live-Stundenplan testen"
         }
+      },
+      "messages": {
+        "data": {
+          "messages": "Mitteilungen laden"
+        },
+        "data_description": {
+          "messages": "Legt den Mitteilungen-Sensor und das Ereignis für neue Mitteilungen an. Gelesen wird nur die Liste, Mitteilungen werden nicht als gelesen markiert."
+        },
+        "description": "WebUntis-Mitteilungen als Sensor, Ereignis und Benachrichtigung. Standardmäßig aus.",
+        "title": "Mitteilungen"
       },
       "notify_menu": {
         "menu_options": {

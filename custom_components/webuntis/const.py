@@ -2,7 +2,7 @@
 
 DOMAIN = "webuntis"
 
-CONFIG_ENTRY_VERSION = 23
+CONFIG_ENTRY_VERSION = 24
 
 CONF_LIVE_ACTIVITIES = "live_activities"
 CONF_FRONTEND_CARD_REGISTERED = "frontend_card_registered"
@@ -29,6 +29,7 @@ DEFAULT_OPTIONS = {
     "invalid_subjects": False,
     "exclude_filter_comparison": False,
     "live_activities": {},
+    "messages": False,
 }
 
 LIVE_ACTIVITY_TAG_SUFFIX = "live_timetable"

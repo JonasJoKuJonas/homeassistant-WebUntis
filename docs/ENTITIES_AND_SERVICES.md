@@ -56,6 +56,9 @@ list exactly like the WebUntis "Hausaufgaben" page, including a print button.
 
 State: number of unread WebUntis messages ("Mitteilungen").
 
+Messages are opt-in: enable them in the integration options under **Messages** (see
+[Optional Configurations](OPTIONAL_CONFIGURATIONS.md#messages-options)).
+
 Attribute `messages` contains the 10 most recent messages, newest first. The text is the preview WebUntis
 shows in the message list (shortened to 1000 characters). The integration never opens a message, so
 reading messages in Home Assistant does not mark them as read in WebUntis.

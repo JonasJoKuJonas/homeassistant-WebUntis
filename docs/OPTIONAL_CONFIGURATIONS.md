@@ -39,7 +39,7 @@ Control how the lesson name is displayed.
 ### Notification Options
 
 Configure how lesson change notifications are sent. Besides lesson changes, the options include new
-homework (`homework`) and new WebUntis messages (`message`).
+homework (`homework`) and new WebUntis messages (`message`, requires the messages option below).
 
 | Option           | Description                                                   | Default         |
 | :--------------- | :------------------------------------------------------------ | :-------------- |
@@ -61,6 +61,15 @@ Show your current lessons as Live Activities directly on your Lock Screen.
 | entity_id     | Mobile App notify service, e.g., `notify.iphone_von_max`.     | `None`      |
 | start_offset  | Minutes before the first lesson to start the live activity.   | `10`        |
 | end_offset    | Minutes after the last lesson to stop the live activity.      | `10`        |
+
+### Messages Options
+
+WebUntis messages ("Mitteilungen") are off by default (opt-in): open the integration's options, choose
+**Messages** and enable **Load messages**.
+
+| Option   | Description                                                                                                                                   | Default |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| messages | Adds `sensor.<name>_messages` and `event.<name>_new_message` and enables the `message` notification option. Messages are not marked as read. | `False` |
 
 ### Backend Options
 

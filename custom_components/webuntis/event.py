@@ -28,7 +28,8 @@ async def async_setup_entry(
     entities: list[EventEntity] = [LessonChangeEventEntity(server)]
     if server.timetable_source != "teacher":
         entities.append(HomeworkEventEntity(server))
-    entities.append(MessageEventEntity(server))
+    if server.messages_enabled:
+        entities.append(MessageEventEntity(server))
     async_add_entities(
         entities,
         True,
