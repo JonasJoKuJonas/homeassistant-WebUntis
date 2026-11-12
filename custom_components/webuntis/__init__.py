@@ -36,8 +36,10 @@ from .const import (
     DEFAULT_OPTIONS,
     DOMAIN,
     FRONTEND_CARD_URL_PATH,
+    MESSAGES_MAX_TEXT_LENGTH,
     NAME_EVENT_HOMEWORK,
     NAME_EVENT_LESSON_CHANGE,
+    NAME_EVENT_MESSAGE,
     SCAN_INTERVAL,
     SIGNAL_NAME_PREFIX,
 )
@@ -46,6 +48,7 @@ from .notify import *
 from .services import async_setup_services
 from .utils.exams import return_exam_events
 from .utils.homework import return_homework_events
+from .utils.messages import fetch_messages, shorten_message
 from .utils.qrLogin import QrData, parse_qr_code
 from .utils.schoolyears import resolve_schoolyear
 from .utils.utils import async_notify, compact_list
@@ -335,6 +338,13 @@ class WebUntis:
         self.calendar_homework_ids = []
         self.calendar_homework_ids_setup = False
         self.homework_list = []
+        # Messages ("Mitteilungen"); disabled when the account has no access
+        self.messages_available = True
+        self.messages = []
+        self.messages_unread = None
+        self.messages_ids = []
+        self.messages_ids_setup = False
+        self._messages_failed = False
         self.next_day_json = None
         self.day_json = None
         self.today = [None, None]
@@ -357,6 +367,7 @@ class WebUntis:
 
         self.lesson_change_callback: Callable[..., None] | None = None
         self.homework_change_callback: Callable[..., None] | None = None
+        self.message_callback: Callable[..., None] | None = None
 
     def event_entity_listen(self, callback, id) -> None:
         """Listen for lesson change events."""
@@ -364,6 +375,8 @@ class WebUntis:
             self.lesson_change_callback = callback
         elif id == NAME_EVENT_HOMEWORK:
             self.homework_change_callback = callback
+        elif id == NAME_EVENT_MESSAGE:
+            self.message_callback = callback
 
     def start_periodic_update(self) -> None:
         """Start periodic execution of update method."""
@@ -802,6 +815,8 @@ class WebUntis:
 
             self.homework_list = param_list
 
+        await self._async_update_messages()
+
         try:
             today = await self._async_add_executor_job_with_retry(
                 "today",
@@ -829,6 +844,86 @@ class WebUntis:
             )
 
         await self._hass.async_add_executor_job(self.webuntis_logout)
+
+    async def _async_update_messages(self) -> None:
+        """Fetch messages and send events/notifications for new ones."""
+        if not self.messages_available:
+            return
+
+        try:
+            result = await self._async_add_executor_job_with_retry(
+                "messages",
+                lambda: fetch_messages(self.session),
+            )
+        except Exception as error:
+            # Optional data source: never let it break the integration
+            if not self._messages_failed:
+                _LOGGER.warning(
+                    "Updating the messages of '%s@%s' failed - %s",
+                    self.school,
+                    self.username,
+                    error,
+                )
+            self._messages_failed = True
+            return
+        self._messages_failed = False
+
+        if result is None:
+            _LOGGER.debug(
+                "Messages are not available for '%s@%s', disabling them",
+                self.school,
+                self.username,
+            )
+            self.messages_available = False
+            self.messages = []
+            self.messages_unread = None
+            return
+
+        self.messages_unread, self.messages = result
+
+        if self.messages_ids_setup:
+            # Oldest first, so notifications arrive in the order they were sent
+            for message in reversed(self.messages):
+                if message["id"] not in self.messages_ids:
+                    await self._async_new_message(message)
+        else:
+            self.messages_ids_setup = True
+
+        self.messages_ids = [message["id"] for message in self.messages]
+
+    async def _async_new_message(self, message: dict) -> None:
+        """Fire the event and send notifications for a new message."""
+        _LOGGER.debug(
+            "New message %s for '%s@%s'", message["id"], self.school, self.username
+        )
+
+        if self.message_callback:
+            self.message_callback(
+                "message",
+                {"message_data": shorten_message(message, MESSAGES_MAX_TEXT_LENGTH)},
+            )
+
+        for service in self.notify_config.values():
+            if "message" not in service.get("options", []):
+                continue
+
+            data = {
+                "data": dict(service.get("data", {})),
+                "target": service.get("target", {}),
+            }
+
+            dic, notify_data = get_notification_data_message(
+                message, service, self.title
+            )
+
+            data["data"].update(notify_data)
+            data.update(dic)
+
+            await async_notify(
+                self._hass,
+                service_id=service["entity_id"],
+                data=data,
+            )
 
     def webuntis_login(self):
         """Handle login for standard password sessions."""

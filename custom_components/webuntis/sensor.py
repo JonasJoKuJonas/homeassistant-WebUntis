@@ -11,11 +11,16 @@ from . import WebUntis
 from .const import (
     DOMAIN,
     ICON_SENSOR_HOMEWORK_LIST,
+    ICON_SENSOR_MESSAGES,
     ICON_SENSOR_NEXT_CLASS,
     ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP,
     ICON_SENSOR_TODAY_END,
     ICON_SENSOR_TODAY_START,
+    MESSAGES_MAX_ATTRIBUTE,
+    MESSAGES_MAX_ATTRIBUTE_BYTES,
+    MESSAGES_MAX_TEXT_LENGTH,
     NAME_SENSOR_HOMEWORK_LIST,
+    NAME_SENSOR_MESSAGES,
     NAME_SENSOR_NEXT_CLASS,
     NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP,
     NAME_SENSOR_TODAY_END,
@@ -23,6 +28,7 @@ from .const import (
 )
 from .entity import WebUntisEntity
 from .utils.homework import build_homework_list
+from .utils.messages import build_messages_attribute
 
 
 async def async_setup_entry(
@@ -41,6 +47,7 @@ async def async_setup_entry(
         WebUntisToayStart(server),
         WebUntisToayEnd(server),
         WebUntisHomeworkListSensor(server),
+        WebUntisMessagesSensor(server),
     ]
 
     # Add sensor entities.
@@ -189,3 +196,41 @@ class WebUntisHomeworkListSensor(WebUntisSensorEntity):
             1 for homework in homeworks if not homework["completed"]
         )
         self._attr_extra_state_attributes = {"homeworks": homeworks}
+
+
+class WebUntisMessagesSensor(WebUntisSensorEntity):
+    """Representation of a Web Untis messages ("Mitteilungen") sensor.
+
+    The state is the number of unread messages, the attribute "messages"
+    contains the most recent messages with a text preview.
+    """
+
+    unit: str | None = None
+    device_class: str | None = None
+
+    def __init__(self, server: WebUntis) -> None:
+        """Initialize the messages sensor."""
+        super().__init__(
+            server=server,
+            name=NAME_SENSOR_MESSAGES,
+            icon=ICON_SENSOR_MESSAGES,
+            device_class=self.device_class,
+        )
+        self._attr_extra_state_attributes = {"messages": []}
+
+    @property
+    def available(self) -> bool:
+        """Return sensor availability (not every account can read messages)."""
+        return self._server.messages_available
+
+    async def async_update(self) -> None:
+        """Update the messages sensor."""
+        self._attr_native_value = self._server.messages_unread
+        self._attr_extra_state_attributes = {
+            "messages": build_messages_attribute(
+                self._server.messages,
+                MESSAGES_MAX_ATTRIBUTE,
+                MESSAGES_MAX_TEXT_LENGTH,
+                MESSAGES_MAX_ATTRIBUTE_BYTES,
+            )
+        }

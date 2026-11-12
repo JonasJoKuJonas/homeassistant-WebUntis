@@ -38,7 +38,8 @@ Control how the lesson name is displayed.
 
 ### Notification Options
 
-Configure how lesson change notifications are sent.
+Configure how lesson change notifications are sent. Besides lesson changes, the options include new
+homework (`homework`) and new WebUntis messages (`message`).
 
 | Option           | Description                                                   | Default         |
 | :--------------- | :------------------------------------------------------------ | :-------------- |

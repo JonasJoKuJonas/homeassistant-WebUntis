@@ -43,6 +43,7 @@ NOTIFY_OPTIONS = [
     "subject",
     "info",
     "replacement",
+    "message",
 ]
 
 TEMPLATE_OPTIONS = ["message_title", "message", "discord", "telegram"]
@@ -58,17 +59,21 @@ ICON_CALENDAR_EXAM = "mdi:pen"
 ICON_EVENT_LESSNON_CHANGE = "mdi:calendar-clock"
 ICON_EVENT_HOMEWORK = "mdi:home-edit"
 ICON_SENSOR_HOMEWORK_LIST = "mdi:notebook-check-outline"
+ICON_SENSOR_MESSAGES = "mdi:email-outline"
+ICON_EVENT_MESSAGE = "mdi:email-alert-outline"
 
 NAME_SENSOR_NEXT_CLASS = "next_class"
 NAME_SENSOR_NEXT_LESSON_TO_WAKE_UP = "next_lesson_to_wake_up"
 NAME_SENSOR_TODAY_START = "today_school_start"
 NAME_SENSOR_TODAY_END = "today_school_end"
 NAME_SENSOR_HOMEWORK_LIST = "homework_list"
+NAME_SENSOR_MESSAGES = "messages"
 NAME_CALENDAR = "calendar"
 NAME_CALENDAR_HOMEWORK = "homework"
 NAME_CALENDAR_EXAM = "exam"
 NAME_EVENT_LESSON_CHANGE = "lesson_change"
 NAME_EVENT_HOMEWORK = "new_homework"
+NAME_EVENT_MESSAGE = "new_message"
 
 
 SCAN_INTERVAL = 10 * 60  # 10min
@@ -81,3 +86,12 @@ DAYS_TO_FUTURE = 30
 DAYS_TO_CHECK = 30
 # Days before the due date a homework entry is grouped as "due soon"
 HOMEWORK_DUE_SOON_DAYS = 3
+
+# Messages ("Mitteilungen")
+# Number of messages exposed as sensor attribute
+MESSAGES_MAX_ATTRIBUTE = 10
+# Maximum characters of the message text in attributes, events and notifications
+# (state attributes are limited to 16 KB in total)
+MESSAGES_MAX_TEXT_LENGTH = 1000
+# Size budget for the messages attribute in bytes (HA limit is 16 KB)
+MESSAGES_MAX_ATTRIBUTE_BYTES = 12000

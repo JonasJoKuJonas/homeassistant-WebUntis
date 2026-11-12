@@ -9,8 +9,10 @@ from .const import (
     DOMAIN,
     ICON_EVENT_HOMEWORK,
     ICON_EVENT_LESSNON_CHANGE,
+    ICON_EVENT_MESSAGE,
     NAME_EVENT_HOMEWORK,
     NAME_EVENT_LESSON_CHANGE,
+    NAME_EVENT_MESSAGE,
 )
 from .entity import WebUntisEntity
 
@@ -26,6 +28,7 @@ async def async_setup_entry(
     entities: list[EventEntity] = [LessonChangeEventEntity(server)]
     if server.timetable_source != "teacher":
         entities.append(HomeworkEventEntity(server))
+    entities.append(MessageEventEntity(server))
     async_add_entities(
         entities,
         True,
@@ -94,4 +97,16 @@ class HomeworkEventEntity(BaseUntisEventEntity):
             name=NAME_EVENT_HOMEWORK,
             icon=ICON_EVENT_HOMEWORK,
             event_types=["homework"],
+        )
+
+
+class MessageEventEntity(BaseUntisEventEntity):
+    """Event entity for new messages ("Mitteilungen")."""
+
+    def __init__(self, server) -> None:
+        super().__init__(
+            server=server,
+            name=NAME_EVENT_MESSAGE,
+            icon=ICON_EVENT_MESSAGE,
+            event_types=["message"],
         )

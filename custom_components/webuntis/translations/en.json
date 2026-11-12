@@ -148,6 +148,16 @@
             }
           }
         }
+      },
+      "new_message": {
+        "name": "New Message",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "message": "Message received"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -165,6 +175,9 @@
       },
       "homework_list": {
         "name": "Homework List"
+      },
+      "messages": {
+        "name": "Messages"
       }
     }
   },
@@ -384,6 +397,7 @@
         "homework": "Homework added",
         "info": "Info text changed",
         "lstext": "Lesson text changed",
+        "message": "New message",
         "replacement": "Lesson replaced by another subject",
         "rooms": "Room changed",
         "subject": "Subject changed",
