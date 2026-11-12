@@ -148,6 +148,16 @@
             }
           }
         }
+      },
+      "new_message": {
+        "name": "New Message",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "message": "Message received"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -165,6 +175,9 @@
       },
       "homework_list": {
         "name": "Homework List"
+      },
+      "messages": {
+        "name": "Messages"
       }
     }
   },
@@ -296,6 +309,7 @@
           "filter": "Filter",
           "lesson": "Lesson Display",
           "live_activities_menu": "Live Timetable",
+          "messages": "Messages",
           "notify_menu": "Notify Menu"
         }
       },
@@ -324,6 +338,16 @@
           "remove_live_activity": "Remove Live Timetable",
           "test_live_activity": "Test Live Timetable"
         }
+      },
+      "messages": {
+        "data": {
+          "messages": "Load messages"
+        },
+        "data_description": {
+          "messages": "Adds the messages sensor and the new message event. Only the message list is read, messages are not marked as read."
+        },
+        "description": "WebUntis messages (\"Mitteilungen\") as sensor, event and notification. Off by default.",
+        "title": "Messages"
       },
       "notify_menu": {
         "menu_options": {
@@ -384,6 +408,7 @@
         "homework": "Homework added",
         "info": "Info text changed",
         "lstext": "Lesson text changed",
+        "message": "New message",
         "replacement": "Lesson replaced by another subject",
         "rooms": "Room changed",
         "subject": "Subject changed",

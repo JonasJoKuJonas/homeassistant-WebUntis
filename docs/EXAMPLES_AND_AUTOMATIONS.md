@@ -13,6 +13,7 @@ Replace `<name>` with your actual WebUntis integration device name.
 4. [Lesson Change Event Trigger](#lesson-change-event-trigger)
 5. [New Homework Event Trigger](#new-homework-event-trigger)
 6. [Add Homework to ToDo](#add-homework-to-todo)
+7. [New Message Event Trigger](#new-message-event-trigger)
 
 ---
 
@@ -200,6 +201,34 @@ action:
       due_date: "{{ trigger.to_state.attributes.homework_data.due_date }}"
       description: "{{ trigger.to_state.attributes.homework_data.text }}"
 mode: single
+```
+
+---
+
+## New Message Event Trigger
+
+```yaml
+trigger:
+  platform: state
+  entity_id: event.<name>_new_message
+```
+
+Available message attributes:
+
+```yaml
+to_state:
+  entity_id: event.<name>_new_message
+  attributes:
+    event_type: message
+    message_data:
+      id: 12345
+      subject: Elternabend
+      sender: Jonas
+      sent: "2025-02-18T13:57:00+01:00"
+      read: false
+      has_attachments: false
+      requires_confirmation: false
+      text: Liebe Eltern, ...
 ```
 
 ---
