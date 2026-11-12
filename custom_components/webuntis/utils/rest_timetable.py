@@ -7,19 +7,17 @@ The REST timetable endpoint returns both, so it is used to fill those gaps.
 
 from __future__ import annotations
 
-import base64
-import json
 import logging
 from datetime import date, datetime
 
 import requests
 from homeassistant.util import dt as dt_util
 
+from .rest_api import REQUEST_TIMEOUT, RestApiError, auth_headers, base_url, cookies
+
 _LOGGER = logging.getLogger(__name__)
 
-TOKEN_ENDPOINT = "/WebUntis/api/token/new"
 TIMETABLE_ENDPOINT = "/WebUntis/api/rest/view/v1/timetable/entries"
-REQUEST_TIMEOUT = 20
 
 # JSON-RPC person types (login_result["personType"]) -> REST resource types
 RESOURCE_TYPES = {
@@ -29,48 +27,8 @@ RESOURCE_TYPES = {
 }  # 12 is parent which also access the student timetable
 
 
-class RestTimetableError(Exception):
-    """Raised when the REST timetable cannot be fetched."""
-
-
-def _base_url(session) -> str:
-    return session.config["server"].replace("/WebUntis/jsonrpc.do", "")
-
-
-def _cookies(session) -> dict[str, str]:
-    # session.config is a webuntis FilterDict, which has no .get()
-    if "jsessionid" not in session.config or not session.config["jsessionid"]:
-        raise RestTimetableError("No JSESSIONID found, please log in first")
-    jsessionid = session.config["jsessionid"]
-    school = session.config["school"]
-    schoolname = "_" + base64.b64encode(school.encode()).decode()
-    return {"JSESSIONID": jsessionid, "schoolname": f'"{schoolname}"'}
-
-
-def _tenant_id(token: str) -> str | None:
-    """Read the tenant id from the JWT payload; some servers require it as a header."""
-    try:
-        payload = token.split(".")[1]
-        payload += "=" * (-len(payload) % 4)
-        claims = json.loads(base64.urlsafe_b64decode(payload))
-    except (IndexError, ValueError):
-        return None
-    tenant = claims.get("tenant_id")
-    return str(tenant) if tenant is not None else None
-
-
-def _get_token(session) -> str:
-    response = requests.get(
-        _base_url(session) + TOKEN_ENDPOINT,
-        cookies=_cookies(session),
-        headers={"User-Agent": session.config["useragent"]},
-        timeout=REQUEST_TIMEOUT,
-    )
-    if response.status_code != 200 or not response.text:
-        raise RestTimetableError(
-            f"Token request failed with status {response.status_code}"
-        )
-    return response.text.strip().strip('"')
+# Kept as a name for callers that catch timetable errors
+RestTimetableError = RestApiError
 
 
 def fetch_rest_timetable(
@@ -94,18 +52,10 @@ def fetch_rest_timetable(
             )
         person_id = resource_id
 
-    token = _get_token(session)
-    headers = {
-        "User-Agent": session.config["useragent"],
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/json",
-    }
-    tenant = _tenant_id(token)
-    if tenant:
-        headers["Tenant-Id"] = tenant
+    headers = auth_headers(session)
 
     response = requests.get(
-        _base_url(session) + TIMETABLE_ENDPOINT,
+        base_url(session) + TIMETABLE_ENDPOINT,
         params={
             "start": start.isoformat(),
             "end": end.isoformat(),
@@ -115,7 +65,7 @@ def fetch_rest_timetable(
             "periodTypes": "",
             "timetableType": "MY_TIMETABLE",
         },
-        cookies=_cookies(session),
+        cookies=cookies(session),
         headers=headers,
         timeout=REQUEST_TIMEOUT,
     )

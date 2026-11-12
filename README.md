@@ -23,6 +23,7 @@
 | **Fetch Lessons Service** | Request lessons for a specific date range. | [`webuntis.get_timetable`](docs/ENTITIES_AND_SERVICES.md#-webuntisget_timetable) |
 | **Count Lessons Service** | Count lessons by subject within a given date range. | [`webuntis.count_lessons`](docs/ENTITIES_AND_SERVICES.md#-webuntiscount_lessons) |
 | **Homework List & Dashboard Card** | Structured homework sensor plus a ready-made card that mirrors the WebUntis "Hausaufgaben" page, incl. print button. | [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) |
+| **Messages** | Sensor with the unread WebUntis messages ("Mitteilungen"), an event and an optional notification for new messages, optionally with attachment links. Opt-in. | [Entities & Services](docs/ENTITIES_AND_SERVICES.md#sensorname_messages) |
 
 
 ---

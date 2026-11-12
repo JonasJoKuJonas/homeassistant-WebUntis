@@ -1,4 +1,7 @@
-from .const import TEMPLATE_OPTIONS
+from html import escape
+
+from .const import MESSAGES_MAX_TEXT_LENGTH, TEMPLATE_OPTIONS
+from .utils.messages import truncate_text
 from .utils.web_untis import get_lesson_name, get_lesson_name_str
 
 
@@ -293,6 +296,69 @@ Due Date: {parameters["due_date"]}"""
         "message": message,
         "title": title,
     }, data
+
+
+"""
+message = {
+    "id": message_id,
+    "subject": subject,
+    "sender": sender_name,
+    "sent": sent_datetime,
+    "read": is_read,
+    "has_attachments": has_attachments,
+    "requires_confirmation": requires_confirmation,
+    "text": content_preview,
+}
+"""
+
+
+def get_notification_data_message(message, service, entry_title):
+    """Build the notification for a new WebUntis message ("Mitteilung")."""
+    result = {"message": ""}
+    data = {}
+
+    subject = message["subject"] or "Message"
+    sender = message["sender"]
+    text = truncate_text(message["text"], MESSAGES_MAX_TEXT_LENGTH)
+    title = f"WebUntis ({entry_title}) - {subject}"
+    body = f"From: {sender}\n{text}" if sender else text
+
+    template = service.get("template", TEMPLATE_OPTIONS[0])
+
+    if template == "message_title":
+        result = {"title": title, "message": body}
+
+    elif template == "message":
+        result["message"] = f"{title}\n{body}"
+
+    elif template == "telegram":
+        result["message"] = f"<b>{escape(title)}</b>\n"
+        if sender:
+            result["message"] += f"<b>From:</b> {escape(sender)}\n"
+        result["message"] += escape(text)
+        data = {"parse_mode": "html"}
+
+    elif template == "discord":
+        fields = []
+        if sender:
+            fields.append({"name": "From", "value": sender, "inline": False})
+        if text:
+            fields.append({"name": "Text", "value": text, "inline": False})
+        data = {
+            "embed": {
+                "title": subject,
+                "description": entry_title,
+                "color": 16750848,
+                "author": {
+                    "name": "WebUntis",
+                    "url": "https://www.home-assistant.io",
+                    "icon_url": "https://brands.home-assistant.io/webuntis/icon.png",
+                },
+                "fields": fields,
+            }
+        }
+
+    return result, data
 
 
 def get_changes(change, lesson, lesson_old, server):
