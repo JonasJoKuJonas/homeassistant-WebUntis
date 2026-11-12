@@ -701,11 +701,14 @@ class WebUntis:
                 "calendar_events",
                 lambda: self._get_events(),
             )
-            self.calendar_events = compact_list(
-                calendar_events,
-                "calendar",
-                timedelta(minutes=self.lesson_compacting_tolerance),
-                self.lesson_compacting_parallel,
+            self.calendar_events = sorted(
+                compact_list(
+                    calendar_events,
+                    "calendar",
+                    timedelta(minutes=self.lesson_compacting_tolerance),
+                    self.lesson_compacting_parallel,
+                ),
+                key=lambda e: e.start,
             )
         except OSError as error:
             self.calendar_events = []
@@ -1133,7 +1136,9 @@ class WebUntis:
                         error,
                     )
 
-        return event_list
+        # compact_list() only compares each event with the previous one, so
+        # group events by name in chronological order before compacting.
+        return sorted(event_list, key=lambda e: (e.summary, e.start))
 
     def _get_events_in_timerange(
         self,
