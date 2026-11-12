@@ -64,12 +64,14 @@ Show your current lessons as Live Activities directly on your Lock Screen.
 
 ### Messages Options
 
-WebUntis messages ("Mitteilungen") are off by default (opt-in): open the integration's options, choose
-**Messages** and enable **Load messages**.
+WebUntis messages ("Mitteilungen"). All options are off by default (opt-in): open the integration's
+options, choose **Messages** and enable **Load messages**.
 
-| Option   | Description                                                                                                                                   | Default |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
-| messages | Adds `sensor.<name>_messages` and `event.<name>_new_message` and enables the `message` notification option. Messages are not marked as read. | `False` |
+| Option                     | Description                                                                                                                                               | Default |
+| :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ |
+| messages                   | Adds `sensor.<name>_messages` and `event.<name>_new_message` and enables the `message` notification option. Messages are not marked as read.             | `False` |
+| message_attachments        | Adds download links for attachments to the messages (`attachments`). Links contain a token valid for 7 days. Only has an effect when `messages` is enabled. | `False` |
+| message_attachments_unread | Also opens unread messages to load their attachments. **This may mark them as read in WebUntis.**                                                         | `False` |
 
 ### Backend Options
 

@@ -1027,14 +1027,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
     ) -> FlowResultType:
         """Manage the messages ("Mitteilungen") options."""
         if user_input is not None:
+            if not user_input["messages"]:
+                # Attachments only work together with messages
+                user_input["message_attachments"] = False
+                user_input["message_attachments_unread"] = False
             return await self.save(user_input)
+        options = self._config_entry.options
         return self.async_show_form(
             step_id="messages",
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "messages",
-                        default=self._config_entry.options.get("messages", False),
+                        "messages", default=options.get("messages", False)
+                    ): selector.BooleanSelector(),
+                    vol.Required(
+                        "message_attachments",
+                        default=options.get("message_attachments", False),
+                    ): selector.BooleanSelector(),
+                    vol.Required(
+                        "message_attachments_unread",
+                        default=options.get("message_attachments_unread", False),
                     ): selector.BooleanSelector(),
                 }
             ),

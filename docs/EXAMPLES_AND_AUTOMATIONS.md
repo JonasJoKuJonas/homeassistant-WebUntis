@@ -14,6 +14,7 @@ Replace `<name>` with your actual WebUntis integration device name.
 5. [New Homework Event Trigger](#new-homework-event-trigger)
 6. [Add Homework to ToDo](#add-homework-to-todo)
 7. [New Message Event Trigger](#new-message-event-trigger)
+8. [Push Notification with Message Attachments](#push-notification-with-message-attachments)
 
 ---
 
@@ -226,10 +227,51 @@ to_state:
       sender: Jonas
       sent: "2025-02-18T13:57:00+01:00"
       read: false
-      has_attachments: false
+      has_attachments: true
       requires_confirmation: false
       text: Liebe Eltern, ...
+      attachments: # only with the "Attachment links" option
+        - name: Open attachments # unread message: loads the files when opened
+          url: /api/webuntis/<entry_id>/messages/12345/attachments?token=...
 ```
+
+---
+
+## Push Notification with Message Attachments
+
+Requires the options **Load messages** and **Attachment links**. Every attachment `url` is a relative path
+with a link token (`/api/webuntis/...?token=...`). The Companion app opens `/api/...` links in the browser
+chosen under *Settings → General → Open links in* (default: Safari); choose *Safari (in-app)* to keep them
+inside the app. The token works without a Home Assistant session.
+A new message is usually unread, so it has one entry `Open attachments`: one file opens directly, several
+are shown as a list of links. Tapping the notification opens the first link, the actions open each entry.
+
+```yaml
+alias: WebUntis message with attachments to iPhone
+triggers:
+  - trigger: state
+    entity_id: event.<name>_new_message
+    not_from: unavailable
+conditions:
+  - condition: template
+    value_template: >-
+      {{ trigger.to_state.attributes.message_data.attachments | default([]) | count > 0 }}
+actions:
+  - action: notify.mobile_app_<your_iphone>
+    data:
+      title: "{{ trigger.to_state.attributes.message_data.subject }}"
+      message: "{{ trigger.to_state.attributes.message_data.text[:200] }}"
+      data:
+        url: "{{ trigger.to_state.attributes.message_data.attachments[0].url }}"
+        actions: >-
+          {% set ns = namespace(items=[]) %}
+          {% for attachment in trigger.to_state.attributes.message_data.attachments %}
+            {% set ns.items = ns.items + [{"action": "URI", "title": attachment.name, "uri": attachment.url}] %}
+          {% endfor %}
+          {{ ns.items }}
+```
+
+The links expire after 7 days.
 
 ---
 

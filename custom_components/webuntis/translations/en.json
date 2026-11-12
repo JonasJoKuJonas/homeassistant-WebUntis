@@ -341,12 +341,16 @@
       },
       "messages": {
         "data": {
+          "message_attachments": "Attachment links",
+          "message_attachments_unread": "Load attachments of unread messages",
           "messages": "Load messages"
         },
         "data_description": {
+          "message_attachments": "Adds download links for attachments to the messages sensor. Each link contains a token that is valid for 7 days, so treat links like passwords. Only has an effect when messages are enabled.",
+          "message_attachments_unread": "Also opens unread messages to load their attachments. Warning: this may mark them as read in WebUntis. Without it, unread messages get a single link that loads the attachments when you open it.",
           "messages": "Adds the messages sensor and the new message event. Only the message list is read, messages are not marked as read."
         },
-        "description": "WebUntis messages (\"Mitteilungen\") as sensor, event and notification. Off by default.",
+        "description": "WebUntis messages (\"Mitteilungen\") as sensor, event and notification. All options are off by default.",
         "title": "Messages"
       },
       "notify_menu": {

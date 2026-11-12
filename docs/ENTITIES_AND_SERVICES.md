@@ -60,8 +60,8 @@ Messages are opt-in: enable them in the integration options under **Messages** (
 [Optional Configurations](OPTIONAL_CONFIGURATIONS.md#messages-options)).
 
 Attribute `messages` contains the 10 most recent messages, newest first. The text is the preview WebUntis
-shows in the message list (shortened to 1000 characters). The integration never opens a message, so
-reading messages in Home Assistant does not mark them as read in WebUntis.
+shows in the message list (shortened to 1000 characters). The message list is read without opening a
+message, so reading messages in Home Assistant does not mark them as read in WebUntis.
 
 ```yaml
 messages:
@@ -69,14 +69,34 @@ messages:
     subject: Elternabend
     sender: Jonas
     sent: "2025-02-18T13:57:00+01:00"
-    read: false
+    read: true
     has_attachments: true
     requires_confirmation: false # true if WebUntis asks for a read confirmation
     text: Liebe Eltern, ...
+    attachments: # only with the "Attachment links" option
+      - name: 2025-02-18-Elternbrief.pdf
+        url: /api/webuntis/<entry_id>/messages/12345/attachments/<attachment_id>?token=...
 ```
 
+With the option **Attachment links**, every message has a list `attachments` with the file `name` and a
+`url`. Open the url in the browser (e.g. as a link or button in a dashboard) to download the file. The url is
+relative and contains a link token (HMAC, bound to this file), so it also works where there is no Home
+Assistant session, e.g. when the Companion app opens it from a push notification. Anyone who has the link
+can open that file until the token expires after 7 days, so treat links like passwords. Tokens are renewed
+automatically while the message is in the list and stay valid across restarts. Requests of logged-in users
+are accepted without a token. Other query parameters are ignored. Files are not stored in Home Assistant.
+
+To load the attachment names, the integration has to open the message in WebUntis. It does this only for
+messages that are already read. An unread message with attachments gets a single entry
+`Open attachments`: opening it loads the attachments (one file is downloaded directly, several are shown as
+a list of links). After the message has been read, the next update shows the real file names. The option
+**Load attachments of unread messages** loads them right away, but may mark the messages as read.
+
+If the attribute gets too large, the texts of older messages are shortened to 200 characters first, then the
+oldest messages are left out.
+
 The sensor is unavailable for accounts that cannot access messages. New messages also trigger
-`event.<name>_new_message` and the `message` notification option.
+`event.<name>_new_message` (its `message_data` includes `attachments`) and the `message` notification option.
 
 ---
 
