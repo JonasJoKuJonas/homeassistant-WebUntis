@@ -34,6 +34,37 @@ class ExamEventsFetcher:
         self.session = server.session
         self.event_list = []
         self.current_schoolyear = server.current_schoolyear
+        self._subject_long_names = None
+
+    def _get_exam_summary(self, subject, teachers):
+        """Resolve real Untis names without changing short-name options."""
+        if not self.server.lesson_long_name:
+            return get_lesson_name_str(self.server, subject, teachers)
+
+        if self._subject_long_names is None:
+            self._subject_long_names = {}
+            try:
+                subjects = self.session.subjects(from_cache=True)
+                for item in subjects:
+                    try:
+                        self._subject_long_names[item.name] = (
+                            item.long_name or item.name
+                        )
+                    except (AttributeError, KeyError):
+                        # Some schools do not supply a long name for every subject.
+                        continue
+            except (errors.Error, requests.RequestException):
+                # Optional master data may be forbidden for this account.
+                _LOGGER.debug("Subject names not available for exams", exc_info=True)
+
+        name = self._subject_long_names.get(subject, subject)
+        # Existing short-name replacements take precedence over long names.
+        name = self.server.lesson_replace_name.get(
+            subject, self.server.lesson_replace_name.get(name, name)
+        )
+        if subject in self.server.lesson_add_teacher:
+            name += f" - {teachers}"
+        return name
 
     def _get_exam_events(self):
         """
@@ -107,7 +138,7 @@ class ExamEventsFetcher:
             subject = lesson["subjects"][0]["name"] if lesson["subjects"] else ""
             teacher = ", ".join(t["name"] for t in lesson["teachers"])
             summary = (
-                get_lesson_name_str(self.server, subject, teacher)
+                self._get_exam_summary(subject, teacher)
                 if subject
                 else lesson["name"] or "Exam"
             )
@@ -184,7 +215,7 @@ class ExamEventsFetcher:
                 teachers = ", ".join(exam.get("teachers", [])) or "Unknown Teacher"
                 rooms = ", ".join(exam.get("rooms", [])) or "Unknown Room"
 
-                summary = get_lesson_name_str(self.server, subject, teachers)
+                summary = self._get_exam_summary(subject, teachers)
 
                 description = f"""{exam_type} Name: {name}"""
 
