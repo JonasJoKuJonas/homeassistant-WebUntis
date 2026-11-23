@@ -368,7 +368,8 @@
     },
     "live_activity_platform": {
       "options": {
-        "ios": "iOS"
+        "ios": "iOS",
+        "android": "Android"
       }
     },
     "homework_display": {
