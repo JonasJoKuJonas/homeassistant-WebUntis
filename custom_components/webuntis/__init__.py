@@ -75,13 +75,13 @@ async def _async_register_frontend_card(hass: HomeAssistant) -> None:
 
     try:
         try:
-            from homeassistant.components.http.server import StaticPathConfig
-
-            await hass.http.async_register_static_paths(
-                [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
-            )
+            from homeassistant.components.http import StaticPathConfig
         except ImportError:
-            # Home Assistant < 2024.7 fallback
+            # Home Assistant < 2024.7 has no StaticPathConfig
+            hass.http.register_static_path(
+                FRONTEND_CARD_URL_PATH, str(card_path), False
+            )
+        else:
             await hass.http.async_register_static_paths(
                 [StaticPathConfig(FRONTEND_CARD_URL_PATH, str(card_path), False)]
             )
