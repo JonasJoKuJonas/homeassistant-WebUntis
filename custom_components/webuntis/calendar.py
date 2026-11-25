@@ -26,7 +26,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Web Untis calendar platform."""
+    """Set up the Untis calendar platform."""
     assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
 
@@ -122,7 +122,7 @@ class BaseUntisCalendar(WebUntisEntity, CalendarEntity):
 
 
 class UntisCalendar(BaseUntisCalendar):
-    """Representation of a Web Untis Calendar sensor."""
+    """Representation of a Untis Calendar sensor."""
 
     _attr_name = None
 
@@ -135,7 +135,7 @@ class UntisCalendar(BaseUntisCalendar):
 
 
 class HomeworkCalendar(BaseUntisCalendar):
-    """Representation of a Web Untis Homework Calendar sensor."""
+    """Representation of a Untis Homework Calendar sensor."""
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Homework Calendar."""
@@ -149,7 +149,7 @@ class HomeworkCalendar(BaseUntisCalendar):
 
 
 class ExamCalendar(BaseUntisCalendar):
-    """Representation of a Web Untis Exams Calendar sensor."""
+    """Representation of a Untis Exams Calendar sensor."""
 
     def __init__(self, server: WebUntis) -> None:
         """Initialize the Exams Calendar."""

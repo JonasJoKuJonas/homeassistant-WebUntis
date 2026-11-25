@@ -1,4 +1,4 @@
-"""The Web Untis sensor platform."""
+"""The Untis sensor platform."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Web Untis sensor platform."""
+    """Set up the Untis sensor platform."""
     assert config_entry.unique_id is not None
     server = hass.data[DOMAIN][config_entry.unique_id]
 
@@ -48,7 +48,7 @@ async def async_setup_entry(
 
 
 class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
-    """Representation of a Web Untis sensor base entity."""
+    """Representation of a Untis sensor base entity."""
 
     unit: str | None = None
     device_class: str | None = None
@@ -71,7 +71,7 @@ class WebUntisSensorEntity(WebUntisEntity, SensorEntity):
 
 
 class WebUntisNextClassSensor(WebUntisSensorEntity):
-    """Representation of a Web Untis next class sensor."""
+    """Representation of a Untis next class sensor."""
 
     unit: str | None = None
     device_class: str | None = "timestamp"
@@ -97,7 +97,7 @@ class WebUntisNextClassSensor(WebUntisSensorEntity):
 
 
 class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
-    """Representation of a Web Untis next lesson to wake up sensor."""
+    """Representation of a Untis next lesson to wake up sensor."""
 
     unit: str | None = None
     device_class: str | None = "timestamp"
@@ -119,7 +119,7 @@ class WebUntisNextLessonToWakeUpSensor(WebUntisSensorEntity):
 
 
 class WebUntisToayStart(WebUntisSensorEntity):
-    """Representation of a Web Untis Today start sensor."""
+    """Representation of a Untis Today start sensor."""
 
     unit: str | None = None
     device_class: str | None = "timestamp"
@@ -141,7 +141,7 @@ class WebUntisToayStart(WebUntisSensorEntity):
 
 
 class WebUntisToayEnd(WebUntisSensorEntity):
-    """Representation of a Web Untis Today end sensor."""
+    """Representation of a Untis Today end sensor."""
 
     unit: str | None = None
     device_class: str | None = "timestamp"
@@ -162,7 +162,7 @@ class WebUntisToayEnd(WebUntisSensorEntity):
 
 
 class WebUntisHomeworkListSensor(WebUntisSensorEntity):
-    """Representation of a Web Untis Homework List sensor.
+    """Representation of a Untis Homework List sensor.
 
     Exposes the full homework list, grouped like the WebUntis "Hausaufgaben"
     view ("due_soon", "open", "overdue", "completed"), as an attribute so it
