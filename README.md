@@ -1,6 +1,6 @@
-# WebUntis
+# Untis
 
-### Custom component to access Web Untis data in Home Assistant
+### Custom component to access Untis data in Home Assistant
 
 [![HACS Badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ![Version](https://img.shields.io/github/v/release/JonasJoKuJonas/homeassistant-WebUntis)
