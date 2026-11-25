@@ -30,6 +30,8 @@ DEFAULT_OPTIONS = {
     "exclude_filter_comparison": False,
     "live_activities": {},
     "messages": False,
+    "message_attachments": False,
+    "message_attachments_unread": False,
 }
 
 LIVE_ACTIVITY_TAG_SUFFIX = "live_timetable"
@@ -96,3 +98,14 @@ MESSAGES_MAX_ATTRIBUTE = 10
 MESSAGES_MAX_TEXT_LENGTH = 1000
 # Size budget for the messages attribute in bytes (HA limit is 16 KB)
 MESSAGES_MAX_ATTRIBUTE_BYTES = 12000
+# Texts are shortened down to this length before older messages are dropped
+MESSAGES_MIN_TEXT_LENGTH = 200
+# Attachment link tokens: validity and when they are renewed
+MESSAGES_ATTACHMENT_URL_EXPIRY = 7 * 24 * 60 * 60  # 7 days
+MESSAGES_ATTACHMENT_URL_RENEW = 24 * 60 * 60  # renew when less than 1 day is left
+# Name of the single link shown for attachments that have not been loaded yet
+MESSAGES_ATTACHMENTS_PLACEHOLDER = "Open attachments"
+MESSAGES_ATTACHMENT_VIEW_URL = (
+    "/api/webuntis/{entry_id}/messages/{message_id}/attachments"
+)
+CONF_ATTACHMENT_VIEW_REGISTERED = "message_attachment_view_registered"
