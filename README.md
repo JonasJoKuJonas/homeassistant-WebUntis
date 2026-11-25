@@ -86,4 +86,4 @@ I’m a 19-year-old software developer from Germany, creating projects like this
 
 
 ## Disclaimer
-This project is not affiliated with WebUntis or Untis GmbH. It is an independent integration developed by hobby developers. All trademarks and logos belong to their respective owners. Use this integration at your own risk. The developer is not responsible for any issues or damages that may arise from using this integration.
+This project is not affiliated with WebUntis or Untis GmbH. It is an independent integration developed by hobby developers. All trademarks and logos and icons belong to their respective owners. Use this integration at your own risk. The developer is not responsible for any issues or damages that may arise from using this integration.
