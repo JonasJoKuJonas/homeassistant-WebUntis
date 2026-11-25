@@ -1,4 +1,4 @@
-"""Base entity for Web Untis."""
+"""Base entity for Untis."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class WebUntisEntity(Entity):
-    """Representation of a Web Untis base entity."""
+    """Representation of a Untis base entity."""
 
     _attr_has_entity_name = True
     _attr_should_poll = False
@@ -37,7 +37,7 @@ class WebUntisEntity(Entity):
         self._attr_unique_id = f"{self._server.unique_id}_{name}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._server.unique_id)},
-            manufacturer="Web Untis",
+            manufacturer="Untis",
             model=f"{self._server.school}@{self._server.username}",
             name=self._server.username,
         )

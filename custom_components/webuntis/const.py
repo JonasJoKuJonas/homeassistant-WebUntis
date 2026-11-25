@@ -1,4 +1,4 @@
-"""Constants for the Web Untis integration."""
+"""Constants for the Untis integration."""
 
 DOMAIN = "webuntis"
 
