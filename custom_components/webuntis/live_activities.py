@@ -33,6 +33,15 @@ _LOGGER = logging.getLogger(__name__)
 
 MAX_ACTIVITY_DURATION = timedelta(hours=8)
 
+PLATFORM_IOS = "ios"
+PLATFORM_ANDROID = "android"
+
+_ANDROID_COLORS = {
+    "orange": "#FF9800",
+    "lightgreen": "#90EE90",
+    "white": "#FFFFFF",
+}
+
 with (Path(__file__).parent / "translations" / "live_activity_strings.json").open(
     encoding="utf-8"
 ) as _f:
@@ -277,8 +286,10 @@ def _build_payload(
     lang: str,
     next_school_day: datetime | None,
     break_timer: bool = False,
+    platform: str = PLATFORM_IOS,
 ) -> tuple[str, str, dict]:
     """Build the (title, message, extra_data) triple for one phase."""
+    android = platform == PLATFORM_ANDROID
     phase = event["phase"]
     block = event["block"]
     strings = _STRINGS[lang]
@@ -298,15 +309,22 @@ def _build_payload(
         icon, color, silent = ICON_SENSOR_NEXT_LESSON_TO_WAKE_UP, "#2196F3", False
     elif phase == "lesson":
         title = lesson_text
-        message = " "
+        message = (
+            f"{_format_time(block['start'])} - {_format_time(block['end'])}"
+            if android
+            else " "
+        )
         icon, color, silent, when = "mdi:school", "orange", True, block["end"]
     elif phase == "break":
         title = strings["break_title"]
         icon, color, silent = "mdi:school-outline", "lightgreen", False
         if break_timer:
-            message = " "  # iOS will replace this by the timer
             when = block["start"]
-            critical_text = f"→ {block['subject_short']} - R{block['room']}"
+            if android:
+                message = strings["break_next"].format(lesson=lesson_text)
+            else:
+                message = " "  # Replaced by the timer
+                critical_text = f"→ {block['subject_short']} - R{block['room']}"
         else:
             message = "\n".join(
                 [
@@ -328,11 +346,14 @@ def _build_payload(
     else:
         return "", "", {}
 
-    extra = {
-        "notification_icon": icon,
-        "notification_icon_color": color,
-        "silent": silent,
-    }
+    extra: dict[str, Any] = {"notification_icon": icon}
+    if android:
+        extra["color"] = _ANDROID_COLORS.get(color, color)
+        extra["alert_once"] = silent
+        extra["sticky"] = True
+    else:
+        extra["notification_icon_color"] = color
+        extra["silent"] = silent
     if when is not None:
         extra["chronometer"] = True
         extra["when"] = int(when.timestamp())
@@ -355,7 +376,9 @@ def _build_test_tag(entity_id: str) -> str:
     return f"{sanitized}_{TEST_TAG_SUFFIX}"[:64]
 
 
-async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> bool:
+async def async_send_test(
+    hass: HomeAssistant, entity_id: str, lang: str, platform: str = PLATFORM_IOS
+) -> bool:
     """Send one real, standalone test Live Activity and self-clear shortly after."""
     service_id = _service_id_for_entity(hass, entity_id)
     if service_id is None:
@@ -364,21 +387,26 @@ async def async_send_test(hass: HomeAssistant, entity_id: str, lang: str) -> boo
     strings = _STRINGS[lang]
     now = dt_util.now()
 
+    data: dict[str, Any] = {
+        "tag": tag,
+        "live_update": True,
+        "chronometer": True,
+        "when": int((now + TEST_ACTIVITY_DURATION).timestamp()),
+        "notification_icon": "mdi:bell-ring-outline",
+    }
+    if platform == PLATFORM_ANDROID:
+        data["color"] = "#2196F3"
+    else:
+        data["notification_icon_color"] = "#2196F3"
+        data["silent"] = False
+
     success = await async_notify(
         hass,
         service_id,
         {
             "title": strings["test_title"],
             "message": strings["test_message"],
-            "data": {
-                "tag": tag,
-                "live_update": True,
-                "silent": False,
-                "chronometer": True,
-                "when": int((now + TEST_ACTIVITY_DURATION).timestamp()),
-                "notification_icon": "mdi:bell-ring-outline",
-                "notification_icon_color": "#2196F3",
-            },
+            "data": data,
         },
     )
 
@@ -458,7 +486,8 @@ class LiveActivityManager:
             events = _build_events(
                 blocks, target.get("start_offset", 10), target.get("end_offset", 10)
             )
-            _flag_restart(events)
+            if target.get("platform", PLATFORM_IOS) == PLATFORM_IOS:
+                _flag_restart(events)
 
             future = [e["time"] for e in events if e["time"] > now]
             if future:
@@ -520,7 +549,11 @@ class LiveActivityManager:
             else None
         )
         title, message, extra = _build_payload(
-            current, lang, next_school_day, break_timer
+            current,
+            lang,
+            next_school_day,
+            break_timer,
+            target.get("platform", PLATFORM_IOS),
         )
 
         await async_notify(
@@ -616,8 +649,10 @@ class LiveActivityOptionsFlowMixin:
             )
 
         lang = _language(self.hass)
+        live_activities = self._config_entry.options[CONF_LIVE_ACTIVITIES]
         for entity_id in user_input.get("services", {}):
-            if not await async_send_test(self.hass, entity_id, lang):
+            platform = live_activities.get(entity_id, {}).get("platform", PLATFORM_IOS)
+            if not await async_send_test(self.hass, entity_id, lang, platform):
                 return await self.async_step_test_live_activity(
                     None, errors={"base": "notification_invalid"}
                 )
@@ -687,7 +722,7 @@ class LiveActivityOptionsFlowMixin:
                 description={"suggested_value": options.get("platform")},
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=["ios"],
+                    options=[PLATFORM_IOS, PLATFORM_ANDROID],
                     mode=selector.SelectSelectorMode.DROPDOWN,
                     translation_key="live_activity_platform",
                 )

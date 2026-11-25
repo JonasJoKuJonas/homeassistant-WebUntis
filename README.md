@@ -19,7 +19,7 @@
 | **30-Day Calendar** | Displays all lessons in the calendar or calendar-card for the upcoming month. | [Entities & Services](docs/ENTITIES_AND_SERVICES.md) |
 | **Lesson Sensors** | Includes school start/end times and next lesson, useful for wake-up automations. | [Examples & Automations](docs/EXAMPLES_AND_AUTOMATIONS.md) |
 | **Lesson Change Notifications** | Get notified for cancellations, room changes, teacher changes, and lesson swaps. | [Notification Options](docs/OPTIONAL_CONFIGURATIONS.md#notification-options) |
-| **Live Timetable (Live Activities)** | Display the current timetable in a live view on your phone or tablet. (Currently only available for iOS) | [Live Activities](docs/OPTIONAL_CONFIGURATIONS.md#live-activities) |
+| **Live Timetable (Live Activities)** | Display the current timetable in a live view on your phone or tablet. (Available for iOS and Android) | [Live Activities](docs/OPTIONAL_CONFIGURATIONS.md#live-activities) |
 | **Fetch Lessons Service** | Request lessons for a specific date range. | [`webuntis.get_timetable`](docs/ENTITIES_AND_SERVICES.md#-webuntisget_timetable) |
 | **Count Lessons Service** | Count lessons by subject within a given date range. | [`webuntis.count_lessons`](docs/ENTITIES_AND_SERVICES.md#-webuntiscount_lessons) |
 | **Homework List & Dashboard Card** | Structured homework sensor plus a ready-made card that mirrors the WebUntis "Hausaufgaben" page, incl. print button. | [WebUntis Homework Card](docs/WEBUNTIS_HOMEWORK_CARD.md) |

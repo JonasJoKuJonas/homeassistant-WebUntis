@@ -57,7 +57,7 @@ Show your current lessons as Live Activities directly on your Lock Screen.
 | Option        | Description                                                   | Default.    |
 | :------------ | :------------------------------------------------------------ | :---------- |
 | name          | Name of the Notify device.                                    | `entity_id` |
-| platform      | Device platform for this target.                              | `None`      |
+| platform      | Device platform for this target (`ios` or `android`).         | `None`      |
 | entity_id     | Mobile App notify service, e.g., `notify.iphone_von_max`.     | `None`      |
 | start_offset  | Minutes before the first lesson to start the live activity.   | `10`        |
 | end_offset    | Minutes after the last lesson to stop the live activity.      | `10`        |
