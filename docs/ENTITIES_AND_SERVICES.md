@@ -19,6 +19,8 @@ Replace `<name>` with your actual WebUntis integration device name.
 | `sensor.<name>_homework_list`          | `sensor.<name>_hausaufgabenliste`            |
 | `event.<name>_lesson_change`           | `event.<name>_stundenanderung`               |
 | `event.<name>_new_homework`            | `event.<name>_neue_hausaufgabe`              |
+| `sensor.<name>_messages`               | `sensor.<name>_mitteilungen`                 |
+| `event.<name>_new_message`             | `event.<name>_neue_mitteilung`               |
 
 > ⚠️ **Important:**  
 > The **Exam Calendar**, **Homework Calendar** and **Homework List sensor** are **not available when using a parent account**.  
@@ -49,6 +51,32 @@ homeworks:
 
 See [WebUntis Homework Card](WEBUNTIS_HOMEWORK_CARD.md) for a ready-made dashboard card that renders this
 list exactly like the WebUntis "Hausaufgaben" page, including a print button.
+
+### `sensor.<name>_messages`
+
+State: number of unread WebUntis messages ("Mitteilungen").
+
+Messages are opt-in: enable them in the integration options under **Messages** (see
+[Optional Configurations](OPTIONAL_CONFIGURATIONS.md#messages-options)).
+
+Attribute `messages` contains the 10 most recent messages, newest first. The text is the preview WebUntis
+shows in the message list (shortened to 1000 characters). The integration never opens a message, so
+reading messages in Home Assistant does not mark them as read in WebUntis.
+
+```yaml
+messages:
+  - id: 12345
+    subject: Elternabend
+    sender: Jonas
+    sent: "2025-02-18T13:57:00+01:00"
+    read: false
+    has_attachments: true
+    requires_confirmation: false # true if WebUntis asks for a read confirmation
+    text: Liebe Eltern, ...
+```
+
+The sensor is unavailable for accounts that cannot access messages. New messages also trigger
+`event.<name>_new_message` and the `message` notification option.
 
 ---
 

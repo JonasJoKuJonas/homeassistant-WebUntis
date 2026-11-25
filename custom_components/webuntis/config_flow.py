@@ -726,6 +726,7 @@ OPTIONS_MENU = [
     "lesson",
     "notify_menu",
     "live_activities_menu",
+    "messages",
     "backend",
 ]
 
@@ -1016,6 +1017,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow, LiveActivityOptionsFlowMixi
                         default=self._config_entry.options.get(
                             "lesson_compacting_parallel", False
                         ),
+                    ): selector.BooleanSelector(),
+                }
+            ),
+        )
+
+    async def async_step_messages(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResultType:
+        """Manage the messages ("Mitteilungen") options."""
+        if user_input is not None:
+            return await self.save(user_input)
+        return self.async_show_form(
+            step_id="messages",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        "messages",
+                        default=self._config_entry.options.get("messages", False),
                     ): selector.BooleanSelector(),
                 }
             ),
